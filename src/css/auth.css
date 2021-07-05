@@ -1,0 +1,81 @@
+.auth-popup {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.auth-popup .overlay {
+  position: absolute;
+  background-color: #000000aa;
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  cursor: pointer;
+}
+
+.auth-popup,
+.auth-popup .overlay {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.auth-popup .inner {
+  max-width: 500px;
+  width: 90vw;
+  min-height: 200px;
+  background: white;
+  border-radius: 20px;
+  padding: 30px 20px;
+  animation: scale-in 0.15s cubic-bezier(0.04, 1.12, 0.37, 1.15);
+}
+
+@keyframes scale-in {
+  0% {
+    transform: scale(1.15);
+    opacity: 0.5;
+  }
+}
+
+@keyframes scale-out {
+  100% {
+    opacity: 0;
+  }
+}
+
+.auth-popup .inner h3 {
+  text-align: center;
+  text-transform: uppercase;
+  color: #333;
+}
+
+.auth-popup .inner .form-area {
+  width: 80%;
+  margin: 0 auto;
+  margin-top: 30px;
+}
+
+.auth-popup .inner .form-area .btn-box {
+  display: flex;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.auth-popup .form-area .alt {
+  padding: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.form-area .alt p {
+  margin-right: 5px;
+  color: #555;
+}
+.form-area .alt .link {
+  margin-right: 5px;
+  color: var(--dark-color);
+}

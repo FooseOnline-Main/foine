@@ -1,13 +1,107 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@font-face {
+  font-family: gilroy;
+  src: url("./fonts/Poppins-Regular.ttf");
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@font-face {
+  font-family: gilroyBold;
+  src: url("./fonts/Poppins-SemiBold.ttf");
+}
+
+:root {
+  --dark-color: #f56a33;
+  --warning-color: orange;
+  --danger-color: red;
+  --light-color: #f56a3310;
+  --text-color: rgb(51, 49, 54);
+  --font-regular: "gilroy";
+  --font-bold: "gilroyBold";
+}
+
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+  font-family: var(--font-regular), "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-decoration: none;
+  user-select: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "gilroyBold";
+}
+
+.mute-heading {
+  display: flex;
+  align-items: center;
+  padding: 10px 0px;
+}
+.mute-heading hr {
+  flex: 1;
+  border: none;
+  border-top: 1px solid #efefef;
+  background-color: #f5f5f5;
+}
+.mute-heading b {
+  color: #222;
+  margin: 0 20px;
+  font-size: 12px;
+}
+
+.submit-btn {
+  border: none;
+  background: var(--dark-color);
+  color: #fff;
+  padding: 15px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.loader-box {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-box.expand {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.loader-box .loader {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 5px solid #ddd;
+  border-top-color: #999;
+  border-right-color: #999;
+  animation: rotate 0.3s infinite linear;
+  -webkit-animation: rotate 0.3s infinite linear;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-box {
+  padding-bottom: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: orangered;
 }

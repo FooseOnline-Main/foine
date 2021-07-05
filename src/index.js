@@ -3,10 +3,25 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import ProductsProvider from './providers/productProvider';
+import AuthProvider from './providers/authProvider';
+import WatchlistProvider from './providers/watchlistProvider';
+import NotificationProvider from './providers/notificationProvider';
+import ErrorProvider from './providers/errorProvider';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ErrorProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <ProductsProvider>
+            <WatchlistProvider>
+                <App />
+            </WatchlistProvider>
+          </ProductsProvider>
+        </NotificationProvider>
+      </AuthProvider>
+    </ErrorProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

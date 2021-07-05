@@ -1,0 +1,24 @@
+#homepage {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#homepage .page-body {
+  flex: 1;
+  overflow: auto;
+  scroll-snap-type: y mandatory;
+}
+
+#homepage .page-body::-webkit-scrollbar {
+  width: 5px;
+  background-color: transparent;
+}
+#homepage .page-body::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: #aaa;
+}
+
+#homepage .page-body > div {
+  scroll-snap-align: start;
+}

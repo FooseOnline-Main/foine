@@ -1,0 +1,130 @@
+.profile_popup {
+  position: fixed;
+  display: flex;
+  flex-direction: row-reverse;
+  --space-x: 10%;
+  z-index: 5;
+}
+
+.profile_popup,
+.close-bg {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.close-bg {
+  position: absolute;
+  background-color: #0000005a;
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  cursor: pointer;
+}
+
+.content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  max-width: 400px;
+  width: 100%;
+  background-color: #fff;
+  animation: slide-in-left 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+  -webkit-animation: slide-in-left 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(100%);
+  }
+}
+
+.header {
+  padding: 20px var(--space-x);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  justify-content: space-between;
+}
+
+.header h3 {
+  font-size: 18px;
+}
+
+.header b {
+  font-size: 14px;
+  color: orangered;
+}
+
+.content .acc-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0;
+  border-bottom: 1px solid #f5f5f5;
+  background: #f9f9f9;
+}
+
+.profile-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content .acc-info h3 {
+  margin-top: 10px;
+  font-size: 15px;
+  color: #555;
+}
+
+.content .acc-info p {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #555;
+}
+
+.content .option-list {
+  flex: 1;
+  overflow: auto;
+}
+.content .option-list::-webkit-scrollbar {
+  width: 5px;
+  background-color: transparent;
+}
+.content .option-list::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: #ddd;
+}
+
+.content .option p {
+  padding: 15px var(--space-x);
+  border-bottom: 1px solid #f9f9f9;
+  font-size: 12px;
+  transition: font-size 0.2s;
+  color: #555;
+  display: flex;
+  align-items: center;
+}
+
+.content .option p:hover {
+  background: #fcfcfc;
+}
+
+.content .option b {
+  margin-left: 10px;
+  margin-right: auto;
+}
+
+.content .option .tag {
+  padding: 5px 15px;
+  background: var(--warning-color);
+  border-radius: 10px;
+  font-size: 10px;
+  color: white;
+}
