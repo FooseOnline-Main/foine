@@ -1,5 +1,7 @@
 // import axios from 'axios';
-import React, { useState, useContext } from 'react';
+
+import React, { useContext, useState } from 'react';
+
 import firebase from '../firebase';
 import { useError } from './errorProvider';
 import {useNotification} from './notificationProvider';
@@ -100,7 +102,7 @@ function ProductsProvider({ children }) {
                     createError(error.message, 2000);
                 })
             }else{
-                createError("Item has already been held!", 3000);
+                createError("Item is being held by someone else!", 3000);
             }            
         }
     }
