@@ -37,7 +37,10 @@ const HomePage = () => {
         document.body.style.overflow = "auto";     
     });
 
-    const reversedProducts = ()=> products.reverse().map(item=> item);
+    const reversedProducts = ()=> {
+        const toReverse = products;
+        return toReverse.reverse().map(item=> item)
+    };
 
     return (
         <div id='homepage'>
