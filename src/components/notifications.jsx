@@ -2,13 +2,13 @@ import '../css/notifications.css';
 
 import { AiFillCloseCircle, AiFillDelete, AiFillDownCircle, AiFillUpCircle } from '@meronex/icons/ai';
 import {FaBell, FaBellSlash} from '@meronex/icons/fa';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {BiBell} from '@meronex/icons/bi';
 import EmptyView from './empty_view';
 import Loader from './simple_loader';
 import { useNotification } from '../providers/notificationProvider';
-import { useState } from 'react/cjs/react.development';
+
 // vercel push
 const DesktopNotifications = () => {
     const [show, setShow] = useState(false);

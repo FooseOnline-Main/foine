@@ -1,6 +1,6 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { Redirect, Route } from 'react-router-dom';
-import { useState } from 'react/cjs/react.development';
+
 import { useAuth } from '../providers/authProvider';
 
 const PrivateRoute = ({component: Component, ...rest}) => {
