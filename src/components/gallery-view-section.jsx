@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { AiFillHeart, AiFillStar, AiOutlineHeart, AiOutlineStar } from '@meronex/icons/ai';
+import { BsStopwatch, BsStopwatchFill } from '@meronex/icons/bs';
+import { FaEye, FaEyeSlash } from '@meronex/icons/fa';
+import React, { useEffect, useState } from 'react';
+import { getStatus, useProducts } from '../providers/productProvider';
+
+import CategoryMenu from './category_menu';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
-import { getStatus, useProducts } from '../providers/productProvider';
-import CategoryMenu from './category_menu';
-import { AiOutlineHeart, AiFillHeart, AiOutlineStar, AiFillStar } from '@meronex/icons/ai';
-import { BsStopwatchFill, BsStopwatch } from '@meronex/icons/bs';
-import { Link } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from '@meronex/icons/fa';
 
-
-const GalleryViewSection = () => {
-    const {products: _products, categories, getProducts, like, addToWishList, holdProduct, unholdProduct } = useProducts();
+const GalleryViewSection = ({searchValue}) => {
+    const {products: _products, categories, getProducts, like, addToWishList, holdProduct, unholdProduct, searchProducts } = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const {user} = useAuth();
     const [products, setProducts] = useState(_products.map(item=> item));
@@ -31,8 +31,14 @@ const GalleryViewSection = () => {
     }, [_products]);
 
     useEffect(() => {
+        const result = shuffle(searchProducts(searchValue));
+        setProducts(result);
+        setPrevShuffle(result.map(item=> item));
+    }, [searchValue]);
+
+    useEffect(() => {
         const shuffleResult = shuffle(getProducts(categoryFilter));
-        setPrevShuffle( shuffleResult);
+        setPrevShuffle(shuffleResult);
         setProducts(shuffleResult.map(item=> item));
     }, [categoryFilter]);
 

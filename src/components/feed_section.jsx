@@ -1,7 +1,11 @@
 import React, { useEffect } from 'react';
-import LiveFeedCard from './feed_card';
 
-const LiveFeedSection = ({products}) => {
+import LiveFeedCard from './feed_card';
+import { useProducts } from '../providers/productProvider';
+
+const LiveFeedSection = () => {
+    const {products} = useProducts();
+    
     useEffect(() => {
         const feedsScrollView = document.getElementById('scroll-feed');
         let feedsPos = { top: 0, left: 0, x: 0, y: 0 };

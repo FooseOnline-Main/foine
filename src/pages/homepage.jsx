@@ -18,19 +18,12 @@ import SignupForm from '../components/signup_form';
 import { useProducts } from '../providers/productProvider';
 
 const HomePage = () => {
-    const [products, setProducts] = useState([]);
-    const { products: _prods, getProducts, searchProducts} = useProducts();
-    const [categoryFilter] = useState("");
+    const [searchString, setSearchString] = useState("");
     const history = useHistory();
 
-    useEffect(() => {
-        setProducts(getProducts(categoryFilter));
-    }, [categoryFilter]);
-
     const handleSearch = (string)=>{
-        (string.length > 0) ?
-        setProducts(searchProducts(string)) :
-        setProducts(getProducts(categoryFilter));
+        document.querySelector('.page-body').scrollBy({top: 10, behavior: "smooth"});
+        setSearchString(string);
     }
 
     history.listen(()=>{
@@ -42,8 +35,8 @@ const HomePage = () => {
             <>
                 <HomeHeader onSearch={handleSearch} />
                 <div className="page-body">
-                    <LiveFeedSection products={products} />
-                    <GalleryViewSection />
+                    <LiveFeedSection />
+                    <GalleryViewSection searchValue={searchString}/>
                 </div>
                 <QuickWatchlistView />
                 <DesktopNotifications />
