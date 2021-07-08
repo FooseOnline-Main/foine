@@ -41,9 +41,26 @@
   -moz-transition: all 0.1s;
   -ms-transition: all 0.1s;
   -o-transition: all 0.1s;
+  display: none;
+  transform: scale(0);
+  -webkit-transform: scale(0);
+  -moz-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
 }
 .gallery-view .inner .side-toggler:hover {
   opacity: 1;
+}
+
+@media (max-width: 850px) {
+  .gallery-view .inner .side-toggler {
+    display: flex;
+    transform: scale(1);
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -ms-transform: scale(1);
+    -o-transform: scale(1);
+  }
 }
 
 .gallery-view .inner .category-section {
@@ -189,6 +206,27 @@
 .gallery-view .inner .item .preview-button {
   background: #0000009a;
   pointer-events: none;
+  opacity: 0;
+}
+.gallery-view .inner .item .float-price {
+  position: absolute;
+  bottom: 25px;
+  left: 0;
+  color: #fff;
+  background: #000;
+  padding: 10px;
+  border-radius: 0 10px 10px 0;
+  -webkit-border-radius: 0 10px 10px 0;
+  -moz-border-radius: 0 10px 10px 0;
+  -ms-border-radius: 0 10px 10px 0;
+  -o-border-radius: 0 10px 10px 0;
+  transition: all 0.15s ease-in-out;
+  -webkit-transition: all 0.15s ease-in-out;
+  -moz-transition: all 0.15s ease-in-out;
+  -ms-transition: all 0.15s ease-in-out;
+  -o-transition: all 0.15s ease-in-out;
+}
+.gallery-view .inner .item:hover .float-price {
   opacity: 0;
 }
 .gallery-view .inner .item:hover .content {

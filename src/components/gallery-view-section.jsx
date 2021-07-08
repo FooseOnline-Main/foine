@@ -90,6 +90,7 @@ const GalleryViewSection = ({searchValue}) => {
                         return <div key={product.id} className="item">
                             {held && <img className="held-img" src="/images/held-img.png" alt={product.name} />}
                             <img draggable="false" src={product.imageUrl} alt="product item" />
+                            <div className="float-price"><p><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></p></div>
                             <div className="content">
                                 <Link to={`/preview-product/${product.id}`} className="preview-button"></Link>
                                 <div className="details">
