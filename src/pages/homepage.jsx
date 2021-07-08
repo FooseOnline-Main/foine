@@ -1,10 +1,10 @@
 import '../css/home.css';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Route, useHistory } from "react-router-dom";
 
 import CheckoutPopup from '../components/cart-checkout-popup';
-import DesktopNotifications from '../components/notifications';
+import FloatNotifications from '../components/float_notifications';
 import ErrorPopup from '../components/error-popup';
 import GalleryViewSection from '../components/gallery-view-section';
 import HomeHeader from '../components/home_header';
@@ -15,10 +15,10 @@ import ProductViewPage from '../components/product_view_page';
 import ProfilePopup from '../components/profile_popup';
 import QuickWatchlistView from '../components/quick_watchlist_view';
 import SignupForm from '../components/signup_form';
-import { useProducts } from '../providers/productProvider';
 
 const HomePage = () => {
     const [searchString, setSearchString] = useState("");
+    const [quickOpenNotifications, setQuickOpenNotifications] = useState(false);
     const history = useHistory();
 
     const handleSearch = (string)=>{
@@ -30,16 +30,21 @@ const HomePage = () => {
         document.body.style.overflow = "auto";     
     });
 
+    const handleQuickOpen = ()=>{
+        setQuickOpenNotifications(true);
+        setTimeout(()=>{ setQuickOpenNotifications(false) }, 150);
+    }
+
     return (
         <div id='homepage'>
             <>
-                <HomeHeader onSearch={handleSearch} />
+                <HomeHeader onSearch={handleSearch} onQuickOpenNotifications={handleQuickOpen} />
                 <div className="page-body">
                     <LiveFeedSection />
                     <GalleryViewSection searchValue={searchString}/>
                 </div>
                 <QuickWatchlistView />
-                <DesktopNotifications />
+                <FloatNotifications quickOpen={quickOpenNotifications} />
                 <Route path="/login">
                     <LoginForm />
                 </Route>

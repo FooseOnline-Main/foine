@@ -8,13 +8,15 @@ import {BiBell} from '@meronex/icons/bi';
 import EmptyView from './empty_view';
 import Loader from './simple_loader';
 import { useNotification } from '../providers/notificationProvider';
+import { useHistory } from 'react-router-dom';
 
 // vercel push
-const DesktopNotifications = () => {
+const FloatNotifications = ({quickOpen}) => {
     const [show, setShow] = useState(false);
     const [holdOn, setHoldOn] = useState(false);
     const [quickNote, setQuickNote] = useState(null);
     const {notifications, unread, deleteNotification, loading} = useNotification();
+    const history = useHistory();
 
     useEffect(() => {
         setQuickNote(unread.reverse()[0] || null);
@@ -39,12 +41,18 @@ const DesktopNotifications = () => {
         }
     }, []);
 
+    useEffect(() => {
+        if(quickOpen)
+            setHoldOn(true);
+    }, [quickOpen]);
+
     const closeNotifications = ()=>{
+        history.replace('/');
         document.querySelector('.notification-list').classList.add('hide');
         setTimeout(()=>{
             document.querySelector('.notification-list').classList.remove('hide');
             setHoldOn(false);
-        }, 200)
+        }, 120)
     }
 
     const toggleShow = ()=>{
@@ -93,7 +101,7 @@ const NotificationItem = ({notification, onDelete})=>{
         if(notification.message.length <= 50){
             markAsRead(notification.id);
         }
-    });
+    }, []);
     
     const reduceMessage = ()=>{
         if(notification.message && notification.message.length > 50){
@@ -102,7 +110,6 @@ const NotificationItem = ({notification, onDelete})=>{
     }
 
     const handleOpen = ()=>{
-        alert(notification.id);
         markAsRead(notification.id);
         setOpen(!open)
     }
@@ -123,4 +130,4 @@ const NotificationItem = ({notification, onDelete})=>{
     </div>
 }
 
-export default DesktopNotifications;
+export default FloatNotifications;

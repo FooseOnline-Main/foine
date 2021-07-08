@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 // Create error context
 const ErrorContext = React.createContext();
 
+
 export function useError() {
     return useContext(ErrorContext);
 }

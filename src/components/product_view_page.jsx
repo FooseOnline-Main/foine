@@ -99,7 +99,7 @@ const ProductViewPage = () => {
                     right: 0;
                     backdrop-filter: blur(5px);
                     -webkit-backdrop-filter: blur(5px);  
-                    z-index: 100;
+                    z-index: 9;
                     display: flex;
                     align-items: center;
                     justify-content: center;
