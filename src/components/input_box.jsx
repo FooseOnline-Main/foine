@@ -1,8 +1,8 @@
 import React from 'react';
 
-const InputBox = ({name, icon, placeholder, type, value="", onChange})=>{
+const InputBox = ({name, icon: Icon, placeholder, type, value="", onChange})=>{
     return <div className="input-box">
-        {icon}
+        <Icon size={18} color="#222" />
         <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} />
         <style jsx>{`
             .input-box{

@@ -1,6 +1,6 @@
 import '../css/auth.css';
 
-import { AiOutlineLock, AiOutlineRedEnvelope } from '@meronex/icons/ai';
+import { AiOutlineLock, AiOutlineMail } from '@meronex/icons/ai';
 import { Link, useHistory } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 
@@ -41,11 +41,8 @@ const LoginForm = () => {
             <div className="inner">
                 <h3>Login to account</h3>
                 <form onSubmit={handleSubmit} className="form-area">
-                    {/* <div className="error-box">
-                        <p>{error.toString()}</p>
-                    </div> */}
-                    <InputBox icon={<AiOutlineRedEnvelope size={15} color="#eee" />} value={email} name="email" placeholder="Enter your email" type="email" onChange={({target: {value}})=> setEmail(value)} />
-                    <InputBox icon={<AiOutlineLock size={15} color="#eee" />} value={password} name="password" placeholder="Enter password" type="password" onChange={({target: {value}})=> setPassword(value)} />
+                    <InputBox icon={AiOutlineMail} value={email} name="email" placeholder="Enter your email" type="email" onChange={({target: {value}})=> setEmail(value)} />
+                    <InputBox icon={AiOutlineLock} value={password} name="password" placeholder="Enter password" type="password" onChange={({target: {value}})=> setPassword(value)} />
                     <div className="btn-box">
                         {!loading ? <button submit className="submit-btn">Login</button> :
                         <Loader />}

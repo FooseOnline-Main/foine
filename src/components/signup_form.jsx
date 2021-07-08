@@ -1,6 +1,6 @@
 import '../css/auth.css';
 
-import { AiOutlineLock, AiOutlinePhone, AiOutlineRedEnvelope, AiOutlineUser } from '@meronex/icons/ai';
+import { AiOutlineLock, AiOutlineMail, AiOutlinePhone, AiOutlineUser } from '@meronex/icons/ai';
 import React, { useEffect, useState } from 'react';
 
 import InputBox from './input_box';
@@ -45,14 +45,11 @@ const SignupForm = () => {
             <div className="inner">
                 <h3>Create An Account</h3>
                 <form onSubmit={handleSubmit} className="form-area">
-                    {/* <div className="error-box">
-                        <p>{error}</p>
-                    </div> */}
-                    <InputBox value={username} icon={<AiOutlineUser size={15} color="#eee" />} name="name" placeholder="Enter your name" type="text" onChange={({target: {value}})=> setUserName(value)} />
-                    <InputBox value={email} icon={<AiOutlineRedEnvelope size={15} color="#eee" />} name="email" placeholder="Enter your email" type="text" onChange={({target: {value}})=> setEmail(value)} />
-                    <InputBox value={phone} icon={<AiOutlinePhone size={15} color="#eee" />} name="telephone" placeholder="Enter telephone number" type="number" onChange={({target: {value}})=> setPhone(value)} />
-                    <InputBox value={password} icon={<AiOutlineLock size={15} color="#eee" />} name="password" placeholder="Choose a password" type="password" onChange={({target: {value}})=> setPassword(value)} />
-                    <InputBox value={c_password} icon={<AiOutlineLock size={15} color="#eee" />} name="c_password" placeholder="Confirm password" type="password" onChange={({target: {value}})=> setCPassword(value)} />
+                    <InputBox value={username} icon={AiOutlineUser} name="name" placeholder="Enter your name" type="text" onChange={({target: {value}})=> setUserName(value)} />
+                    <InputBox value={email} icon={AiOutlineMail} name="email" placeholder="Enter your email" type="text" onChange={({target: {value}})=> setEmail(value)} />
+                    <InputBox value={phone} icon={AiOutlinePhone} name="telephone" placeholder="Enter telephone number" type="number" onChange={({target: {value}})=> setPhone(value)} />
+                    <InputBox value={password} icon={AiOutlineLock} name="password" placeholder="Choose a password" type="password" onChange={({target: {value}})=> setPassword(value)} />
+                    <InputBox value={c_password} icon={AiOutlineLock} name="c_password" placeholder="Confirm password" type="password" onChange={({target: {value}})=> setCPassword(value)} />
                     <div className="btn-box">
                         {!loading ? <button type="submit" className="submit-btn">Sign Up</button> :
                         <Loader />}

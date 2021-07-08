@@ -1,21 +1,18 @@
 import { AiOutlineSearch, AiOutlineUser } from '@meronex/icons/ai';
 import React, {useEffect, useState} from 'react';
 
-import { FaEye } from '@meronex/icons/fa';
+import { FaBell, FaEye } from '@meronex/icons/fa';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
+import { useNotification } from '../providers/notificationProvider';
 
-const HomeHeader = ({onSearch}) => {
-    const [authenticated, setAuthenticated] = useState(false);
+const HomeHeader = ({onSearch, onQuickOpenNotifications}) => {
+    const {unread} = useNotification();
     const {user} = useAuth();
-
-    useEffect(() => {
-        setAuthenticated(!user.isAnonymous);
-    }, [user]);
 
     const renderAuth = ()=>{
         return <>
-        {authenticated ? 
+        {!user.isAnonymous ? 
         <>
             <Link to='/profile' className='profile-button'>
                 <AiOutlineUser size={15} color="#eee" />
@@ -33,6 +30,10 @@ const HomeHeader = ({onSearch}) => {
         <Link to='/watchlist' className='profile-button'>
             <FaEye size={18} color="#eee" />
             <b style={{marginLeft: 5}}>WatchList</b>
+        </Link>
+        <Link onClick={onQuickOpenNotifications} className='profile-button'>
+            <FaBell size={16} color="#eee" />
+            {unread.length ? <div className="tag">{unread.length}</div> : <></>}
         </Link>
         </>
     }
@@ -85,6 +86,20 @@ const HomeHeader = ({onSearch}) => {
                     font-size: 12px;
                     font-family: var(--font-bold);
                     color: #ccc;
+                }
+
+                .profile-button .tag{
+                    position: absolute;
+                    bottom: 40%;
+                    left: 50%;
+                    padding: 0px 5px;
+                    border-radius: 10px;
+                    border: 2px solid #222;
+                    background: orangered;
+                    font-size: 9px;
+                    min-width: 20px;
+                    text-align: center;
+                    color: #fff;
                 }
 
                 .profile-button:not(:last-child){
