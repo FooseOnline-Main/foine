@@ -91,6 +91,11 @@ const CategoryMenu = ({categories, onChange}) => {
                     font-size: 13px;
                     box-shadow: 0 0 10px #ddd;
                 }
+                @media (max-width: 600px) {
+                    .category-menu .item{
+                        margin-right: 10px;
+                    }
+                }
 
                 .category-menu .item.select{
                     color: white;

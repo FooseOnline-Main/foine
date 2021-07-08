@@ -108,16 +108,19 @@ const HomeHeader = ({onSearch}) => {
 
                 @media(max-width: 600px){
                     .home-header{
-                        margin-bottom: 50px;
+                        margin-bottom: 60px;
                     }
                     .home-header h4{
                         margin-right: auto;
                     }
                     .home-header .search-form{
                         position: absolute;
-                        top: 100%;
+                        top: calc(100% + 10px);
                         width: 90%;
                         left: 0;
+                    }
+                    .profile-button:not(:last-child){
+                        margin-right: 15px;
                     }
                 }
             `}</style>
