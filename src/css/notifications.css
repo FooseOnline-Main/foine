@@ -9,6 +9,11 @@
   -ms-transition: right 0.2s ease-out;
   -o-transition: right 0.2s ease-out;
 }
+@media (max-width: 600px) {
+  .notifications {
+    display: none;
+  }
+}
 
 .notifications.show {
   right: 5%;

@@ -1,4 +1,4 @@
-import { AiFillDownCircle, AiFillUpCircle, AiOutlineCheckSquare, AiOutlineDelete } from '@meronex/icons/ai';
+import { AiFillCloseCircle, AiFillDownCircle, AiFillUpCircle, AiOutlineCheckSquare, AiOutlineDelete, AiTwotoneCloseCircle } from '@meronex/icons/ai';
 import { FaBellSlash } from '@meronex/icons/fa';
 import { motion, useMotionValue, useTransform, } from 'framer-motion';
 import React, {useRef, useEffect, useState} from 'react';
@@ -21,7 +21,10 @@ const NotificationPopup = () => {
             <div onClick={history.goBack} className="overlay"></div>
             <div className="inner">
                 {notifications.length > 0 && <div className={`promptier ${showPrompt ? 'show' : ''}`}>Slide notification left or right</div>}
-                <header><h3>Notifications</h3></header>
+                <header>
+                    <h3>Notifications</h3>
+                    <AiFillCloseCircle onClick={history.goBack} style={{cursor: "pointer"}} size={25} color="#777" />
+                </header>
                 <div className="items">
                     {notifications.length ? 
                     notifications.map((notification)=> 
@@ -54,6 +57,12 @@ const NotificationPopup = () => {
                 }
                 .note-popup .promptier.show{
                     bottom: 20px;
+                }
+
+                .note-popup header{
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
                 }
 
 
