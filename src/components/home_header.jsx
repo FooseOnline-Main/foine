@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
 import { useNotification } from '../providers/notificationProvider';
 
-const HomeHeader = ({onSearch, onQuickOpenNotifications}) => {
+const HomeHeader = ({onSearch}) => {
     const {unread} = useNotification();
     const {user} = useAuth();
 
@@ -31,7 +31,7 @@ const HomeHeader = ({onSearch, onQuickOpenNotifications}) => {
             <FaEye size={18} color="#eee" />
             <b style={{marginLeft: 5}}>WatchList</b>
         </Link>
-        <Link onClick={onQuickOpenNotifications} className='profile-button'>
+        <Link to="/notifications" className='profile-button'>
             <FaBell size={16} color="#eee" />
             {unread.length ? <div className="tag">{unread.length}</div> : <></>}
         </Link>

@@ -15,10 +15,10 @@ import ProductViewPage from '../components/product_view_page';
 import ProfilePopup from '../components/profile_popup';
 import QuickWatchlistView from '../components/quick_watchlist_view';
 import SignupForm from '../components/signup_form';
+import NotificationPopup from '../components/notification_popup';
 
 const HomePage = () => {
     const [searchString, setSearchString] = useState("");
-    const [quickOpenNotifications, setQuickOpenNotifications] = useState(false);
     const history = useHistory();
 
     const handleSearch = (string)=>{
@@ -30,21 +30,16 @@ const HomePage = () => {
         document.body.style.overflow = "auto";     
     });
 
-    const handleQuickOpen = ()=>{
-        setQuickOpenNotifications(true);
-        setTimeout(()=>{ setQuickOpenNotifications(false) }, 150);
-    }
-
     return (
         <div id='homepage'>
             <>
-                <HomeHeader onSearch={handleSearch} onQuickOpenNotifications={handleQuickOpen} />
+                <HomeHeader onSearch={handleSearch} />
                 <div className="page-body">
                     <LiveFeedSection />
                     <GalleryViewSection searchValue={searchString}/>
                 </div>
                 <QuickWatchlistView />
-                <FloatNotifications quickOpen={quickOpenNotifications} />
+                <FloatNotifications />
                 <Route path="/login">
                     <LoginForm />
                 </Route>
@@ -56,6 +51,9 @@ const HomePage = () => {
                 </Route>
                 <Route path="/preview-product/:id">
                     <ProductViewPage />
+                </Route>
+                <Route path="/notifications">
+                    <NotificationPopup />
                 </Route>
                 <PrivateRoute path="/profile" component={ProfilePopup} />
                 <ErrorPopup />

@@ -80,7 +80,7 @@ const FloatNotifications = ({quickOpen}) => {
                 </div>
                 {loading ? <Loader /> : <></>}
             </div> : <></>}
-            <div className={`quick-message ${quickNote !== null ? 'show' : ''}`}>
+            {!holdOn ?<div className={`quick-message ${quickNote !== null ? 'show' : ''}`}>
                 <figure>
                     <BiBell size={30} color="#ccc" />
                 </figure>
@@ -88,7 +88,7 @@ const FloatNotifications = ({quickOpen}) => {
                     {quickNote ? <><h4>{quickNote.title}</h4>
                     <p>{quickNote.message}</p></> : <></>}
                 </div>
-            </div>
+            </div> : <></>}
         </div>
     );
 }
@@ -110,8 +110,8 @@ const NotificationItem = ({notification, onDelete})=>{
     }
 
     const handleOpen = ()=>{
-        markAsRead(notification.id);
         setOpen(!open)
+        markAsRead(notification.id);
     }
 
     return <div className={`item ${notification.read ? '' : 'unread'}`}>
