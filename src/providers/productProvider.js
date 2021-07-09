@@ -91,6 +91,22 @@ function ProductsProvider({ children }) {
         return products.filter(product=> product.category === category);
     }
 
+    const increaseWatch = (product)=>{
+        productsRef.doc(product.id).update({watchCount: (product.watchCount + 1)})
+        .catch(error=>{
+            createError(error.message, 2000);
+        })
+    }
+
+    const reduceWatch = (product)=>{
+        if(product.watchCount){
+            productsRef.doc(product.id).update({watchCount: (product.watchCount - 1)})
+            .catch(error=>{
+                createError(error.message, 2000);
+            })
+        }
+    }
+
     const holdProduct = (userId, product) => {
         if(product && userId){
             if(product.status === 0){
@@ -172,7 +188,8 @@ function ProductsProvider({ children }) {
             products, categories, loading,
             fetchProducts, getProducts, holdProduct, fetchProductById, 
             unholdProduct, markProductsAsSold, searchProducts,
-            like, addToWishList, share, getProductById, comment
+            like, addToWishList, share, getProductById, comment, increaseWatch, 
+            reduceWatch
         }}>
             {children}
         </ProductsContext.Provider>

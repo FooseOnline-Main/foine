@@ -1,4 +1,4 @@
-import { AiOutlineClose, AiOutlineUser } from '@meronex/icons/ai';
+import { AiOutlineClose, AiOutlineEye, AiOutlineUser } from '@meronex/icons/ai';
 import { FaEye, FaEyeSlash, FaStopwatch } from '@meronex/icons/fa';
 import React, { useEffect, useState } from 'react';
 import { getStatus, useProducts } from '../providers/productProvider';
@@ -10,7 +10,7 @@ import { useWatchlist } from '../providers/watchlistProvider';
 
 const ProductViewPage = () => {
     const params = useParams();
-    const {products, comment, fetchProductById, getProductById, holdProduct, unholdProduct} = useProducts();
+    const {products, comment, fetchProductById, getProductById, holdProduct, unholdProduct, increaseWatch, reduceWatch} = useProducts();
     const {watchlist, isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const {user} = useAuth();
     const [watching, setWatching] = useState(false);
@@ -45,6 +45,16 @@ const ProductViewPage = () => {
         }, 150);
     }
 
+    const handleWatch = ()=>{
+        if(watching) {
+            reduceWatch(product);
+            removeFromWatchlist(product.id)
+        }else{
+            increaseWatch(product);
+            addToWatchlist(user.uid, product.id)
+        }
+    }
+
     return (
         <div className='single-product-page'>
             <div className="close-sheet" onClick={onClosePage}></div>
@@ -53,7 +63,12 @@ const ProductViewPage = () => {
                 <div className="close-button" onClick={onClosePage}>
                     <AiOutlineClose color="#ffffff" size={15} />
                 </div>
-                <div className="img-box" style={{backgroundImage: `url(${product.imageUrl})`}}></div>
+                <div className="img-box" style={{backgroundImage: `url(${product.imageUrl})`}}>
+                    {product.watchCount ? <div className="watch-count">
+                        <AiOutlineEye size={20} color="#FF6123" />
+                        <span style={{marginLeft: 5}}>{product.watchCount}</span>
+                    </div> : <></>}
+                </div>
                 <div className="content">
                     <div className="details">
                         <div  style={{flex: '1'}}>
@@ -72,7 +87,7 @@ const ProductViewPage = () => {
                             <FaStopwatch size={18} color="#fff" />
                             <span>{product.heldBy !== "" ? "Unhold Item" : "Hold Item"}</span>
                         </button>}
-                        {product.status !== 2 ? <button onClick={()=> watching ? removeFromWatchlist(product.id) : addToWatchlist(user.uid, product.id)} id="add-to-watchlist">
+                        {product.status !== 2 ? <button onClick={handleWatch} id="add-to-watchlist">
                             {watching ? <FaEyeSlash size={20} color="#fff" /> : <FaEye size={20} color="#fff" />}
                             <span>{watching ? 'Unwatch Item' : 'Watch Item'}</span>
                         </button> : <></>}
@@ -128,6 +143,12 @@ const ProductViewPage = () => {
                     border-radius: 20px;
                     overflow-x: hidden;
                     overflow-y: scroll;
+                }
+
+                .single-product-page .main-page .watch-count{
+                    top: 20px;
+                    left: 5%;
+                    background: #222;
                 }
 
                 @media(max-width: 1000px){

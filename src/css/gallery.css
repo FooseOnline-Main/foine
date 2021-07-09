@@ -158,10 +158,6 @@
   min-width: 100%;
   min-height: 300px;
 }
-@media (max-width: 1090px) {
-  .gallery-view .inner .item {
-  }
-}
 
 .gallery-view .item img {
   width: 100%;
@@ -208,12 +204,16 @@
   pointer-events: none;
   opacity: 0;
 }
+.gallery-view .inner .item .watch-count {
+  top: 15px;
+  left: 5%;
+}
 .gallery-view .inner .item .float-price {
   position: absolute;
   bottom: 25px;
   left: 0;
   color: #fff;
-  background: #000;
+  background: #222;
   padding: 10px;
   border-radius: 0 10px 10px 0;
   -webkit-border-radius: 0 10px 10px 0;
@@ -268,7 +268,7 @@
   top: 10px;
   color: #fff;
   font-size: 12px;
-  padding: 10px 5%;
+  padding: 7px 5%;
   border-radius: 10px 10px 10px 10px;
 }
 

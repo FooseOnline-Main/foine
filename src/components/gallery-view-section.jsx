@@ -1,4 +1,4 @@
-import { AiFillHeart, AiFillStar, AiOutlineHeart, AiOutlineStar } from '@meronex/icons/ai';
+import { AiFillHeart, AiFillStar, AiOutlineEye, AiOutlineHeart, AiOutlineStar } from '@meronex/icons/ai';
 import { BsStopwatch, BsStopwatchFill } from '@meronex/icons/bs';
 import { FaEye, FaEyeSlash } from '@meronex/icons/fa';
 import React, { useEffect, useState } from 'react';
@@ -11,7 +11,7 @@ import { useWatchlist } from '../providers/watchlistProvider';
 import {HiMenuAlt2, HiX} from '@meronex/icons/hi';
 
 const GalleryViewSection = ({searchValue}) => {
-    const {products: _products, categories, getProducts, like, addToWishList, holdProduct, unholdProduct, searchProducts } = useProducts();
+    const {products: _products, categories, getProducts, like, addToWishList, holdProduct, unholdProduct, reduceWatch, increaseWatch, searchProducts } = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const {user} = useAuth();
     const [products, setProducts] = useState(_products.map(item=> item));
@@ -58,11 +58,13 @@ const GalleryViewSection = ({searchValue}) => {
         return array;
     }
 
-    const handleAddToCart = (productId)=>{
-        if(isWatching(productId)){
-           return removeFromWatchlist(productId);
+    const handleAddToWatchlist = (product)=>{
+        if(isWatching(product.id)){
+           reduceWatch(product);
+           return removeFromWatchlist(product.id);
         }
-        addToWatchlist(user.uid, productId);
+        increaseWatch(product);
+        addToWatchlist(user.uid, product.id);
     }
 
     return (
@@ -91,6 +93,10 @@ const GalleryViewSection = ({searchValue}) => {
                             {held && <img className="held-img" src="/images/held-img.png" alt={product.name} />}
                             <img draggable="false" src={product.imageUrl} alt="product item" />
                             <div className="float-price"><p><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></p></div>
+                            {product.watchCount ? <div className="watch-count">
+                                <AiOutlineEye size={20} color="#FF6123" />
+                                <span style={{marginLeft: 5}}>{product.watchCount}</span>
+                            </div> : <></>}
                             <div className="content">
                                 <Link to={`/preview-product/${product.id}`} className="preview-button"></Link>
                                 <div className="details">
@@ -98,7 +104,7 @@ const GalleryViewSection = ({searchValue}) => {
                                 </div>
                                 {product.status === 2 ? <></> : <div className="add-watchlist">
                                     <p><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></p>
-                                    {held ? <></> :<button onClick={()=>handleAddToCart(product.id)} className={`btn ${isWatching(product.id) ? "" : "active"}`}>{isWatching(product.id) ? 
+                                    {held ? <></> :<button onClick={()=>handleAddToWatchlist(product)} className={`btn ${isWatching(product.id) ? "" : "active"}`}>{isWatching(product.id) ? 
                                     (<><FaEyeSlash style={{marginRight: 5}} size={18} color="#222" /><span>Unwatch</span></>) : 
                                     (<><FaEye style={{marginRight: 5}} size={18} color="#fff" /><span>Watch</span></>)}</button>}
                                 </div>}
