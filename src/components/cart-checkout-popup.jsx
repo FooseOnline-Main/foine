@@ -3,7 +3,7 @@ import '../css/watchlist.css';
 import { Link, Route, useHistory } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 
-import { AiOutlineInfo } from '@meronex/icons/ai';
+import { AiOutlineEye, AiOutlineInfo } from '@meronex/icons/ai';
 import EmptyView from './empty_view';
 import { FaEyeSlash } from '@meronex/icons/fa';
 import { useAuth } from '../providers/authProvider';
@@ -103,8 +103,10 @@ const WatchlistItem = ({item})=>{
                 <Link to={`/preview-product/${item.id}`} className="info">
                     <h3>{item.name}</h3>
                     <p className="size">{item.size}</p>
-                    <p className="size">{item.category}</p>
-                    {/* <span className="tag">{getStatus(item.status).value}</span> */}
+                    {item.watchCount  ? <p style={{fontSize: 11, display: "flex", alignItems: "center"}}>
+                        <AiOutlineEye size={16} color="red" style={{marginRight: 5}} /> {item.watchCount} other(s) watching</p> : 
+                        <p className="size">{item.category}</p>}
+                    
                 </Link >
                 <div className="price">
                     <p><small>GHC</small><span>{parseFloat(item.price).toFixed(2)}</span></p>

@@ -1,6 +1,6 @@
 import { getStatus, useProducts } from '../providers/productProvider';
 
-import { AiOutlineCheck } from '@meronex/icons/ai';
+import { AiOutlineCheck, AiOutlineEye } from '@meronex/icons/ai';
 import { Link } from 'react-router-dom';
 import React from 'react';
 import { useAuth } from '../providers/authProvider';
@@ -8,7 +8,7 @@ import { useWatchlist } from '../providers/watchlistProvider';
 
 const LiveFeedCard = ({feed}) => {
     const {user} = useAuth();
-    const {holdProduct, unholdProduct} = useProducts();
+    const {holdProduct, unholdProduct, increaseWatch, reduceWatch} = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const productId = feed.id;
 
@@ -20,8 +20,10 @@ const LiveFeedCard = ({feed}) => {
 
     const handleAddToWatchlist = ()=>{
         if(isWatching(feed.id)){
+            reduceWatch(feed);
             removeFromWatchlist(productId);
         }else{
+            increaseWatch(feed);
             addToWatchlist(user.uid, productId);
         }
     }
@@ -41,6 +43,10 @@ const LiveFeedCard = ({feed}) => {
             <div style={{display: "flex", paddingTop: 20}}>
                 {feed.status === 1 ? <img src="/images/held-img.png" style={{opacity: 0.9, margin: "0 auto"}} width="50%" alt={feed.name} /> : <></>}
             </div>
+            {feed.watchCount ? <div className="watch-count">
+                <AiOutlineEye size={20} color="#FF6123" />
+                <span style={{marginLeft: 5}}>{feed.watchCount}</span>
+            </div> : <></>}
             <div className="details" onClick={onViewItem}>
                 <div style={{background: getStatus(feed.status).color}} className="status">{getStatus(feed.status).value}</div>
                 <Link to={`/preview-product/${feed.id}`} >
@@ -78,6 +84,14 @@ const LiveFeedCard = ({feed}) => {
                     background-position: center center;
                     background-size: cover;
                 }
+
+                .feed-card .watch-count{
+                    top: 5%;
+                    left: 5%;
+                    z-index: 1;
+                }
+
+                .feed-card .watch-count span{font-size: 13px}
 
                 .feed-card .add-section{
                     display: flex;
