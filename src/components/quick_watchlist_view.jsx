@@ -8,7 +8,7 @@ import { useProducts } from '../providers/productProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 
 const QuickWatchlistView = () => {
-    const {getProductById} = useProducts();
+    const {getProductById, reduceWatch} = useProducts();
     const {removeFromWatchlist, watchlist, checkOut} = useWatchlist();
     const {user} = useAuth();
     const [open, setOpen] = useState(true);
@@ -44,7 +44,7 @@ const QuickWatchlistView = () => {
                             <Link to={"/preview-product/" + product.id}>
                                 <img src={product.imageUrl} alt="watchlist item" />
                             </Link>
-                            <div onClick={()=> removeFromWatchlist(product.id)} className="remove-btn">
+                            <div onClick={()=> {reduceWatch(product); removeFromWatchlist(product.id);}} className="remove-btn">
                                 <AiOutlineClose color="white" size={10} />
                             </div>
                         </div>}
