@@ -35,16 +35,16 @@ export const getStatus = (status)=>{
     return output;
 }
 
-
 function ProductsProvider({ children }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]); 
     const [loading, setLoading] = useState(false);
     const {createError} = useError();
-    const {notifyHold, notifyUnheld} = useNotification();
+    const {notifyHold, notifyPurchaseRequest, notifyUnheld} = useNotification();
 
     const productsRef = firebase.firestore().collection('products');
     const catsRef = firebase.firestore().collection('categories');
+    const holdCounterRef = firebase.firestore().collection('holdCounter');
 
     const fetchProducts = async ()=>{
         setLoading(true);
@@ -107,16 +107,65 @@ function ProductsProvider({ children }) {
         }
     }
 
+    const requestPurchase = (userId, product) => {
+        if(product && userId){
+            productsRef.doc(product.id).update({
+                purchaseRequests: [
+                    ...product.purchaseRequests, 
+                    {
+                        userId,
+                        accepted: false,
+                        interest: 0,
+                    }
+                ]
+            }).then(_=>{
+                notifyPurchaseRequest(product.heldBy, product.id);
+            }).catch(error=>{
+                createError(error.message, 2000);
+            })
+        }
+    }
+
     const holdProduct = (userId, product) => {
+        const saveHoldData = (holdCount)=>{
+            // check if already held before
+            product.holders.includes(userId) ? 
+
+            // send warning to user
+            createError("Sorry, you can only hold product once") :
+
+            // if never held, allow hold
+            productsRef.doc(product.id).update(
+                {heldBy: userId, status: 1, holders: [...product.holders, userId]}
+            )
+            .then(_=>{
+                // do something here
+                holdCounterRef.doc(userId).update({count: holdCount + 1});
+                notifyHold(product.id);
+            }).catch(error=>{
+                createError(error.message, 2000);
+            });
+        }
+
         if(product && userId){
             if(product.status === 0){
-                productsRef.doc(product.id).update({heldBy: userId, status: 1})
-                .then(_=>{
-                    // do something here
-                    notifyHold(product.id);
-                }).catch(error=>{
-                    createError(error.message, 2000);
-                })
+                // check if user hold limit is exceeded
+                holdCounterRef.doc(userId).get()
+                .then((doc)=>{
+                    if(doc.exists){
+                        if(doc.data().count === 5){
+                            // warn user on exceeded hold limit
+                            createError("Sorry, you cannot hold more than 5 products at a time")
+                        }else{
+                            saveHoldData(doc.data().count);
+                        }
+                    }else{
+                        holdCounterRef.doc(userId).set({count: 0});
+                        saveHoldData(0);
+                    }
+                }).catch(({message})=>{
+                    createError(message);
+                });
             }else{
                 createError("Item is being held by someone else!", 3000);
             }            
@@ -125,6 +174,13 @@ function ProductsProvider({ children }) {
 
      const unholdProduct = (userId, product) => {
         if(userId && product){
+            // reduce user hold counter
+            holdCounterRef.doc(userId).get().then((doc)=>{
+                holdCounterRef.doc(userId).update({count: doc.data().count - 1})
+            }).catch(({message})=>{
+                createError(message);
+            });
+               
             productsRef.doc(product.id).update({heldBy: "", status: 0})
             .then(_=>{
                 // do something here
@@ -187,7 +243,7 @@ function ProductsProvider({ children }) {
         <ProductsContext.Provider value={{
             products, categories, loading,
             fetchProducts, getProducts, holdProduct, fetchProductById, 
-            unholdProduct, markProductsAsSold, searchProducts,
+            unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
             like, addToWishList, share, getProductById, comment, increaseWatch, 
             reduceWatch
         }}>
