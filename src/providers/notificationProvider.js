@@ -89,6 +89,24 @@ function NotificationProvider({ children }) {
         })
     }
 
+    const notifyPurchaseRequest = (productHolderId, productId) => {
+        if(productHolderId){
+            const noteId = v4();
+            notificationsRef.doc(noteId).set({
+                createdAt: Date.now(),
+                id: noteId,
+                message: "Someone wants to buy a product you are holding. Would you like to accept this request?",
+                title: "Purchase Request",
+                to: productHolderId,
+                type: "PURCHASE_REQUEST",
+                read: false,
+                other: {productId}
+            }).catch(({message})=>{
+                createError(message);
+            })
+        }
+    }
+
     const markAsRead = (id)=>{
         if(id){
             notificationsRef.doc(id).update({read: true})
@@ -120,7 +138,8 @@ function NotificationProvider({ children }) {
     return (
         <NotificationContext.Provider value={{
             notifications, loading, unread, 
-            notifyHold, notifyUnheld, deleteNotification, markAsRead
+            notifyHold, notifyUnheld, deleteNotification, markAsRead,
+            notifyPurchaseRequest
         }}>
             {children}
         </NotificationContext.Provider>
