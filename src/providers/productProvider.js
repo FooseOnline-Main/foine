@@ -126,6 +126,17 @@ function ProductsProvider({ children }) {
         }
     }
 
+    const cancelRequestPurchase = (userId, product) => {
+        if(product && userId){
+            const newProductsRequests = product.purchaseRequests.filter(request=> request.userId !== userId);
+            productsRef.doc(product.id).update({
+                purchaseRequests: newProductsRequests
+            }).catch(error=>{
+                createError(error.message, 2000);
+            })
+        }
+    }
+
     const holdProduct = (userId, product) => {
         const saveHoldData = (holdCount)=>{
             // check if already held before
@@ -181,7 +192,7 @@ function ProductsProvider({ children }) {
                 createError(message);
             });
                
-            productsRef.doc(product.id).update({heldBy: "", status: 0})
+            productsRef.doc(product.id).update({heldBy: "", status: 0, purchaseRequests: []})
             .then(_=>{
                 // do something here
                 notifyUnheld(product.id);
@@ -244,8 +255,8 @@ function ProductsProvider({ children }) {
             products, categories, loading,
             fetchProducts, getProducts, holdProduct, fetchProductById, 
             unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
-            like, addToWishList, share, getProductById, comment, increaseWatch, 
-            reduceWatch
+            cancelRequestPurchase, like, addToWishList, share, getProductById, 
+            comment, increaseWatch, reduceWatch
         }}>
             {children}
         </ProductsContext.Provider>
