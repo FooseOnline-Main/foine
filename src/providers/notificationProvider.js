@@ -19,6 +19,8 @@ function NotificationProvider({ children }) {
     const {user} = useAuth();
     const {createError} = useError();
     const [unread, setUnread] = useState([]);
+    const [action, setAction] = useState(null);
+    const resetAction = ()=> setAction(null);
 
     // initializing firestore refs
     const store = firebase.firestore();
@@ -100,7 +102,10 @@ function NotificationProvider({ children }) {
                 to: productHolderId,
                 type: "PURCHASE_REQUEST",
                 read: false,
-                other: {productId}
+                other: {
+                    productId,
+                    link: "/negotiate/"+productId
+                }
             }).catch(({message})=>{
                 createError(message);
             })
@@ -108,6 +113,7 @@ function NotificationProvider({ children }) {
     }
 
     const markAsRead = (id)=>{
+        setAction("mark_as_read")
         if(id){
             notificationsRef.doc(id).update({read: true})
             .catch(({message})=>{
@@ -124,6 +130,7 @@ function NotificationProvider({ children }) {
     }
 
     const deleteNotification = (id)=>{
+        setAction("delete");
         setLoading(true);
         notificationsRef.doc(id).delete()
         .then(_=>{
@@ -137,9 +144,9 @@ function NotificationProvider({ children }) {
 
     return (
         <NotificationContext.Provider value={{
-            notifications, loading, unread, 
+            notifications, loading, unread, action, 
             notifyHold, notifyUnheld, deleteNotification, markAsRead,
-            notifyPurchaseRequest
+            notifyPurchaseRequest, resetAction
         }}>
             {children}
         </NotificationContext.Provider>

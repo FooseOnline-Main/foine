@@ -8,7 +8,7 @@ import { useWatchlist } from '../providers/watchlistProvider';
 
 const LiveFeedCard = ({feed}) => {
     const {user} = useAuth();
-    const {holdProduct, unholdProduct, increaseWatch, reduceWatch} = useProducts();
+    const {holdProduct, unholdProduct, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const productId = feed.id;
 
@@ -36,6 +36,24 @@ const LiveFeedCard = ({feed}) => {
         }
     }
 
+    const handleRequestPurchase = ()=>{
+        if(requestedPurchase()){
+            cancelRequestPurchase(user.uid, feed);
+        }else{
+            requestPurchase(user.uid, feed);
+        }
+    }
+
+    const requestedPurchase = ()=>{
+        let output = false;
+        feed.purchaseRequests.forEach(request=>{
+            if(request.userId === user.uid){
+                output = true;
+            }
+        });
+        return output;
+    }
+
     return (
         <div className='feed-card' 
         style={{backgroundImage: `url(${feed.imageUrl})`}}
@@ -56,7 +74,8 @@ const LiveFeedCard = ({feed}) => {
                 </Link>
                 {feed.status !== 2 ? 
                 <div className="add-section">
-                    {feed.heldBy === user.uid ? <></> :<label htmlFor={feed.id} className="add-to-watchlist">
+                    {feed.heldBy === user.uid ? <></> :
+                    <label htmlFor={feed.id} className="add-to-watchlist">
                         <input type="checkbox" checked={isWatching(feed.id)} name="add-watchlist" className="add-watchlist" id={feed.id} onChange={handleAddToWatchlist} />
                         <div className="check-box">
                             <AiOutlineCheck size={10} color="#fff" />
@@ -64,8 +83,15 @@ const LiveFeedCard = ({feed}) => {
                         <span>{isWatching(feed.id) ? "Unwatch" : "Watch"}</span>
                     </label>}
                     {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                    <></> : <label htmlFor={`${feed.id}hold`} className="hold">
-                        <input type="checkbox" checked={(feed.heldBy === (user.uid ))} name="add-watchlist" className="add-watchlist" id={`${feed.id}hold`} onChange={handleHoldItem} />
+                    <label htmlFor={`${feed.id}request`} className="request">
+                        <input type="checkbox" checked={requestedPurchase()} name="request" className="request" id={`${feed.id}request`} onChange={handleRequestPurchase} />
+                        <div className="check-box">
+                            <AiOutlineCheck size={10} color="#fff" />
+                        </div>
+                        <span>{requestedPurchase() ? "Requested" : "Request"}</span>
+                    </label> : 
+                    <label htmlFor={`${feed.id}hold`} className="hold">
+                        <input type="checkbox" checked={(feed.heldBy === (user.uid ))} name="hold" className="hold" id={`${feed.id}hold`} onChange={handleHoldItem} />
                         <div className="check-box">
                             <AiOutlineCheck size={10} color="#fff" />
                         </div>
@@ -106,7 +132,7 @@ const LiveFeedCard = ({feed}) => {
                     display: flex;
                     cursor: pointer;
                 }
-                .feed-card .add-watchlist{display: none}
+                .feed-card input{display: none}
                 .feed-card .add-watchlist:checked + .check-box{
                     background: var(--dark-color)
                 }
@@ -118,7 +144,7 @@ const LiveFeedCard = ({feed}) => {
                     height: 15px;
                     border-radius: 50%;
                     border: 2px solid var(--dark-color);
-                    margin-right: 5px;
+                    margin-right: 0px;
                     display: flex;
                     align-items: center;
                     justify-content: center;

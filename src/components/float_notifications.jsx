@@ -1,133 +1,100 @@
 import '../css/notifications.css';
-
-import { AiFillCloseCircle, AiFillDelete, AiFillDownCircle, AiFillUpCircle } from '@meronex/icons/ai';
-import {FaBell, FaBellSlash} from '@meronex/icons/fa';
 import React, {useEffect, useState} from 'react';
-
 import {BiBell} from '@meronex/icons/bi';
-import EmptyView from './empty_view';
-import Loader from './simple_loader';
 import { useNotification } from '../providers/notificationProvider';
-import { useHistory } from 'react-router-dom';
+import { useProducts } from '../providers/productProvider';
+import {motion} from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 // vercel push
-const FloatNotifications = ({quickOpen}) => {
-    const [show, setShow] = useState(false);
-    const [holdOn, setHoldOn] = useState(false);
-    const [quickNote, setQuickNote] = useState(null);
-    const {notifications, unread, deleteNotification, loading} = useNotification();
-    const history = useHistory();
+const FloatNotifications = () => {
+    const [quickNotes, setQuickNotes] = useState([]);
+    const {unread, action, resetAction} = useNotification();
 
     useEffect(() => {
-        setQuickNote(unread.reverse()[0] || null);
-        const quicknotetimeout = setTimeout(()=>setQuickNote(null), 3000);
-        return ()=>{
-            clearTimeout(quicknotetimeout);
+        if(quickNotes.length >= 3){
+            setQuickNotes([{
+                type: "ALL_NOTIFICATIONS", 
+                title: "New Notifications",
+                message: `You have ${unread.length} new notifications. 
+                Open notifications to check them out`,
+                other: {link: '/notifications'
+                },
+            }]);
+        }else{
+            if(unread.length > 0 && action === null){
+                setTimeout(()=>{
+                    setQuickNotes([unread.reverse()[0], ...quickNotes]);
+                }, 400);
+            }else{
+                resetAction();
+            }
         }
     }, [unread]);
 
-    useEffect(() => {
-        document.addEventListener("mousemove", mousemoveEvent);
-
-        function mousemoveEvent({clientX}){
-            if(clientX >= window.innerWidth - (window.innerWidth*0.1)){
-                return setShow(true)
-            }
-            setShow(false);
-        }
-
-        return ()=>{
-            document.removeEventListener("mousemove", mousemoveEvent)
-        }
-    }, []);
-
-    useEffect(() => {
-        if(quickOpen)
-            setHoldOn(true);
-    }, [quickOpen]);
-
-    const closeNotifications = ()=>{
-        history.replace('/');
-        document.querySelector('.notification-list').classList.add('hide');
-        setTimeout(()=>{
-            document.querySelector('.notification-list').classList.remove('hide');
-            setHoldOn(false);
-        }, 120)
-    }
-
-    const toggleShow = ()=>{
-        if(holdOn){
-             closeNotifications()
-        } else {
-            setHoldOn(true)
-        }
+    const removeQuickNote = (note)=>{
+        setQuickNotes(quickNotes.filter(item=> item !== note));
     }
 
     return (
-        <div className={`notifications ${holdOn || show ? "show" : ""}`}>
-            <div onClick={toggleShow} className="bubble-btn">
-                <FaBell size={18} color="#222" />
-                {unread.length < 1 ? <></> : <div className="tag">{unread.length}</div>}
-            </div>
-            {holdOn ? <div className="notification-list">
-                <header>
-                    <h5 style={{fontSize: 14}}>Notifications</h5>
-                    {/* <div className="tag">{notifications.length}</div> */}
-                    <AiFillCloseCircle onClick={closeNotifications} size={20} color="#bbb" style={{marginLeft: "auto", cursor: "pointer"}} />
-                </header>
-                <div className="content">
-                    {notifications.length < 1 ? <EmptyView message="No notifications available" useIcon={true} icon={<FaBellSlash size={60} color="#ddd"/>} /> : notifications.map(item=> <NotificationItem key={item.id} notification={item} onDelete={()=>deleteNotification(item.id)} />) }
-                </div>
-                {loading ? <Loader /> : <></>}
-            </div> : <></>}
-            {!holdOn ?<div className={`quick-message ${quickNote !== null ? 'show' : ''}`}>
-                <figure>
-                    <BiBell size={30} color="#ccc" />
-                </figure>
-                <div className="info">
-                    {quickNote ? <><h4>{quickNote.title}</h4>
-                    <p>{quickNote.message}</p></> : <></>}
-                </div>
-            </div> : <></>}
+        <div className="quick-notifications">
+            {quickNotes.map((note, id)=>
+                <QuickNote key={id} note={note} onRemoveNote={removeQuickNote} />
+            )}
         </div>
     );
 }
 
-const NotificationItem = ({notification, onDelete})=>{
-    const [open, setOpen] = useState(false);
-    const {markAsRead} = useNotification();
+const QuickNote = ({note, onRemoveNote})=>{
+    const [holdOn, setHoldOn] = useState(true);
+    const [timeout, setQuickTimeout] = useState(null);
+    const {getProductById} = useProducts();
 
     useEffect(() => {
-        if(notification.message.length <= 50){
-            markAsRead(notification.id);
+        setQuickTimeout(setTimeout(()=>{
+            setHoldOn(false);
+            onRemoveNote(note);
+        }, 3000));
+
+        return ()=>{
+            clearTimeout(timeout);
         }
     }, []);
-    
-    const reduceMessage = ()=>{
-        if(notification.message && notification.message.length > 50){
-            return notification.message.substring(0, 50).concat('...');
+
+    const handleRemove = ()=>{
+        setQuickTimeout(setTimeout(()=> {
+            setHoldOn(false); 
+            onRemoveNote(note);
+        }, 3000))
+    }
+
+    const renderIconImageSide = ()=>{
+        if(note.type === "PURCHASE_REQUEST"){
+            const product = getProductById(note.other.productId);
+            return <img src={product.imageUrl} alt={product.name} />
+        }else{
+            return <figure>
+                <BiBell size={30} color="#ccc" />
+            </figure>
         }
     }
 
-    const handleOpen = ()=>{
-        setOpen(!open)
-        markAsRead(notification.id);
-    }
-
-    return <div className={`item ${notification.read ? '' : 'unread'}`}>
-        <header>
-            <h5 style={{fontSize: "12px"}}>{notification.title}</h5>
-            <div className="actions">
-                {notification.message.length > 50 ? 
-                open ? <AiFillUpCircle onClick={handleOpen} size={20} style={{cursor: "pointer"}} color="#aaa" /> : <AiFillDownCircle onClick={()=>setOpen(!open)} size={20} style={{cursor: "pointer"}} color="#aaa" /> 
-                : <></>}
-                <AiFillDelete onClick={onDelete} style={{marginLeft: 8, cursor: "pointer"}} size={17} color="#ff000077" />
+    return (
+        <motion.div layout={true}
+            onMouseOver={()=>clearTimeout(timeout)} 
+            onMouseOut={handleRemove}
+            className={`quick-message ${holdOn ? 'show' : ''}`}
+        >
+            {renderIconImageSide()}
+            <div className="info">
+                {note ? <><h4>{note.title}</h4>
+                <p>{note.message}</p></> : <></>}
+                {note.other && note.other.link ? <div className="links-box">
+                    <Link to={note.other.link}>Check Now</Link>
+                </div> : <></>}
             </div>
-        </header>
-        <p style={{fontSize: "11px", color: "#777", fontWeight: "500"}}>
-            {notification.message.length > 50 ? open ? notification.message : reduceMessage() : notification.message}
-        </p>
-    </div>
+        </motion.div>
+    )
 }
 
 export default FloatNotifications;
