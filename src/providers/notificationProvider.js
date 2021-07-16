@@ -91,7 +91,7 @@ function NotificationProvider({ children }) {
         })
     }
 
-    const notifyPurchaseRequest = (productHolderId, productId) => {
+    const notifyPurchaseRequest = (productHolderId, productId, requestId) => {
         if(productHolderId){
             const noteId = v4();
             notificationsRef.doc(noteId).set({
@@ -104,12 +104,46 @@ function NotificationProvider({ children }) {
                 read: false,
                 other: {
                     productId,
-                    link: "/negotiate/"+productId
+                    link: "/negotiate/"+requestId
                 }
             }).catch(({message})=>{
                 createError(message);
             })
         }
+    }
+
+    const notifyAcceptedRequest = (userId, productId, productName) => {
+        const noteId = v4();
+        notificationsRef.doc(noteId).set({
+            createdAt: Date.now(),
+            id: noteId,
+            message: `Your request to purchase ${productName} has been accepted by holder. You can now go ahead and purchase with an interest of GH1.00`,
+            title: "Purchase Request Accepted",
+            to: userId,
+            type: "ACCEPTED_REQUEST",
+            read: false,
+            other: {
+                productId,
+                link: "/preview-product/"+productId
+            }
+        }).catch(({message})=>{
+            createError(message);
+        })
+    }
+
+    const notifyDeniedRequest = (userId, productName) => {
+        const noteId = v4();
+        notificationsRef.doc(noteId).set({
+            createdAt: Date.now(),
+            id: noteId,
+            message: `Sorry to inform you, but your request to purchase ${productName} has been denied by holder.`,
+            title: "Purchase Request Denied",
+            to: userId,
+            type: "DENIED_REQUEST",
+            read: false,
+        }).catch(({message})=>{
+            createError(message);
+        })
     }
 
     const markAsRead = (id)=>{
@@ -146,7 +180,8 @@ function NotificationProvider({ children }) {
         <NotificationContext.Provider value={{
             notifications, loading, unread, action, 
             notifyHold, notifyUnheld, deleteNotification, markAsRead,
-            notifyPurchaseRequest, resetAction
+            notifyPurchaseRequest, resetAction, notifyAcceptedRequest,
+            notifyDeniedRequest
         }}>
             {children}
         </NotificationContext.Provider>

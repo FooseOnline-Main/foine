@@ -1,6 +1,7 @@
 // import axios from 'axios';
 
 import React, { useContext, useState } from 'react';
+import { v4 } from 'uuid';
 
 import firebase from '../firebase';
 import { useError } from './errorProvider';
@@ -40,7 +41,7 @@ function ProductsProvider({ children }) {
     const [categories, setCategories] = useState([]); 
     const [loading, setLoading] = useState(false);
     const {createError} = useError();
-    const {notifyHold, notifyPurchaseRequest, notifyUnheld} = useNotification();
+    const {notifyHold, notifyPurchaseRequest, notifyAcceptedRequest, notifyDeniedRequest, notifyUnheld} = useNotification();
 
     const productsRef = firebase.firestore().collection('products');
     const catsRef = firebase.firestore().collection('categories');
@@ -72,6 +73,18 @@ function ProductsProvider({ children }) {
         setLoading(true);
         const prodSnapshot = await productsRef.doc(id).get();
         return prodSnapshot.data();
+    }
+
+    const getProductByReqId = (reqId)=>{
+        let output = null;
+        products.forEach(product=> {
+            product.purchaseRequests.forEach(request=>{
+                if(request.id === reqId){
+                    output = product;
+                }
+            })
+        });
+        return output;
     }
 
     const searchProducts = (searchString)=>{
@@ -109,21 +122,46 @@ function ProductsProvider({ children }) {
 
     const requestPurchase = (userId, product) => {
         if(product && userId){
+            const requestId = v4();
             productsRef.doc(product.id).update({
                 purchaseRequests: [
                     ...product.purchaseRequests, 
                     {
+                        id: requestId,
                         userId,
                         accepted: false,
                         interest: 0,
                     }
                 ]
             }).then(_=>{
-                notifyPurchaseRequest(product.heldBy, product.id);
+                notifyPurchaseRequest(product.heldBy, product.id, requestId);
             }).catch(error=>{
                 createError(error.message, 2000);
             })
         }
+    }
+
+    const acceptPurchaseRequest = (product, requestId)=>{
+        let request = product.purchaseRequests.filter(req=> req.id === requestId)[0];
+        request = {...request, interest: 1, accepted: true};
+        productsRef.doc(product.id).update({purchaseRequests: [request]})
+        .then(_=>{
+            notifyAcceptedRequest(request.userId, product.id, product.name);
+        }).catch(({message})=>{
+            createError(message, 2000)
+        });
+    }
+
+    const denyPurchaseRequest = (product, requestId)=>{
+        const request = product.purchaseRequests.filter(req=> req.id === requestId)[0];
+        productsRef.doc(product.id).update({
+            purchaseRequests: product.purchaseRequests.filter(req=> req.id !== requestId)
+        })
+        .then(_=>{
+            notifyDeniedRequest(request.userId, product.name);
+        }).catch(({message})=>{
+            createError(message, 2000)
+        });
     }
 
     const cancelRequestPurchase = (userId, product) => {
@@ -256,7 +294,8 @@ function ProductsProvider({ children }) {
             fetchProducts, getProducts, holdProduct, fetchProductById, 
             unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
             cancelRequestPurchase, like, addToWishList, share, getProductById, 
-            comment, increaseWatch, reduceWatch
+            comment, increaseWatch, reduceWatch, getProductByReqId, acceptPurchaseRequest,
+            denyPurchaseRequest
         }}>
             {children}
         </ProductsContext.Provider>
