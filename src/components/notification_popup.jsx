@@ -2,7 +2,7 @@ import { AiFillCloseCircle, AiFillDownCircle, AiFillUpCircle, AiOutlineCheckSqua
 import { FaBellSlash } from '@meronex/icons/fa';
 import { motion, useMotionValue, useTransform, } from 'framer-motion';
 import React, {useRef, useEffect, useState} from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useNotification } from '../providers/notificationProvider';
 import EmptyView from './empty_view';
 
@@ -110,7 +110,8 @@ const NotificationItem = ({data: notification, onDelete: deleteNotification, onM
     const background = useTransform(
         x, [-50, 50], ["#FF3838", "#222222"])
     const constraintRef = useRef({left: 0, right: 0});
-   
+    const hasLink = notification.other && notification.other.link;
+       
     const handleDragEnd = (e, {point: {x: endPoint}}) =>{
         promise.delete && deleteNotification(notification.id);
         promise.markRead && markAsRead(notification.id);
@@ -158,10 +159,16 @@ const NotificationItem = ({data: notification, onDelete: deleteNotification, onM
         </motion.div>
         <motion.div layout drag="x" onDrag={handleDrag} onDragEnd={handleDragEnd} className={`item ${!notification.read ? "unread" : ""}`} dragConstraints={{left: 0, right: 0}}>
             <motion.div className="title-box">
+                {hasLink ? 
+                <Link to={notification.other.link} className="title">{notification.title}</Link> : 
                 <motion.h4 className="title">{notification.title}</motion.h4>
+                }
                 { notification.message.length > 100 ? viewFull ? <AiFillUpCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <AiFillDownCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <></>}
             </motion.div>
-            <motion.p className="message">{viewFull ? notification.message : reduceMessage(notification.message)}</motion.p>
+            {hasLink ? 
+                <Link to={notification.other.link} className="message">{viewFull ? notification.message : reduceMessage(notification.message)}</Link> : 
+                <motion.p className="message">{viewFull ? notification.message : reduceMessage(notification.message)}</motion.p>
+            }
         </motion.div>
         <style jsx>{`
             .wrapper{
@@ -203,10 +210,13 @@ const NotificationItem = ({data: notification, onDelete: deleteNotification, onM
 
             .wrapper .title{
                 font-size: 14px;
+                color: #222;
+                font-weight: bold;
             }
             .wrapper .message{
                 font-size: 12px;
                 opacity: 0.8;
+                color: #555;
             }
         `}</style>
     </motion.div>

@@ -16,6 +16,7 @@ import ProfilePopup from '../components/profile_popup';
 import QuickWatchlistView from '../components/quick_watchlist_view';
 import SignupForm from '../components/signup_form';
 import NotificationPopup from '../components/notification_popup';
+import NegotiationPopup from '../components/negotiation_popup';
 
 const HomePage = () => {
     const [searchString, setSearchString] = useState("");
@@ -54,6 +55,9 @@ const HomePage = () => {
                 </Route>
                 <Route path="/notifications">
                     <NotificationPopup />
+                </Route>
+                <Route path="/negotiate/:reqId">
+                    <NegotiationPopup />
                 </Route>
                 <PrivateRoute path="/profile" component={ProfilePopup} />
                 <ErrorPopup />
