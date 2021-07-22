@@ -1,5 +1,5 @@
 import { AiOutlineSearch, AiOutlineUser } from '@meronex/icons/ai';
-import React, {useEffect, useState} from 'react';
+import React, {Fragment} from 'react';
 
 import { FaBell, FaEye } from '@meronex/icons/fa';
 import { Link } from 'react-router-dom';
@@ -11,31 +11,31 @@ const HomeHeader = ({onSearch}) => {
     const {user} = useAuth();
 
     const renderAuth = ()=>{
-        return <>
+        return <Fragment>
         {!user.isAnonymous ? 
-        <>
+        <Fragment>
             <Link to='/profile' className='profile-button'>
                 <AiOutlineUser size={15} color="#eee" />
                 <b style={{marginLeft: 5}}>My Profile</b>
             </Link>
-        </> : 
-        <>
+        </Fragment> : 
+        <Fragment>
             <Link to='/login' className='profile-button auth'>
                 <b>Login</b>
             </Link>
             <Link to='/signup' className='profile-button auth'>
                 <b><pre>Signup</pre></b>
             </Link>
-        </>}
+        </Fragment>}
         <Link to='/watchlist' className='profile-button'>
             <FaEye size={18} color="#eee" />
             <b style={{marginLeft: 5}}>WatchList</b>
         </Link>
         <Link to="/notifications" className='profile-button'>
             <FaBell size={16} color="#eee" />
-            {unread.length ? <div className="tag">{unread.length}</div> : <></>}
+            {unread.length ? <div className="tag">{unread.length}</div> : <Fragment></Fragment>}
         </Link>
-        </>
+        </Fragment>
     }
 
     return (

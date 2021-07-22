@@ -1,5 +1,4 @@
-import React, {useEffect, useState} from 'react';
-
+import React, {useEffect, useState, Fragment} from 'react';
 import { AiOutlineClose } from '@meronex/icons/ai';
 import EmptyView from './empty_view';
 import { Link } from 'react-router-dom';
@@ -49,12 +48,12 @@ const QuickWatchlistView = () => {
                             </div>
                         </div>}
                     )}
-                    {checkOut.length < 1 ? <EmptyView message="Checkout watchlist is empty" useIcon={false} /> : <></>}
+                    {checkOut.length < 1 ? <EmptyView message="Checkout watchlist is empty" useIcon={false} /> : <Fragment></Fragment>}
                 </div>
                 {checkOut.length > 0 ?<div className="checkout-btn-box">
                     <p><small>GHC</small><big>{parseFloat(amount).toFixed(2)}</big></p>
                     <Link to="/watchlist/checkout" className="btn">Checkout</Link>
-                </div> : <></>}
+                </div> : <Fragment></Fragment>}
             </div>
             <style jsx>{`
                 .quick-watchlist-view{

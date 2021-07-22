@@ -83,17 +83,16 @@ function WatchlistProvider({ children }) {
         setCheckOut(newCheckoutList.map(item=> item));
     }
 
-    const clearCheckedOut = (key)=>{
+    const clearCheckedOut = ()=>{
         // remove checkedout watchlist items
-        const newWatchlist = watchlist.filter(id=> !checkOut.includes(id));
-        watchlistRef.doc(key)
-        .update({watchlist: [...newWatchlist]})
-        .then(_=>{
-            setCheckOut([]);
-            setWatchlist([...newWatchlist]);
-        }).catch(error=> {
-            console.log(error);
-        })
+        watchlist.forEach(item=> {
+            if(checkOut.includes(item.productId)){
+                watchlistRef.doc(item.id).delete()
+                .catch(error=> {
+                    console.log(error);
+                })
+            }
+        });
     }
 
     return (

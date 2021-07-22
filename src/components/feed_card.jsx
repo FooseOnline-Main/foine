@@ -2,7 +2,7 @@ import { getStatus, useProducts } from '../providers/productProvider';
 
 import { AiOutlineCheck, AiOutlineEye } from '@meronex/icons/ai';
 import { Link } from 'react-router-dom';
-import React from 'react';
+import React, {Fragment} from 'react';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 
@@ -59,12 +59,12 @@ const LiveFeedCard = ({feed}) => {
         style={{backgroundImage: `url(${feed.imageUrl})`}}
         >
             <div style={{display: "flex", paddingTop: 20}}>
-                {feed.status === 1 ? <img src="/images/held-img.png" style={{opacity: 0.9, margin: "0 auto"}} width="50%" alt={feed.name} /> : <></>}
+                {feed.status === 1 ? <img src="/images/held-img.png" style={{opacity: 0.9, margin: "0 auto"}} width="50%" alt={feed.name} /> : <Fragment></Fragment>}
             </div>
             {feed.watchCount ? <div className="watch-count">
                 <AiOutlineEye size={20} color="#FF6123" />
                 <span style={{marginLeft: 5}}>{feed.watchCount}</span>
-            </div> : <></>}
+            </div> : <Fragment></Fragment>}
             <div className="details" onClick={onViewItem}>
                 <div style={{background: getStatus(feed.status).color}} className="status">{getStatus(feed.status).value}</div>
                 <Link to={`/preview-product/${feed.id}`} >
@@ -74,7 +74,7 @@ const LiveFeedCard = ({feed}) => {
                 </Link>
                 {feed.status !== 2 ? 
                 <div className="add-section">
-                    {feed.heldBy === user.uid ? <></> :
+                    {feed.heldBy === user.uid ? <Fragment></Fragment> :
                     <label htmlFor={feed.id} className="add-to-watchlist">
                         <input type="checkbox" checked={isWatching(feed.id)} name="add-watchlist" className="add-watchlist" id={feed.id} onChange={handleAddToWatchlist} />
                         <div className="check-box">
@@ -98,7 +98,7 @@ const LiveFeedCard = ({feed}) => {
                         <span>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</span>
                     </label>}
                 </div> : 
-                <></>}
+                <Fragment></Fragment>}
             </div>
             <style jsx>{`
                 .feed-card{

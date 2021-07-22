@@ -1,5 +1,5 @@
 import { FaInfoCircle } from '@meronex/icons/fa';
-import React from 'react';
+import React, {Fragment} from 'react';
 import { useError } from '../providers/errorProvider';
 
 const ErrorPopup = () => {
@@ -10,7 +10,7 @@ const ErrorPopup = () => {
             {error ? <div className="bubble">
                 <FaInfoCircle size={30} style={{marginRight: 15}} color="#fff" />
                 <p>{error}</p>
-            </div> : <></>}
+            </div> : <Fragment></Fragment>}
             <style jsx>{`
                 .error-popup{
                     position: fixed;

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useProducts } from '../providers/productProvider';
-import { useAuth } from '../providers/authProvider';
 import '../css/negotiation.css';
 import { useEffect } from 'react';
 import Loader from './simple_loader';
@@ -65,7 +64,7 @@ const NegotiationPopup = () => {
             <div onClick={()=>history.replace('/')} className="close-bg"></div>
             <div className="inner">
                 {loading && !product && !request ? <Loader /> : 
-                <>
+                <Fragment>
                     <div className="img-box">
                         <img src={product.imageUrl} alt={product.name} />
                     </div>
@@ -78,7 +77,7 @@ const NegotiationPopup = () => {
                             </div>
                         </div>
                         <div className="content">
-                            {loadSuccess ? <Loader /> : request.accepted ? renderSuccess() : <>
+                            {loadSuccess ? <Loader /> : request.accepted ? renderSuccess() : <Fragment>
                             <b style={{fontSize: 14, marginTop: "auto"}}>Benefits of accepting request:</b>
                             <div className="benefits">
                                 <div className="benefit">
@@ -94,14 +93,14 @@ const NegotiationPopup = () => {
                                     <span>You get 10 points for your kindness</span>
                                 </div>
                             </div>
-                            {request.accepted ? <></> : <div className="actions">
+                            {request.accepted ? <Fragment></Fragment> : <div className="actions">
                                 <div onClick={handleAccept} id="accept"><p>Accept</p></div>
                                 <div onClick={handleDeny} id="deny"><p>Deny</p></div>
                             </div>}
-                            </>}
+                            </Fragment>}
                         </div>
                     </div>
-                </>}
+                </Fragment>}
             </div>
         </div>
     );

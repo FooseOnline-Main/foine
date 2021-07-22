@@ -1,10 +1,10 @@
-import { AiFillCloseCircle, AiFillDownCircle, AiFillUpCircle, AiOutlineCheckSquare, AiOutlineDelete, AiTwotoneCloseCircle } from '@meronex/icons/ai';
-import { FaBellSlash } from '@meronex/icons/fa';
+import React, {useRef, useEffect, useState, Fragment} from 'react';
 import { motion, useMotionValue, useTransform, } from 'framer-motion';
-import React, {useRef, useEffect, useState} from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { useNotification } from '../providers/notificationProvider';
 import EmptyView from './empty_view';
+import { FaBellSlash } from '@meronex/icons/fa';
+import { AiFillCloseCircle, AiFillDownCircle, AiFillUpCircle, AiOutlineCheckSquare, AiOutlineDelete, AiTwotoneCloseCircle } from '@meronex/icons/ai';
 
 const NotificationPopup = () => {
     const history = useHistory();
@@ -163,7 +163,7 @@ const NotificationItem = ({data: notification, onDelete: deleteNotification, onM
                 <Link to={notification.other.link} className="title">{notification.title}</Link> : 
                 <motion.h4 className="title">{notification.title}</motion.h4>
                 }
-                { notification.message.length > 100 ? viewFull ? <AiFillUpCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <AiFillDownCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <></>}
+                { notification.message.length > 100 ? viewFull ? <AiFillUpCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <AiFillDownCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <Fragment></Fragment>}
             </motion.div>
             {hasLink ? 
                 <Link to={notification.other.link} className="message">{viewFull ? notification.message : reduceMessage(notification.message)}</Link> : 

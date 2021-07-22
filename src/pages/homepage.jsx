@@ -1,6 +1,6 @@
 import '../css/home.css';
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Route, useHistory } from "react-router-dom";
 
 import CheckoutPopup from '../components/cart-checkout-popup';
@@ -17,13 +17,13 @@ import QuickWatchlistView from '../components/quick_watchlist_view';
 import SignupForm from '../components/signup_form';
 import NotificationPopup from '../components/notification_popup';
 import NegotiationPopup from '../components/negotiation_popup';
+import { useRef } from 'react';
 
 const HomePage = () => {
     const [searchString, setSearchString] = useState("");
     const history = useHistory();
 
     const handleSearch = (string)=>{
-        document.querySelector('.page-body').scrollBy({top: 10, behavior: "smooth"});
         setSearchString(string);
     }
 
@@ -33,7 +33,7 @@ const HomePage = () => {
 
     return (
         <div id='homepage'>
-            <>
+            <Fragment>
                 <HomeHeader onSearch={handleSearch} />
                 <div className="page-body">
                     <LiveFeedSection />
@@ -61,7 +61,7 @@ const HomePage = () => {
                 </Route>
                 <PrivateRoute path="/profile" component={ProfilePopup} />
                 <ErrorPopup />
-            </>
+            </Fragment>
         </div>
     );
 }

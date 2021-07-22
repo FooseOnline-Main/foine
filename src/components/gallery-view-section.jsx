@@ -1,14 +1,14 @@
-import { AiFillHeart, AiFillStar, AiOutlineEye, AiOutlineHeart, AiOutlineStar } from '@meronex/icons/ai';
-import { BsStopwatch, BsStopwatchFill } from '@meronex/icons/bs';
-import { FaEye, FaEyeSlash } from '@meronex/icons/fa';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import { getStatus, useProducts } from '../providers/productProvider';
 import '../css/gallery.css';
+import { BsStopwatch, BsStopwatchFill } from '@meronex/icons/bs';
+import { AiFillHeart, AiFillStar, AiOutlineEye, AiOutlineHeart, AiOutlineStar } from '@meronex/icons/ai';
+import {HiMenuAlt2, HiX} from '@meronex/icons/hi';
+import { FaEye, FaEyeSlash } from '@meronex/icons/fa';
 import CategoryMenu from './category_menu';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
-import {HiMenuAlt2, HiX} from '@meronex/icons/hi';
 
 const GalleryViewSection = ({searchValue}) => {
     const {products: _products, categories, getProducts, like, addToWishList, holdProduct, unholdProduct, reduceWatch, increaseWatch, searchProducts } = useProducts();
@@ -18,6 +18,21 @@ const GalleryViewSection = ({searchValue}) => {
     const [categoryFilter, setCategoryFilter] = useState("");
     const [prevShuffle, setPrevShuffle] = useState([]);
     const [showMenu, setShowMenu] = useState(false);
+    const scrollRef = useRef();
+
+    const shuffle = (array)=>{
+        var currentIndex = array.length,  randomIndex;
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+            // Pick a remaining element...
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
 
     useEffect(() => {
         setProducts(prevShuffle.map(item=>{ 
@@ -36,6 +51,7 @@ const GalleryViewSection = ({searchValue}) => {
         const result = shuffle(searchProducts(searchValue));
         setProducts(result);
         setPrevShuffle(result.map(item=> item));
+        searchValue.length > 0 && scrollRef.current.scrollIntoView(true, {behavior: "smooth"});
     }, [searchValue]);
 
     useEffect(() => {
@@ -43,20 +59,6 @@ const GalleryViewSection = ({searchValue}) => {
         setPrevShuffle(shuffleResult);
         setProducts(shuffleResult.map(item=> item));
     }, [categoryFilter]);
-
-    const shuffle = (array)=>{
-        var currentIndex = array.length,  randomIndex;
-        // While there remain elements to shuffle...
-        while (0 !== currentIndex) {
-            // Pick a remaining element...
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex--;
-            // And swap it with the current element.
-            [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
-        }
-        return array;
-    }
 
     const handleAddToWatchlist = (product)=>{
         if(isWatching(product.id)){
@@ -68,10 +70,7 @@ const GalleryViewSection = ({searchValue}) => {
     }
 
     return (
-        <div className="gallery-view">
-            {/* <div className="mute-heading">
-                <hr /><b>All Products</b><hr />
-            </div> */}
+        <div ref={scrollRef} className="gallery-view">
             <CategoryMenu categories={categories} onChange={(categoryId)=> setCategoryFilter(categoryId)} />
             <div className="inner">
                 <div className={`category-section ${showMenu ? "show" : ""}`}>
@@ -96,17 +95,17 @@ const GalleryViewSection = ({searchValue}) => {
                             {product.watchCount ? <div className="watch-count">
                                 <AiOutlineEye size={20} color="#FF6123" />
                                 <span style={{marginLeft: 5}}>{product.watchCount}</span>
-                            </div> : <></>}
+                            </div> : <Fragment></Fragment>}
                             <div className="content">
                                 <Link to={`/preview-product/${product.id}`} className="preview-button"></Link>
                                 <div className="details">
                                     <h3>{product.name}</h3>
                                 </div>
-                                {product.status === 2 ? <></> : <div className="add-watchlist">
+                                {product.status === 2 ? <Fragment></Fragment> : <div className="add-watchlist">
                                     <p><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></p>
-                                    {held ? <></> :<button onClick={()=>handleAddToWatchlist(product)} className={`btn ${isWatching(product.id) ? "" : "active"}`}>{isWatching(product.id) ? 
-                                    (<><FaEyeSlash style={{marginRight: 5}} size={18} color="#222" /><span>Unwatch</span></>) : 
-                                    (<><FaEye style={{marginRight: 5}} size={18} color="#fff" /><span>Watch</span></>)}</button>}
+                                    {held ? <Fragment></Fragment> :<button onClick={()=>handleAddToWatchlist(product)} className={`btn ${isWatching(product.id) ? "" : "active"}`}>{isWatching(product.id) ? 
+                                    (<Fragment><FaEyeSlash style={{marginRight: 5}} size={18} color="#222" /><span>Unwatch</span></Fragment>) : 
+                                    (<Fragment><FaEye style={{marginRight: 5}} size={18} color="#fff" /><span>Watch</span></Fragment>)}</button>}
                                 </div>}
                                 <div className="actions">
                                     <div onClick={()=> like(user.uid, product)} className="act">
@@ -118,7 +117,7 @@ const GalleryViewSection = ({searchValue}) => {
                                         {product.wishlist.includes(user.uid) ? <AiFillStar size={20} color="#fff" /> : <AiOutlineStar size={20} color="#fff" />}
                                     </div>
                                     {(held && !heldByMe) || product.status === 2 ? 
-                                    <></> : 
+                                    <Fragment></Fragment> : 
                                     <div onClick={()=> { heldByMe ? 
                                         unholdProduct(user.uid, product) : 
                                         holdProduct(user.uid, product)}} 

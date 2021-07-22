@@ -246,3 +246,140 @@
 .checkout-page .payable small {
   margin-right: 5px;
 }
+
+/* WATCHLIST ITEM */
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: stretch;
+  padding: 15px var(--padding-x);
+  border-bottom: 1px solid #f5f5f5;
+}
+.item.fade::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+.item:hover {
+  background: #fafafa;
+}
+.item .check {
+  width: 50px;
+  padding-top: 10px;
+}
+.item .check .checker {
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--dark-color);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.item .check .checker.on {
+  background: var(--dark-color);
+}
+
+.item .img {
+  width: 60px;
+  height: 60px;
+  background-size: cover;
+  background-position: center;
+  margin-right: 15px;
+  border-radius: 10px;
+}
+
+.item .details {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+}
+.item .details .info {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.item .info h3 {
+  font-size: 14px;
+}
+.item .info .size,
+.item .info .tag {
+  margin: 0px 0;
+  font-size: 12px;
+}
+
+.item .info .tag {
+  color: #aaa;
+}
+
+.item .price {
+  color: var(--dark-color);
+  align-self: stretch;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.item .price small {
+  font-size: 12px;
+  margin-right: 5px;
+}
+.item .price span {
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* CHECKOUT PRODUCTS */
+.products-view {
+}
+.products-view .toggler {
+  min-width: 100%;
+  border: none;
+  background: #eee;
+  color: #777;
+  padding: 10px 0;
+  cursor: pointer;
+  text-align: center;
+  font-size: 13px;
+}
+
+.products-view .items-container {
+  max-height: initial;
+  transition: height 0.3s linear;
+}
+
+.products-view .items-container.hidden {
+  max-height: 0px;
+  overflow: hidden;
+}
+.products-view .items-container .item {
+  padding: 10px 5%;
+  border-bottom: 1px solid #fafafa;
+  display: flex;
+  align-items: center;
+}
+
+.products-view .item .price {
+  margin-left: auto;
+  color: var(--dark-color);
+}
+
+.products-view .item .info {
+  margin-left: 10px;
+}
+
+.products-view img {
+  border-radius: 10px;
+}
+
+.products-view .item p {
+  font-size: 13px;
+  line-height: 18px;
+}

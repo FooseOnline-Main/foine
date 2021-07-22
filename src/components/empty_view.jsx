@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 
 const EmptyView = ({message, icon, useIcon = true}) => {
     return (
         <div className="empty-box">
-            {useIcon ? icon : <></>}
+            {useIcon ? icon : <Fragment></Fragment>}
             <p style={{marginTop: useIcon ? 20 : 0}}>{message}</p>
             <style jsx>{`
                 .empty-box{

@@ -244,7 +244,9 @@ function ProductsProvider({ children }) {
         if(checkoutProducts.length > 0 && checkoutProducts !== null){
             const productIds = checkoutProducts.map(item=> item.id);
             productIds.forEach(id => {
-                productsRef.doc(id).update({status: 2})
+                productsRef.doc(id).update({
+                    status: 2, holders: [], watchCount: 0, holders: [], heldBy: ""
+                })
                 .catch(({message})=> createError(message));
             });
         }

@@ -68,12 +68,11 @@
   padding: 20px 2%;
   min-width: 250px;
   margin-right: 5%;
-  box-shadow: 0 0 20px #efefef;
+  box-shadow: 0 0 10px 2px #00000020;
   border-radius: 20px;
   align-self: start;
   display: flex;
   flex-direction: column;
-  border: 1px solid #eee;
   transition: all 0.2s ease-in-out;
   -webkit-transition: all 0.2s ease-in-out;
   -moz-transition: all 0.2s ease-in-out;
@@ -125,6 +124,7 @@
   display: grid;
   grid-template-columns: repeat(3, 31.5%);
   grid-gap: 2%;
+  padding-left: 10px;
   padding-bottom: 60px;
   padding-top: 20px;
 }
@@ -157,13 +157,32 @@
 .gallery-view .inner .item {
   min-width: 100%;
   min-height: 300px;
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  transition: all 0.25s ease-out;
+  -webkit-transition: all 0.25s ease-out;
+  -moz-transition: all 0.25s ease-out;
+  -ms-transition: all 0.25s ease-out;
+  -o-transition: all 0.25s ease-out;
+  box-shadow: 0 0 10px 2px #00000020;
+  border: 5px solid #fff;
+}
+
+.gallery-view .inner .item:hover {
 }
 
 .gallery-view .item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: inherit;
+  -webkit-border-radius: inherit;
+  -moz-border-radius: inherit;
+  -ms-border-radius: inherit;
+  -o-border-radius: inherit;
 }
 
 .gallery-view .item .held-img {
@@ -257,6 +276,10 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  -ms-border-radius: 20px;
+  -o-border-radius: 20px;
 }
 .gallery-view .item .content .add-watchlist button.active {
   background: var(--dark-color);

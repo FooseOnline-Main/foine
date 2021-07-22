@@ -1,5 +1,5 @@
 import '../css/notifications.css';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, Fragment} from 'react';
 import {BiBell} from '@meronex/icons/bi';
 import { useNotification } from '../providers/notificationProvider';
 import { useProducts } from '../providers/productProvider';
@@ -87,11 +87,11 @@ const QuickNote = ({note, onRemoveNote})=>{
         >
             {renderIconImageSide()}
             <div className="info">
-                {note ? <><h4>{note.title}</h4>
-                <p>{note.message}</p></> : <></>}
+                {note ? <Fragment><h4>{note.title}</h4>
+                <p>{note.message}</p></Fragment> : <Fragment></Fragment>}
                 {note.other && note.other.link ? <div className="links-box">
                     <Link to={note.other.link}>Check Now</Link>
-                </div> : <></>}
+                </div> : <Fragment></Fragment>}
             </div>
         </motion.div>
     )

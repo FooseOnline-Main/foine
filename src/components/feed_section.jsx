@@ -139,19 +139,39 @@ const LiveFeedSection = () => {
                     top: 0;
                     bottom: 0;
                     width: 80px;
+                    pointer-events: none;
                 }
 
                 .feed-section .vanishing-point.left{
-                    background: linear-gradient(to right, transparent, transparent);
+                    background: linear-gradient(to right, white, transparent);
                     left: 0;
                 }
                 .feed-section .vanishing-point.right{
-                    background: linear-gradient(to left, transparent, transparent);
+                    background: linear-gradient(to left, white, transparent);
                     right: 0;
                 }
 
                 .feed-section .inner::-webkit-scrollbar{
                     display: none;
+                }
+
+                @media(max-width: 800px){
+                    .feed-section .vanishing-point{
+                        position: absolute;
+                        top: 0;
+                        bottom: 0;
+                        width: 40px;
+                        pointer-events: none;
+                    }
+                }
+                @media(max-width: 500px){
+                    .feed-section .vanishing-point{
+                        position: absolute;
+                        top: 0;
+                        bottom: 0;
+                        width: 20px;
+                        pointer-events: none;
+                    }
                 }
             `}</style>
         </div>

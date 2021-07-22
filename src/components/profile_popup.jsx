@@ -1,12 +1,10 @@
-import '../css/profile.css';
-
-import { AiOutlineFileText, AiOutlineInfoCircle, AiOutlineLogout, AiOutlineShoppingCart, AiOutlineStar, AiOutlineUser } from '@meronex/icons/ai';
+import React, { useEffect, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import React, { useEffect } from 'react';
-
+import '../css/profile.css';
 import Loader from './simple_loader';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
+import { AiOutlineFileText, AiOutlineInfoCircle, AiOutlineLogout, AiOutlineShoppingCart, AiOutlineStar, AiOutlineUser } from '@meronex/icons/ai';
 
 const ProfilePopup = () => {
     const {user, logout, loading} = useAuth();
@@ -79,7 +77,7 @@ const ProfilePopup = () => {
                         <p><AiOutlineLogout size={20} color="#555" /><b>Logout</b></p>
                     </Link>
                 </div>
-                {loading ? <Loader expand={true} /> : <></>}
+                {loading ? <Loader expand={true} /> : <Fragment></Fragment>}
             </div>
         </div>
     );

@@ -1,15 +1,15 @@
-import '../css/watchlist.css';
-
+import React, { useEffect, useState, Fragment } from 'react';
 import { Link, Route, useHistory } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
-
 import { AiOutlineEye, AiOutlineInfo } from '@meronex/icons/ai';
 import EmptyView from './empty_view';
 import { FaEyeSlash } from '@meronex/icons/fa';
 import { useAuth } from '../providers/authProvider';
-import { usePaystackPayment } from 'react-paystack';
 import { useProducts } from '../providers/productProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
+import {pay} from '../api/';
+import '../css/watchlist.css';
+import Loader from './simple_loader';
+import PromptPopup from './prompt_popup';
 
 const regions = [
     "Ahafo", "Ashanti", "Bono", "Bono East", "Central", "Eastern", "Greater Accra", "North East", "Northern", "Oti", "Savannah", "Upper East", "Upper West", "Volta", "Western", "Western North"
@@ -74,7 +74,7 @@ const WatchlistPage = ({onClose})=>{
         {watchlist.length > 0 && checkOut.length > 0 ? <div className="footer">
             <Link to="/watchlist/checkout" className="submit-btn">Proceed to checkout</Link>
             <p className="price-tally"><b>GHC</b><h3>{getCheckoutTally().toFixed(2)}</h3></p>
-        </div> : <></>}
+        </div> : <Fragment></Fragment>}
     </div>
 }
 
@@ -113,92 +113,6 @@ const WatchlistItem = ({item})=>{
                     <span onClick={()=>removeFromWatchlist(item.id)} style={{color: "#ccc", fontSize: 12}}>- Remove -</span>
                 </div>
             </div>
-            <style jsx>{`
-                .item{
-                    display: flex;
-                    align-items: center;
-                    justify-content: stretch;
-                    padding: 15px var(--padding-x);
-                    border-bottom: 1px solid #f5f5f5;
-                }
-                .item.fade::before{
-                    content: "";
-                    position: absolute;
-                    top: 0; left: 0; right: 0; bottom: 0;
-                    z-index: 1;
-                    backdrop-filter: blur(1px);
-                    -webkit-backdrop-filter: blur(2px);
-                    pointer-events: none;
-                }
-                .item:hover{
-                    background: #fafafa;
-                }
-                .item .check{
-                    width: 50px;
-                    padding-top: 10px;
-                }
-                .item .check .checker{
-                    width: 15px;
-                    height: 15px;
-                    border: 2px solid var(--dark-color);
-                    border-radius: 50%;
-                    cursor: pointer;
-                }
-                .item .check .checker.on{
-                    background: var(--dark-color);
-                }
-
-                .item .img{
-                    width: 60px;
-                    height: 60px;
-                    background-size: cover;
-                    background-position: center;
-                    margin-right: 15px;
-                    border-radius: 10px;
-                }
-
-                .item .details{
-                    display: flex;
-                    flex: 1;
-                    align-items: stretch;
-                }
-                .item .details .info{
-                    flex: 1;
-                    font-size: 14px;
-                    color: #333;
-                }
-
-                .item .info h3{
-                    font-size: 14px;
-                }
-                .item .info .size, 
-                .item .info .tag{
-                    margin: 0px 0;
-                    font-size: 12px;
-                }
-
-                .item .info .tag{
-                    color: #aaa;
-                }
-
-                .item .price{
-                    color: var(--dark-color);
-                    align-self: stretch;
-                    text-align: right;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                }
-
-                .item .price small{
-                    font-size: 12px;
-                    margin-right: 5px;
-                }
-                .item .price span{
-                    font-size: 16px;
-                    cursor: pointer;
-                }
-            `}</style>
         </div>
     )
 }
@@ -206,21 +120,16 @@ const WatchlistItem = ({item})=>{
 const CheckoutPage = ({onClose})=>{
     const [deliveryId, setDeliveryId] = useState(0);
     const [deliveryAddress, setDeliveryAddress] = useState("");
+    const {markProductsAsSold, getProductById} = useProducts();
     const {clearCheckedOut, checkOut} = useWatchlist();
     const [deliveryFee, setDeliveryFee] = useState(0)
-    const {markProductsAsSold, getProductById} = useProducts();
     const [totalPayment, setTotalPayment] = useState(getCheckoutTally() + deliveryFee);
     const {user} = useAuth();
     const [email, setEmail] = useState(user.isAnonymous ? "" : user.email);
     const history = useHistory();
-
-    const initializePayment = usePaystackPayment({
-        reference: (new Date()).getTime(),
-        email: email,
-        amount: totalPayment * 100,
-        currency: 'GHS',
-        publicKey: process.env.REACT_APP_LIVE_PUBLIC_PAYSTACK_API_KEY,
-    });
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(null);
+    const [message, setMessage] = useState("");
 
     useEffect(() => {
         setTotalPayment(getCheckoutTally() + deliveryFee);
@@ -231,7 +140,7 @@ const CheckoutPage = ({onClose})=>{
             history.replace('/watchlist');
         }
         document.body.style.overflow = "hidden";
-    }, [checkOut]);
+    }, []);
 
     function getCheckoutTally(){
         let output = 0;
@@ -251,22 +160,28 @@ const CheckoutPage = ({onClose})=>{
         return output;
     }
 
-    const handleCheckout = (e)=>{
+    const handleCheckout = async (e)=>{
         e.preventDefault();
+        setLoading(true);
         // initialize paystack for payment
-        initializePayment(
-        ({ transaction, reference, status }) => {
-            // implementation for  whatever you want to do when the Paystack dialog closed.
-            markProductsAsSold(getProductsForCheckout())
-            clearCheckedOut(user.uid);
-            onClose();
-        }, () => {
-            // implementation for  whatever you want to do when the Paystack dialog closed.
-            console.log('closed')
-        })
+        const {data} = await pay(email, totalPayment * 100);
+        
+        if(data.status){
+            setSuccess(true);
+            setLoading(false);
+            const checkoutProducts = getProductsForCheckout();
+            markProductsAsSold(checkoutProducts)
+            clearCheckedOut();
+            setMessage(`Transaction made successfully.\n Transaction Reference: \n ${data.data.reference}`);
+        }else{
+            setSuccess(false);
+            setMessage("Error submitting payment, Please try again");
+        }
     }
 
     return <form onSubmit={handleCheckout} className="checkout-page">
+        {loading && <Loader expand={true} />}
+        {message && <PromptPopup onClose={onClose} type={success ? "success" : "failure"} message={message} />}
         <div className="header">
             <h3>Checkout</h3>
             <div onClick={onClose} className="close-btn">{'<'}</div>
@@ -296,7 +211,7 @@ const CheckoutPage = ({onClose})=>{
                         <option value="30.00">Accra - 30.00</option>
                         <option value="70.00">Tema - 70.00</option>
                     </select>
-                </div> : <></>}
+                </div> : <Fragment></Fragment>}
                 {deliveryId === 2 ? 
                 <div className="address-form">
                     <select name="area-range" onChange={({target})=> {setDeliveryFee(target.value === "" ? 0 : parseFloat(target.value));}} id="area-range">
@@ -307,7 +222,7 @@ const CheckoutPage = ({onClose})=>{
                         <option value="70.00">Tema - 70.00</option>
                     </select>
                     <textarea value={deliveryAddress} onChange={(input)=> setDeliveryAddress(input.value)} placeholder="Enter delivery address"></textarea>
-                </div> : <></>}
+                </div> : <Fragment></Fragment>}
                 {deliveryId === 3 ? 
                 <div className="address-form">
                     <div className="warning">
@@ -318,7 +233,7 @@ const CheckoutPage = ({onClose})=>{
                         <option value="">Select your region</option>
                         {regions.map(region=> <option value="5.00">{region}</option>)}
                     </select>
-                </div> : <></>}
+                </div> : <Fragment></Fragment>}
             </div>
             <div className="amount-payable">
                 <div className='label'>
@@ -346,7 +261,7 @@ const CheckoutPage = ({onClose})=>{
                 <div className="email-input">
                     <input autoFocus required value={email} name="email" type="email" placeholder="Enter your email address" onChange={({target: {value}})=> setEmail(value)} />
                 </div>
-            </div> : <></>}
+            </div> : <Fragment></Fragment>}
         </div>
         <div className="footer">
             <button type="submit" className="submit-btn" style={{marginRight: 0}}>Accept Checkout</button>
@@ -369,55 +284,6 @@ const ProductsViewForCheckout = ({checkoutProducts})=>{
                 <span className="price"><small>GHC</small>{parseFloat(item.price).toFixed(2)}</span>
             </div>)}
         </div>
-        <style jsx>{`
-            .products-view{
-
-            }    
-            .products-view .toggler{
-                min-width: 100%;
-                border: none;
-                background: #eee;
-                color: #777;
-                padding: 10px 0;
-                cursor: pointer; 
-                text-align: center;
-                font-size: 13px;
-            }
-
-            .products-view .items-container{
-                max-height: initial;
-                transition: height .3s linear;
-            }
-
-            .products-view .items-container.hidden{
-                max-height: 0px;
-                overflow: hidden;
-            }
-            .products-view .items-container .item{
-                padding: 10px 5%;
-                border-bottom: 1px solid #fafafa;
-                display: flex;
-                align-items: center;
-            }
-
-            .products-view .item .price{
-                margin-left: auto;
-                color: var(--dark-color);
-            }
-
-            .products-view .item .info{
-                margin-left: 10px;
-            }
-
-            .products-view img{
-                border-radius: 10px;
-            }
-
-            .products-view .item p{
-                font-size: 13px;
-                line-height: 18px;
-            }
-        `}</style>
     </div>
 }
 
