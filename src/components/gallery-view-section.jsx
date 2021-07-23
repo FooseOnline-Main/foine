@@ -71,7 +71,7 @@ const GalleryViewSection = ({searchValue}) => {
 
     return (
         <div ref={scrollRef} className="gallery-view">
-            <CategoryMenu categories={categories} onChange={(categoryId)=> setCategoryFilter(categoryId)} />
+            <CategoryMenu onToggleMenu={(value)=> setShowMenu(value)} categories={categories} onChange={(categoryId)=> setCategoryFilter(categoryId)} />
             <div className="inner">
                 <div className={`category-section ${showMenu ? "show" : ""}`}>
                     <div className="mute-heading">
@@ -132,9 +132,6 @@ const GalleryViewSection = ({searchValue}) => {
                         </div>})}
                     </div>
                 </section>
-                <div onClick={()=> setShowMenu(!showMenu)} className="side-toggler">
-                    {!showMenu ? <HiMenuAlt2 size={25} color="#555" /> : <HiX size={25} color="#555" />}
-                </div>
             </div>
         </div>
     );

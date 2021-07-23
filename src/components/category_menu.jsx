@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { HiMenuAlt2, HiX } from '@meronex/icons/hi';
+import React, { Fragment, useEffect, useState } from 'react';
 
-const CategoryMenu = ({categories, onChange}) => {
+const CategoryMenu = ({categories, onChange, onToggleMenu}) => {
     const [selectedId, setSelectedId] = useState('');
+    const [showMenu, setShowMenu] = useState(false);
 
     useEffect(() => {
         const menuScrollView = document.getElementById('scroll-menu');
@@ -48,60 +50,103 @@ const CategoryMenu = ({categories, onChange}) => {
     }
 
     return (
-        <div className='category-menu' id='scroll-menu'>
-            <div onClick={()=>selectCategory('')} 
-                 className={`item ${selectedId==='' ? 'select' : ''}`}>
-                <pre>All</pre>
+        <div className="categories-section">
+            <div onClick={()=> { onToggleMenu(!showMenu); setShowMenu(!showMenu);}} className="side-toggler">
+                {!showMenu ? <HiMenuAlt2 size={20} color="#555" /> : <HiX size={20} color="#555" />}
             </div>
-            {categories.map((category, id)=>{ 
-                return (
-            <div key={id} onClick={()=>selectCategory(category.name)} 
-            className={`item ${selectedId===category.name ? 'select' : ''}`}
-            >
-                <pre>{category.name}</pre>
+            <div className='category-menu' id='scroll-menu'>
+                <div onClick={()=>selectCategory('')} 
+                    className={`item ${selectedId==='' ? 'select' : ''}`}>
+                    <pre>All</pre>
                 </div>
+                {categories.map((category, id)=>{ 
+                    return (
+                <div key={id} onClick={()=>selectCategory(category.name)} 
+                className={`item ${selectedId===category.name ? 'select' : ''}`}
+                >
+                    <pre>{category.name}</pre>
+                    </div>
+                    )}
                 )}
-            )}
 
-            <style jsx>{`
-                .category-menu{
-                    padding: 10px 5%;
-                    overflow-x: auto;
-                    display: flex;
-                    align-items: center;
-                }
-
-                .category-menu::-webkit-scrollbar{
-                    height: 3px;
-                    background: transparent;
-                }
-                .category-menu::-webkit-scrollbar-thumb{
-                    height: 5px;
-                    border-radius: 10px;
-                    background: #eee;
-                }
-
-                .category-menu .item{
-                    padding: 10px 15px;
-                    border-radius: 15px;
-                    color: var(--text-color);
-                    margin-right: 20px;
-                    cursor: pointer;
-                    display: flex;
-                    font-size: 13px;
-                    box-shadow: 0 0 10px #ddd;
-                }
-                @media (max-width: 600px) {
-                    .category-menu .item{
-                        margin-right: 10px;
+                <style jsx>{`
+                    .categories-section{
+                        display: flex;
+                        align-items: center;
                     }
-                }
+                    
+                    .side-toggler {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 10px;
+                        -webkit-border-radius: 10px;
+                        -moz-border-radius: 10px;
+                        -ms-border-radius: 10px;
+                        -o-border-radius: 10px;
+                        min-width: 50px;
+                        height: 40px;
+                        background: white;
+                        box-shadow: 0 0 10px 5px #0000000f;
+                        cursor: pointer;
+                        transition: all 0.1s;
+                        -webkit-transition: all 0.1s;
+                        -moz-transition: all 0.1s;
+                        -ms-transition: all 0.1s;
+                        -o-transition: all 0.1s;
+                        display: none;
+                        margin-left: 5%;
+                    }
 
-                .category-menu .item.select{
-                    color: white;
-                    background-color: var(--dark-color);
-                }
-            `}</style>
+                    @media (max-width: 850px) {
+                        .side-toggler {
+                            display: flex;
+                            transform: scale(1);
+                            -webkit-transform: scale(1);
+                            -moz-transform: scale(1);
+                            -ms-transform: scale(1);
+                            -o-transform: scale(1);
+                        }
+                    }
+                    .category-menu{
+                        padding: 10px 5%;
+                        overflow-x: auto;
+                        display: flex;
+                        align-items: center;
+                    }
+
+                    .category-menu::-webkit-scrollbar{
+                        height: 3px;
+                        background: transparent;
+                    }
+                    .category-menu::-webkit-scrollbar-thumb{
+                        height: 5px;
+                        border-radius: 10px;
+                        background: #eee;
+                    }
+
+                    .category-menu .item{
+                        padding: 10px 15px;
+                        border-radius: 15px;
+                        color: var(--text-color);
+                        margin-right: 20px;
+                        cursor: pointer;
+                        display: flex;
+                        font-size: 13px;
+                        box-shadow: 0 0 10px #ddd;
+                    }
+                    @media (max-width: 600px) {
+                        .category-menu .item{
+                            margin-right: 10px;
+                        }
+                    }
+
+                    .category-menu .item.select{
+                        color: white;
+                        background-color: var(--dark-color);
+                    }
+                `}</style>
+            </div>
         </div>
     );
 }
