@@ -3,7 +3,8 @@
 // if the repo is public
 // You could optionally use .env file to store these data
 
-const value = process.env.REACT_APP_FIREBASE_CONFIG;
-const configuration = JSON.parse(value.toString());
+const value = (process.env.REACT_APP_FIREBASE_CONFIG).toString();
+console.log(typeof value, value, JSON.parse(value));
+const configuration = JSON.parse(value);
 
 export default configuration;
