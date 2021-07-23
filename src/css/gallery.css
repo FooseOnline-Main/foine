@@ -132,13 +132,7 @@
   -ms-transition: all 0.25s ease-out;
   -o-transition: all 0.25s ease-out;
   box-shadow: 0 0 10px 2px #00000020;
-  border: 5px solid #fff;
-}
-
-@media (max-width: 500px) {
-  .gallery-view .inner .item {
-    border-width: 2px;
-  }
+  border: 1px solid #fff;
 }
 
 .gallery-view .item img {
