@@ -164,8 +164,9 @@ const CheckoutPage = ({onClose})=>{
         e.preventDefault();
         setLoading(true);
         // initialize paystack for payment
-        const {data} = await pay(email, totalPayment * 100);
-        
+        const result = await pay(email, totalPayment * 100);
+        console.log(result);
+        const {data} = result;
         if(data.status){
             setSuccess(true);
             setLoading(false);

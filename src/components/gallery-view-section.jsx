@@ -59,7 +59,7 @@ const GalleryViewSection = ({searchValue}) => {
         setPrevShuffle(shuffleResult);
         setProducts(shuffleResult.map(item=> item));
     }, [categoryFilter]);
-
+    
     const handleAddToWatchlist = (product)=>{
         if(isWatching(product.id)){
            reduceWatch(product);
