@@ -150,6 +150,16 @@
   }
 }
 
+@media (max-width: 500px) {
+  .gallery-view .inner {
+    padding: 20px 0px;
+  }
+  .gallery-view .inner section .grid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
 .gallery-view .inner section::-webkit-scrollbar {
   display: none;
 }
