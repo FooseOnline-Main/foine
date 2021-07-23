@@ -181,7 +181,10 @@
   border: 5px solid #fff;
 }
 
-.gallery-view .inner .item:hover {
+@media (max-width: 500px) {
+  .gallery-view .inner .item {
+    border-width: 2px;
+  }
 }
 
 .gallery-view .item img {
