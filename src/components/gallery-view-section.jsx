@@ -102,31 +102,19 @@ const GalleryViewSection = ({searchValue}) => {
                                     <h3>{product.name}</h3>
                                 </div>
                                 {product.status === 2 ? <Fragment></Fragment> : <div className="add-watchlist">
-                                    <p><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></p>
+                                    {/* <p><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></p> */}
                                     {held ? <Fragment></Fragment> :<button onClick={()=>handleAddToWatchlist(product)} className={`btn ${isWatching(product.id) ? "" : "active"}`}>{isWatching(product.id) ? 
                                     (<Fragment><FaEyeSlash style={{marginRight: 5}} size={18} color="#222" /><span>Unwatch</span></Fragment>) : 
                                     (<Fragment><FaEye style={{marginRight: 5}} size={18} color="#fff" /><span>Watch</span></Fragment>)}</button>}
-                                </div>}
-                                <div className="actions">
-                                    <div onClick={()=> like(user.uid, product)} className="act">
-                                        <div className="tag">{product.likes.length}</div>
-                                        {product.likes.includes(user.uid) ? <AiFillHeart size={20} color="red" /> : <AiOutlineHeart size={20} color="#fff" /> }
-                                    </div>
-                                    <div onClick={()=> addToWishList(user.uid, product)} className="act">
-                                        <div className="tag">{product.wishlist.length}</div>
-                                        {product.wishlist.includes(user.uid) ? <AiFillStar size={20} color="#fff" /> : <AiOutlineStar size={20} color="#fff" />}
-                                    </div>
-                                    {(held && !heldByMe) || product.status === 2 ? 
-                                    <Fragment></Fragment> : 
-                                    <div onClick={()=> { heldByMe ? 
+                                    {<div onClick={()=> { heldByMe ? 
                                         unholdProduct(user.uid, product) : 
                                         holdProduct(user.uid, product)}} 
-                                        className="act"
+                                        className="act hold"
                                     >
                                         <div className="tag">{held ? "Unhold" : "Hold"}</div>
-                                        {held ? <BsStopwatchFill size={20} color="#fff" /> : <BsStopwatch size={20} color="#fff" />}
+                                        {held ? <BsStopwatchFill size={20} color="var(--dark-color)" /> : <BsStopwatch size={20} color="#222" />}
                                     </div>}
-                                </div>
+                                </div>}
                             </div>
                             <div style={{background: getStatus(product.status).color}} className="status">{getStatus(product.status).value}</div>
                         </div>})}
