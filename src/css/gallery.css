@@ -246,6 +246,16 @@
   background: var(--dark-color);
   color: #fff;
 }
+
+@media (max-width: 450px) {
+  .gallery-view .item .content .add-watchlist {
+    justify-content: center;
+  }
+  .gallery-view .item .content .add-watchlist p {
+    display: none;
+  }
+}
+
 .gallery-view .item .status {
   position: absolute;
   right: 10px;
