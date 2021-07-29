@@ -208,10 +208,10 @@ const CheckoutPage = ({onClose})=>{
     return <form onSubmit={handleCheckout} className="checkout-page">
         {loading && <Loader expand={true} />}
         <Route exact path="/watchlist/checkout/verify-otp">
-            <Popup onClose={()=>history.replace('/watchlist')} child={<OTPVerification data={OTPData} onSuccess={handleOTPComplete} />} />
+            <Popup onClose={history.goBack} child={<OTPVerification data={OTPData} onSuccess={handleOTPComplete} />} />
         </Route>
         <Route exact path="/watchlist/checkout/confirm-offline">
-            <Popup onClose={()=>history.replace('/watchlist')} child={<CompletePayment data={OTPResponse} />} />
+            <Popup onClose={history.goBack} child={<CompletePayment data={OTPResponse} />} />
         </Route>
         {message.error && <PromptPopup onClose={()=> setMessage({...message, error: ""})} type="failure" message={message.error} />}
         {message.success && <PromptPopup onClose={()=> setMessage({...message, success: ""})} type="success" message={message.success} />}
