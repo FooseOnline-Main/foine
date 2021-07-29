@@ -10,6 +10,7 @@
 
 :root {
   --dark-color: #f56a33;
+  --dark-color-transparent: #f56a3330;
   --warning-color: orange;
   --danger-color: red;
   --light-color: #f56a3310;
@@ -108,10 +109,6 @@ h5 {
 }
 
 .prompt .anim {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  border: 5px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,7 +125,7 @@ h5 {
 
 .prompt p {
   margin-top: 20px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 20px;
 }
 

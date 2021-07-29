@@ -4,12 +4,12 @@ import { Link, useHistory } from 'react-router-dom';
 import { useNotification } from '../providers/notificationProvider';
 import EmptyView from './empty_view';
 import { FaBellSlash } from '@meronex/icons/fa';
-import { AiFillCloseCircle, AiFillDownCircle, AiFillUpCircle, AiOutlineCheckSquare, AiOutlineDelete, AiTwotoneCloseCircle } from '@meronex/icons/ai';
+import { AiFillCloseCircle, AiFillDownCircle, AiFillUpCircle, AiOutlineCheckSquare, AiOutlineDelete } from '@meronex/icons/ai';
 
 const NotificationPopup = () => {
     const history = useHistory();
     const [showPrompt, setShowPrompt] = useState(false); 
-    const {notifications, markAsRead, unread, deleteNotification} = useNotification();
+    const {notifications, markAsRead, /*unread,*/ deleteNotification} = useNotification();
 
     useEffect(() => {
         setShowPrompt(true);

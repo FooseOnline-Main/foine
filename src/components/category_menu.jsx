@@ -1,5 +1,5 @@
 import { HiMenuAlt2, HiX } from '@meronex/icons/hi';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const CategoryMenu = ({categories, onChange, onToggleMenu}) => {
     const [selectedId, setSelectedId] = useState('');

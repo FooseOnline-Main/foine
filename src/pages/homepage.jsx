@@ -17,7 +17,6 @@ import QuickWatchlistView from '../components/quick_watchlist_view';
 import SignupForm from '../components/signup_form';
 import NotificationPopup from '../components/notification_popup';
 import NegotiationPopup from '../components/negotiation_popup';
-import { useRef } from 'react';
 
 const HomePage = () => {
     const [searchString, setSearchString] = useState("");

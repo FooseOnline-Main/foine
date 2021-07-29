@@ -245,7 +245,7 @@ function ProductsProvider({ children }) {
             const productIds = checkoutProducts.map(item=> item.id);
             productIds.forEach(id => {
                 productsRef.doc(id).update({
-                    status: 2, holders: [], watchCount: 0, holders: [], heldBy: ""
+                    status: 2, holders: [], watchCount: 0, heldBy: ""
                 })
                 .catch(({message})=> createError(message));
             });

@@ -6,10 +6,11 @@ import { FaEyeSlash } from '@meronex/icons/fa';
 import { useAuth } from '../providers/authProvider';
 import { useProducts } from '../providers/productProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
-import {pay} from '../api/';
+import {confirmOTP, pay} from '../api/';
 import '../css/watchlist.css';
 import Loader from './simple_loader';
 import PromptPopup from './prompt_popup';
+import Popup from './popup';
 
 const regions = [
     "Ahafo", "Ashanti", "Bono", "Bono East", "Central", "Eastern", "Greater Accra", "North East", "Northern", "Oti", "Savannah", "Upper East", "Upper West", "Volta", "Western", "Western North"
@@ -32,7 +33,7 @@ const CheckoutPopup = () => {
         <div className="watchlist-popup">
             <div className="overlay" onClick={handleClose}></div>
             <div className="inner">
-                <Route exact path="/watchlist/checkout">
+                <Route path="/watchlist/checkout">
                     <CheckoutPage onClose={handleGoBack} />
                 </Route>
                 <Route exact path="/watchlist">
@@ -124,12 +125,20 @@ const CheckoutPage = ({onClose})=>{
     const {clearCheckedOut, checkOut} = useWatchlist();
     const [deliveryFee, setDeliveryFee] = useState(0)
     const [totalPayment, setTotalPayment] = useState(getCheckoutTally() + deliveryFee);
+    const [providerId, setProviderId] = useState(0);
+    const [phone, setPhone] = useState("");
     const {user} = useAuth();
-    const [email, setEmail] = useState(user.isAnonymous ? "" : user.email);
     const history = useHistory();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(null);
-    const [message, setMessage] = useState("");
+    const [message, setMessage] = useState({error: "", success: ""});
+    const [OTPData, setOTPData] = useState();
+    const [OTPResponse, setOTPResponse] = useState();
+    const providers = [
+        {code: "mtn", name: 'MTN'}, 
+        {code: "voda", name: "Vodafone"}, 
+        {code: "tgo", name: "Airtel/Tigo"}
+    ];
 
     useEffect(() => {
         setTotalPayment(getCheckoutTally() + deliveryFee);
@@ -164,25 +173,49 @@ const CheckoutPage = ({onClose})=>{
         e.preventDefault();
         setLoading(true);
         // initialize paystack for payment
-        const result = await pay(email, totalPayment * 100);
-        console.log(result);
-        const {data} = result;
-        if(data.status){
+        
+        const {status, data, error} = await pay({
+            provider: providers[providerId].code,
+            phone, 
+            amount: totalPayment * 100, 
+            paymentMethod: "mobile_money"
+        });
+        console.log(data, error);
+        
+        if(status){
             setSuccess(true);
             setLoading(false);
-            const checkoutProducts = getProductsForCheckout();
-            markProductsAsSold(checkoutProducts)
-            clearCheckedOut();
-            setMessage(`Transaction made successfully.\n Transaction Reference: \n ${data.data.reference}`);
+            setOTPData(data);
+            history.push('/watchlist/checkout/verify-otp');
+            // const checkoutProducts = getProductsForCheckout();
+            // markProductsAsSold(checkoutProducts)
+            // clearCheckedOut();
         }else{
+            setLoading(false);
             setSuccess(false);
-            setMessage("Error submitting payment, Please try again");
+            // error.message
+            setMessage({success: "", error: "Sorry, something went wrong. Please try again."});
         }
+    }
+
+    const handleOTPComplete = (data)=>{
+        setOTPData(null);
+        setOTPResponse(data);
+        history.goBack();
+        history.push('/watchlist/checkout/confirm-offline');
     }
 
     return <form onSubmit={handleCheckout} className="checkout-page">
         {loading && <Loader expand={true} />}
-        {message && <PromptPopup onClose={onClose} type={success ? "success" : "failure"} message={message} />}
+        <Route exact path="/watchlist/checkout/verify-otp">
+            <Popup onClose={()=>history.replace('/watchlist')} child={<OTPVerification data={OTPData} onSuccess={handleOTPComplete} />} />
+        </Route>
+        <Route exact path="/watchlist/checkout/confirm-offline">
+            <Popup onClose={()=>history.replace('/watchlist')} child={<CompletePayment data={OTPResponse} />} />
+        </Route>
+        {message.error && <PromptPopup onClose={()=> setMessage({...message, error: ""})} type="failure" message={message.error} />}
+        {message.success && <PromptPopup onClose={()=> setMessage({...message, success: ""})} type="success" message={message.success} />}
+        
         <div className="header">
             <h3>Checkout</h3>
             <div onClick={onClose} className="close-btn">{'<'}</div>
@@ -196,7 +229,6 @@ const CheckoutPage = ({onClose})=>{
                 <div className="choose-delivery">
                     <div className={`${deliveryId === 0 ? 'selected' : ''}`} onClick={()=>{ setDeliveryId(0); setDeliveryFee(0)}}>Pick up</div>
                     <div className={`${deliveryId === 1 ? 'selected' : ''}`} onClick={()=>{ setDeliveryId(1); setDeliveryFee(0)}}>Parcel Office</div>
-                    {/* <div className={`${deliveryId === 2 ? 'selected' : ''}`} onClick={()=> setDeliveryId(2)}>Doors Step</div> */}
                     <div className={`${deliveryId === 3 ? 'selected' : ''}`} onClick={()=> setDeliveryId(3)}><pre>Discounted shipping</pre></div>
                 </div>
                 {deliveryId === 1 ? 
@@ -236,6 +268,25 @@ const CheckoutPage = ({onClose})=>{
                     </select>
                 </div> : <Fragment></Fragment>}
             </div>
+            <div className="delivery-address">
+                <div className='label'>
+                    Select Network Provider
+                </div>
+                <div className="choose-delivery">
+                    {providers.map((provider, id)=> 
+                    <div className={`${providerId === id ? 'selected' : ''}`} onClick={()=>{setProviderId(id)}}>
+                        {provider.name}
+                    </div>)}
+                </div>
+            </div>
+            <div className="email-setup">
+                <div className='label'>
+                    Phone Number
+                </div>
+                <div className="email-input">
+                    <input autoFocus required value={phone} name="phone" type="text" placeholder="Enter your phone number" onChange={({target: {value}})=> setPhone(value)} />
+                </div>
+            </div>
             <div className="amount-payable">
                 <div className='label'>
                     Amount Payable
@@ -255,19 +306,108 @@ const CheckoutPage = ({onClose})=>{
                     </div>
                 </div>
             </div>
-            {user.isAnonymous ? <div className="email-setup">
-                <div className='label'>
-                    Email Address
-                </div>
-                <div className="email-input">
-                    <input autoFocus required value={email} name="email" type="email" placeholder="Enter your email address" onChange={({target: {value}})=> setEmail(value)} />
-                </div>
-            </div> : <Fragment></Fragment>}
         </div>
         <div className="footer">
             <button type="submit" className="submit-btn" style={{marginRight: 0}}>Accept Checkout</button>
         </div>
     </form>
+}
+
+const CompletePayment = ({data})=>{;
+    return <div className="verify-otp">
+        <h2>Complete Payment</h2>
+        <p>{data.display_text}</p>
+        <div className="input-area"><Loader /></div>
+        <style jsx>{`
+            h2{ margin-bottom: 10px}
+            p{
+                margin-bottom: 20px;
+                font-size: 14px;
+            }    
+            .input-area{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        `}</style>
+    </div>
+}
+
+const OTPVerification = ({data, onSuccess})=>{
+    const {display_text, reference} = data;
+    const [value, setValue] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async ()=>{
+        if(value){
+            setLoading(true);
+            const {status, data, error} = await confirmOTP(value, reference);
+            console.log(error, data);
+            
+            if(status){
+                setLoading(false);
+                setError( "")
+                onSuccess(data);
+            }else{
+                setLoading(false);
+                // error.data.message
+                setError("Wrong pin. Make sure you enter the right pin.");
+            }
+        }
+    }
+
+    return <div className="verify-otp">
+        <h2>OTP Verification</h2>
+        <p>{display_text}</p>
+        <div className={`err-box ${error ? 'show' : ""}`}>{error}</div>
+        <div className="input-area">
+            <input type="text" className={error ? "err" : ""} autoFocus placeholder="Enter OTP code" value={value} onChange={({target: {value}})=> {setValue(value); error && setError("")}} />
+            <span className="button" onClick={!loading ? handleSubmit : ()=>{}} type="submit">{loading ? <Loader /> : 'Submit'}</span>
+        </div>
+        <style jsx>{`
+            h2{ margin-bottom: 10px}
+            p{
+                margin-bottom: 20px;
+                font-size: 14px;
+            }    
+            .input-area{
+                display: flex;
+                align-items: center;
+            }
+            input{
+                padding: 10px;
+                margin-right: 10px;
+                outline: none;
+                border: none;
+                background: #eaeaea;
+                border-radius: 10px;
+                font-size: 12px;
+                flex: 1;
+            }
+            .err-box{
+                min-height: 30px;
+            }
+            .err-box.show{
+                padding: 10px 10px;
+                font-size: 12px;
+                color: #D80707;
+                background: #FF000021;
+                border-radius: 10px;
+                margin: 10px 0;
+                display: flex;
+                align-items: center;
+            }
+            span.button{
+                padding: 10px 20px;
+                color: #fff;
+                background: var(--dark-color);
+                border: none;
+                border-radius: 10px;
+                font-size: 13px;
+            }
+        `}</style>
+    </div>
 }
 
 const ProductsViewForCheckout = ({checkoutProducts})=>{

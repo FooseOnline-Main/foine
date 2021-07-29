@@ -67,7 +67,7 @@
 
 .gallery-view .inner section {
   overflow: auto;
-  height: calc(100vh - 150px);
+  height: calc(100vh - 120px);
   transition: all 0.2s ease-in-out;
   -webkit-transition: all 0.2s ease-in-out;
   -moz-transition: all 0.2s ease-in-out;

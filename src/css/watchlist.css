@@ -136,7 +136,7 @@
   color: #777;
 }
 
-.checkout-page .email-setup .email-input {
+.checkout-page .email-setup > div {
   padding: 10px 5%;
 }
 
@@ -171,8 +171,8 @@
   border-bottom-left-radius: 0px;
 } */
 .checkout-page .body .choose-delivery div.selected {
-  background-color: var(--dark-color);
-  color: #fff;
+  background-color: var(--dark-color-transparent);
+  color: var(--dark-color);
 }
 
 .checkout-page .body .delivery-address .address-form {

@@ -3,15 +3,14 @@ import { Link } from 'react-router-dom';
 import { getStatus, useProducts } from '../providers/productProvider';
 import '../css/gallery.css';
 import { BsStopwatch, BsStopwatchFill } from '@meronex/icons/bs';
-import { AiFillHeart, AiFillStar, AiOutlineEye, AiOutlineHeart, AiOutlineStar } from '@meronex/icons/ai';
-import {HiMenuAlt2, HiX} from '@meronex/icons/hi';
+import { AiOutlineEye } from '@meronex/icons/ai';
 import { FaEye, FaEyeSlash } from '@meronex/icons/fa';
 import CategoryMenu from './category_menu';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 
 const GalleryViewSection = ({searchValue}) => {
-    const {products: _products, categories, getProducts, like, addToWishList, holdProduct, unholdProduct, reduceWatch, increaseWatch, searchProducts } = useProducts();
+    const {products: _products, categories, getProducts, /* like, addToWishList,*/ holdProduct, unholdProduct, reduceWatch, increaseWatch, searchProducts } = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const {user} = useAuth();
     const [products, setProducts] = useState(_products.map(item=> item));
