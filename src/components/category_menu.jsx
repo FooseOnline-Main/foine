@@ -61,8 +61,8 @@ const CategoryMenu = ({categories, onChange, onToggleMenu}) => {
                 </div>
                 {categories.map((category, id)=>{ 
                     return (
-                <div key={id} onClick={()=>selectCategory(category.name)} 
-                className={`item ${selectedId===category.name ? 'select' : ''}`}
+                <div key={id} onClick={()=>selectCategory(category._id)} 
+                className={`item ${selectedId===category._id ? 'select' : ''}`}
                 >
                     <pre>{category.name}</pre>
                     </div>

@@ -36,7 +36,7 @@ const HomePage = () => {
                 <HomeHeader onSearch={handleSearch} />
                 <div className="page-body">
                     <LiveFeedSection />
-                    <GalleryViewSection searchValue={searchString}/>
+                    {/* <GalleryViewSection searchValue={searchString}/> */}
                 </div>
                 <QuickWatchlistView />
                 <FloatNotifications />

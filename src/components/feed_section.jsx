@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import LiveFeedCard from './feed_card';
 import { useProducts } from '../providers/productProvider';
+import Loader from './simple_loader';
 
 const LiveFeedSection = () => {
-    const {products} = useProducts();
+    const {products, fetchProducts, loading} = useProducts();
     
     useEffect(() => {
         const feedsScrollView = document.getElementById('scroll-feed');
@@ -46,42 +47,73 @@ const LiveFeedSection = () => {
         feedsScrollView.addEventListener('mousedown', mouseDownHandler);
     }, []);
 
+    const handleFeedScroll = (e)=>{
+        const feedsScrollView = document.getElementById('scroll-feed');
+        const {scrollTop, scrollHeight, offsetHeight} = feedsScrollView;
+        if(offsetHeight + scrollTop >= scrollHeight && !loading){
+            fetchProducts(products.length);
+        }
+    }
+
+
     return (
         <div className='feed-section'>
             <div className="live-notice">
-                <div className="inner">
+                <div>
                     <div className="indicator"></div>
                     <p>Live Feed</p>
                 </div>
                 <hr />
             </div>
-            <div className="inner" id="scroll-feed">
+            <div className="inner" onScroll={handleFeedScroll} id="scroll-feed">
                 {products.map((feed, id)=>(<LiveFeedCard feed={feed} key={id} />))}
             </div>
+            {loading && <div style={{minHeight: "100px"}}><Loader expand={false} /></div>}
             <div className="vanishing-point left"></div>
             <div className="vanishing-point right"></div>
             <style jsx>{`
+                .feed-section{
+                    min-height: calc(100vh - 60px);
+                    max-height: calc(100vh - 60px);
+                    display: flex;
+                    flex-direction: column;
+                    background: #fafafa;
+                    overflow: auto;
+                }
                 .feed-section .inner{
                     padding: 20px 5%;
-                    display: flex;
-                    align-items: center;
+                    justify-self: stretch;
+                    flex: 1;
+                    display: column;
+                    columns: 4;
+                    column-gap: 2.5%;
                     overflow: auto;
+                }
+
+                @media(max-width: 1000px){
+                    .feed-section .inner{
+                        columns: 3;
+                    }
+                }
+                @media(max-width: 650px){
+                    .feed-section .inner{
+                        columns: 2;
+                    }
                 }
 
                 .feed-section .live-notice{
                     padding: 10px 5%;
                     display: flex;
                     align-items: center;
-                    padding-bottom: 0;
+                    justify-content: start;
                 }
 
-                .feed-section .live-notice .inner{
+                .feed-section .live-notice > div{
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     padding: 10px 20px;
                     border-radius: 20px;
-                    box-shadow: 0 0 10px #ff00001a;
                     background: #222;
                     color: #fff;
                 }
@@ -140,6 +172,7 @@ const LiveFeedSection = () => {
                     bottom: 0;
                     width: 80px;
                     pointer-events: none;
+                    display: none;
                 }
 
                 .feed-section .vanishing-point.left{

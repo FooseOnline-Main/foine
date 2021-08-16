@@ -10,7 +10,7 @@ const LiveFeedCard = ({feed}) => {
     const {user} = useAuth();
     const {holdProduct, unholdProduct, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
-    const productId = feed.id;
+    const productId = feed._id;
 
     const onViewItem = ()=>{
         // set current open feed
@@ -19,7 +19,7 @@ const LiveFeedCard = ({feed}) => {
     }
 
     const handleAddToWatchlist = ()=>{
-        if(isWatching(feed.id)){
+        if(isWatching(feed._id)){
             reduceWatch(feed);
             removeFromWatchlist(productId);
         }else{
@@ -46,74 +46,112 @@ const LiveFeedCard = ({feed}) => {
 
     const requestedPurchase = ()=>{
         let output = false;
-        feed.purchaseRequests.forEach(request=>{
-            if(request.userId === user.uid){
-                output = true;
-            }
-        });
+        // feed.purchaseRequests.forEach(request=>{
+        //     if(request.userId === user.uid){
+        //         output = true;
+        //     }
+        // });
         return output;
     }
 
     return (
-        <div className='feed-card' 
-        style={{backgroundImage: `url(${feed.imageUrl})`}}
-        >
-            <div style={{display: "flex", paddingTop: 20}}>
+        <div className='feed-card'>
+            <Link to={`/preview-product/${feed._id}`}>
+                <div style={{width: "100%", background: "#fff", overflow: "visible"}}>
+                    <img src={feed.imageUrl} className="feed-img" alt={feed.name} />
+                </div>
+            </Link>
+            <div className="held-stamp">
                 {feed.status === 1 ? <img src="/images/held-img.png" style={{opacity: 0.9, margin: "0 auto"}} width="50%" alt={feed.name} /> : <Fragment></Fragment>}
             </div>
+
+            {/* feed status */}
+            <div style={{background: getStatus(feed.status).color}} className="status">{getStatus(feed.status).value}</div>
+
+            {/* watch count */}
             {feed.watchCount ? <div className="watch-count">
-                <AiOutlineEye size={20} color="#FF6123" />
+                <AiOutlineEye size={20} />
                 <span style={{marginLeft: 5}}>{feed.watchCount}</span>
             </div> : <Fragment></Fragment>}
+
+            {/* details */}
             <div className="details" onClick={onViewItem}>
-                <div style={{background: getStatus(feed.status).color}} className="status">{getStatus(feed.status).value}</div>
-                <Link to={`/preview-product/${feed.id}`} >
+                <Link to={`/preview-product/${feed._id}`} >
                     <h3>{feed.name}</h3>
-                    <p>{feed.size} Size</p>
-                    <p><small>GHC</small><span>{parseFloat(feed.price).toFixed(2)}</span></p>
+                    <div className="flex">
+                        <p>{feed.size} Size</p>
+                        <p style={{color: "var(--dark-color)"}}><small>GHC</small><span>{parseFloat(feed.price).toFixed(2)}</span></p>
+                    </div>
                 </Link>
+
+                {/* add section */}
                 {feed.status !== 2 ? 
                 <div className="add-section">
                     {feed.heldBy === user.uid ? <Fragment></Fragment> :
-                    <label htmlFor={feed.id} className="add-to-watchlist">
-                        <input type="checkbox" checked={isWatching(feed.id)} name="add-watchlist" className="add-watchlist" id={feed.id} onChange={handleAddToWatchlist} />
-                        <div className="check-box">
-                            <AiOutlineCheck size={10} color="#fff" />
-                        </div>
-                        <span>{isWatching(feed.id) ? "Unwatch" : "Watch"}</span>
-                    </label>}
+                    // <label htmlFor={feed._id} className="add-to-watchlist">
+                    //     <input type="checkbox" checked={isWatching(feed._id)} name="add-watchlist" className="add-watchlist" id={feed._id} onChange={handleAddToWatchlist} />
+                    //     <span>{isWatching(feed._id) ? "Unwatch" : "Watch"}</span>
+                    // </label>
+                    <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed._id) ? "Unwatch" : "Watch"}</button>
+                    }
+
                     {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                    <label htmlFor={`${feed.id}request`} className="request">
-                        <input type="checkbox" checked={requestedPurchase()} name="request" className="request" id={`${feed.id}request`} onChange={handleRequestPurchase} />
-                        <div className="check-box">
-                            <AiOutlineCheck size={10} color="#fff" />
-                        </div>
-                        <span>{requestedPurchase() ? "Requested" : "Request"}</span>
-                    </label> : 
-                    <label htmlFor={`${feed.id}hold`} className="hold">
-                        <input type="checkbox" checked={(feed.heldBy === (user.uid ))} name="hold" className="hold" id={`${feed.id}hold`} onChange={handleHoldItem} />
-                        <div className="check-box">
-                            <AiOutlineCheck size={10} color="#fff" />
-                        </div>
-                        <span>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</span>
-                    </label>}
+                    // <label htmlFor={`${feed._id}request`} className="request">
+                    //     <input type="checkbox" checked={requestedPurchase()} name="request" className="request" id={`${feed._id}request`} onChange={handleRequestPurchase} />
+                    //     <span>{requestedPurchase() ? "Requested" : "Request"}</span>
+                    // </label>
+                    <button onClick={handleRequestPurchase}>{requestedPurchase() ? "Requested" : "Request"}</button>
+                     : 
+
+                    <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
+                    }
+
                 </div> : 
                 <Fragment></Fragment>}
             </div>
             <style jsx>{`
                 .feed-card{
-                    min-width: 300px;
-                    min-height: 300px;
+                    min-height: 250px;
+                    margin-bottom: 30px;
+                    break-inside: avoid;
+                    box-shadow: 0 0 20px 1px #00000010;
+                    overflow: hidden;
+                    padding: 0px;
                     border-radius: 20px;
-                    background-color: #efefef;
-                    border: 1px solid #efefef;
-                    background-position: center center;
-                    background-size: cover;
+                    margin-bottom: 30px;
+                    background: #fff;
+                    animation: slide-up .5s ease-in;
+                    -webkit-animation: slide-up .5s ease-in;
+                }
+
+                @keyframes slide-up{
+                    0%{
+                        transform: translateY(10px);
+                        opacity: 0.5;
+                    }
+                }
+
+                .feed-card .feed-img{
+                    max-width: calc(100% - 20px);
+                    margin: 10px auto;
+                    margin-top: 10px;
+                    margin-left: 10px;
+                    border-radius: 20px;
+                    box-shadow: 0 10px 10px 1px #00000010;
+                }
+
+                .feed-card .held-stamp{
+                    position: absolute;
+                    top: 40%;
+                    left: 0;
+                    width: 100%;
+                    display: flex;
+                    padding-top: 20px;
                 }
 
                 .feed-card .watch-count{
-                    top: 5%;
-                    left: 5%;
+                    top: 20px;
+                    left: 20px;
                     z-index: 1;
                 }
 
@@ -121,163 +159,74 @@ const LiveFeedCard = ({feed}) => {
 
                 .feed-card .add-section{
                     display: flex;
-                    align-items: center;
                     justify-content: space-between;
+                    align-items: center;
                     margin-top: 10px;
-                    border-top: 1px solid #ffffff1a;
-                    padding-top: 10px;
-                    padding-right: 20px;
+                    column-gap: 5%;
                 }
-                .feed-card .add-section > label{
-                    display: flex;
+                
+                .feed-card .add-section button{
+                    border: none;
+                    border-radius: 10px;
+                    padding: 10px 20px;
+                    font-size: 0.7em;
                     cursor: pointer;
+                    background: transparent;
+                    box-sizing: content-box;
                 }
-                .feed-card input{display: none}
-                .feed-card .add-watchlist:checked + .check-box{
-                    background: var(--dark-color)
+                .feed-card .add-section button.watch{
+                    flex: 1;
+                    background: var(--dark-color);
+                    color: #fff;
                 }
-                .feed-card .add-watchlist:checked + .check-box > *{
-                    display: block;
-                }
-                .feed-card .add-section .check-box{
-                    width: 15px;
-                    height: 15px;
-                    border-radius: 50%;
-                    border: 2px solid var(--dark-color);
-                    margin-right: 0px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .feed-card .add-section .check-box > *{
-                    display: none;
-                }
-                .feed-card .add-section span{
-                    font-size: 12px;
-                }
-
-                .feed-card:not(:last-child){
-                    margin-right: 50px;
-                }
-
-                .feed-card .actions{
-                    position: absolute;
-                    right: 20px;
-                    top: 20px;
-                    padding: 10px;
-                    display: flex;
-                    flex-direction: column;
-                    border-radius: 50px;
-                    background-color: #0000005a;
-                    backdrop-filter: blur(5px);
-                    -webkit-backdrop-filter: blur(5px);
-                    opacity: 0.2;
-                    pointer-events: none;
-                    transition: opacity .3s;
-                }
-
-                .feed-card:hover .actions{
-                    opacity: 1;
-                    pointer-events: initial;
-                }
-
-                .feed-card .actions > div{
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: #ffffff2a;
-                    cursor: pointer;
-                }
-
-                .feed-card .actions div:nth-child(2){
-                    margin: 5px 0;
-                }
-
-                .feed-card .actions > div:hover .count{
-                    opacity: 1;
-                    transform: translateX(-50%) translateY(0px);
-                }
-
-                .feed-card .actions .count{
-                    position: absolute;
-                    left: 50%;
-                    bottom: 100%;
-                    transform: translateX(-50%) translateY(5px);
-                    padding: 5px 20px;
-                    font-size: 13px;
-                    color: #ffffff;
-                    background: #FF3300;
-                    border-radius: 20px;
-                    opacity: 0;
-                    transition: all .5s cubic-bezier(0.03, 0.95, 0.27, 1.07);
-                    pointer-events: none;
-                }
-
-                .feed-card .actions .count::before{
-                    content: "";
-                    position: absolute;
-                    top: calc(100% - 6px);
-                    left: 50%;
-                    transform: translateX(-50%) rotate(45deg);
-                    width: 10px;
-                    height: 10px;
-                    background: inherit;
+                .feed-card .add-section button.hold{
+                    border: 1px dashed #222;
+                    color: #222;
                 }
 
                 .feed-card .details{
-                    position: absolute;
-                    bottom: 0;
-                    right: 0;
-                    min-width: 60%;
-                    max-width: 70%;
-                    padding: 10px 20px;
-                    padding-top: 20px;
-                    padding-right: 0;
-                    min-height: 20%;
-                    border-right: none;
-                    border-radius: 20px 0 20px 0;
+                    padding: 20px;
+                    padding-top: 0;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
-                    color: white;
-                    background-color: #0000005a;
-                    backdrop-filter: blur(5px);
-                    -webkit-backdrop-filter: blur(5px);                    
+                    font-size: 16px;
+                    background: #fff;
                 }
 
-                .feed-card *{
-                    color: #fff;
+                .details .flex{
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
                 }
 
                 .feed-card h3{
-                    font-size: 16px;
-                    font-family: var(--font-regular)
+                    font-size: 1.1em;
+                    color: #222;
                 }
 
                 .feed-card p{
-                    font-size: 14px;
-                    margin-top: 5px;
+                    font-size: 0.8em;
+                    color: #777;
                 }
 
                 .feed-card span{
-                    font-size: 20px;
+                    font-size: 1.3em;
                     margin-left: 5px;
                     font-family: 'gilroyBold'
                 }
 
                 .feed-card .status{
                     position: absolute;
-                    top: -12px;
-                    left: 20px;
+                    top: 20px;
+                    right: 20px;
                     padding: 5px 10px;
                     border-radius: 8px;
-                    font-size: 12px;
+                    font-size: 0.7em;
+                    color: #fff;
+                    opacity: 0.8;
                 }
 
-                .feed-card .details *{user-select: none;}
             `}</style>
         </div>
     );

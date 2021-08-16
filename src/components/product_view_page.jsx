@@ -10,7 +10,7 @@ import '../css/product_preview.css';
 
 const ProductViewPage = () => {
     const params = useParams();
-    const {products, comment, fetchProductById, getProductById, holdProduct, unholdProduct, increaseWatch, reduceWatch} = useProducts();
+    const {products, comment, fetchProductById, getProductById, holdProduct, getProductComments, unholdProduct, increaseWatch, reduceWatch} = useProducts();
     const {watchlist, isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const {user} = useAuth();
     const [watching, setWatching] = useState(false);
@@ -18,15 +18,16 @@ const ProductViewPage = () => {
     const [product, setProduct] = useState();
 
     useEffect(() => {
-        async function fetchData(){
+        (async function(){
             if(products.length > 0){
-                setProduct(getProductById(params.id));
+                setProduct(await getProductById(params.id));
             }else{
                 setProduct(await fetchProductById(params.id));
             }
             setWatching(isWatching(params.id));
-        }
-        fetchData();
+        })()
+
+        console.log(product);
     }, [watchlist, products]);
 
     const handleComment = (e)=>{
@@ -92,15 +93,12 @@ const ProductViewPage = () => {
                             <span>{watching ? 'Unwatch Item' : 'Watch Item'}</span>
                         </button> : <Fragment></Fragment>}
                     </div>
-                    {/* <div className="mute-heading">
-                        <hr /><b>comment</b><hr />
-                    </div> */}
                     <div className="comment-section">
                         <form onSubmit={handleComment} className="comment-input">
                             <input type="text" value={commentMsg} onChange={({target: {value}})=> setCommentMsg(value)} placeholder="Leave a comment..." />
                         </form>
                         <div className="comments-list">
-                            {product.comments.map(comment => <Comment  comment={comment}/>)}
+                            {product.comments.map((comment, key) => <Comment key={key} comment={comment}/>)}
                         </div>
                     </div>
                 </div></Fragment> : <Loader />}

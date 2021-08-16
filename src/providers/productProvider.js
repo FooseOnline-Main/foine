@@ -1,14 +1,14 @@
 // import axios from 'axios';
 
 import React, { useContext, useState } from 'react';
+import { useEffect } from 'react';
 import { v4 } from 'uuid';
-
+import { app } from '../feathers';
 import firebase from '../firebase';
 import { useError } from './errorProvider';
 import {useNotification} from './notificationProvider';
 
 const ProductsContext = React.createContext();
-
 export function useProducts() {
     return useContext(ProductsContext);
 }
@@ -37,45 +37,69 @@ export const getStatus = (status)=>{
 }
 
 function ProductsProvider({ children }) {
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]); 
-    const [loading, setLoading] = useState(false);
+    // feathers services
+    const productService = {
+        categories: app.service('categories'),
+        products: app.service('products'),
+        comments: app.service('/product/comments'),
+        holders: app.service('/product/holders')
+    };
+
+    // provider state
     const {createError} = useError();
+    const [loading, setLoading] = useState(false);
     const {notifyHold, notifyPurchaseRequest, notifyAcceptedRequest, notifyDeniedRequest, notifyUnheld} = useNotification();
-
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+        
+    // firebase references
     const productsRef = firebase.firestore().collection('products');
-    const catsRef = firebase.firestore().collection('categories');
-    const holdCounterRef = firebase.firestore().collection('holdCounter');
+    // const catsRef = firebase.firestore().collection('categories');
+    // const holdCounterRef = firebase.firestore().collection('holdCounter');
+    
+    useEffect(async () => {
+        // fetch products and categories
+        fetchProducts();
+        productService.categories.find().then(({data})=> setCategories(data));
 
-    const fetchProducts = async ()=>{
+        // add listener to product service
+        productService.products.on("updated", fetchProducts)
+        return () => {};
+    }, []);
+
+    const fetchProducts = async (skip)=>{
         setLoading(true);
-        // make api call to fetch products from db
-        catsRef.get().then(item=>{
-            setCategories(item.docs.map(doc=> doc.data()) || []);
-        }).catch(({message})=>{
-            createError(message);
-        })
-
-        productsRef.onSnapshot(snapshot=>{
-            setProducts(snapshot.docs.map(doc=> doc.data()) || []);
+        const limit = (skip || 0) + 8;
+        // console.log(`Skipping ${skip} products and fetching ${limit}`);
+        productService.products.find({query: {$limit: limit, $skip: skip || 0}})
+        .then(({data})=> {
             setLoading(false);
-            snapshot.docChanges(item=>{
-                setProducts(item.docs.map(doc=> doc.data()) || []);
-            });
-        });       
+            setProducts([...products, ...data])
+        });
     }
 
-    const getProductById = (id)=>{
-        return products.filter(product=> product.id === id)[0];
+    const getProductById = async (id)=>{
+        const product = products.filter(product=> product._id === id)[0];
+        const comments = await getProductComments(id);
+
+        return {...product, comments};
     }
 
     const fetchProductById = async (id)=>{
         setLoading(true);
-        const prodSnapshot = await productsRef.doc(id).get();
-        return prodSnapshot.data();
+        const product = await productService.products.get(id);
+        const comments = await getProductComments(id);
+
+        return {...product, comments};
+    }
+
+    const getProductComments = async (productId)=>{
+        const {data} = await productService.comments.find({query: {productId}});
+        return data;
     }
 
     const getProductByReqId = (reqId)=>{
+        // Do something here
         let output = null;
         products.forEach(product=> {
             product.purchaseRequests.forEach(request=>{
@@ -105,7 +129,8 @@ function ProductsProvider({ children }) {
     }
 
     const increaseWatch = (product)=>{
-        productsRef.doc(product.id).update({watchCount: (product.watchCount + 1)})
+        // productsRef.doc(product.id).update({watchCount: (product.watchCount + 1)})
+        productService.products.update(product._id, {...product, watchCount: (product.watchCount + 1)})
         .catch(error=>{
             createError(error.message, 2000);
         })
@@ -113,7 +138,8 @@ function ProductsProvider({ children }) {
 
     const reduceWatch = (product)=>{
         if(product.watchCount){
-            productsRef.doc(product.id).update({watchCount: (product.watchCount - 1)})
+            // productsRef.doc(product.id).update({watchCount: (product.watchCount - 1)})
+            productService.products.update(product._id, {...product, watchCount: (product.watchCount - 1)})
             .catch(error=>{
                 createError(error.message, 2000);
             })
@@ -175,67 +201,51 @@ function ProductsProvider({ children }) {
         }
     }
 
-    const holdProduct = (userId, product) => {
-        const saveHoldData = (holdCount)=>{
-            // check if already held before
-            product.holders.includes(userId) ? 
-
-            // send warning to user
-            createError("Sorry, you can only hold product once") :
-
-            // if never held, allow hold
-            productsRef.doc(product.id).update(
-                {heldBy: userId, status: 1, holders: [...product.holders, userId]}
-            )
-            .then(_=>{
-                // do something here
-                holdCounterRef.doc(userId).update({count: holdCount + 1});
-                notifyHold(product.id);
-            }).catch(error=>{
-                createError(error.message, 2000);
-            });
-        }
-
+    const holdProduct = async (userId, product) => {
         if(product && userId){
             if(product.status === 0){
-                // check if user hold limit is exceeded
-                holdCounterRef.doc(userId).get()
-                .then((doc)=>{
-                    if(doc.exists){
-                        if(doc.data().count === 5){
-                            // warn user on exceeded hold limit
-                            createError("Sorry, you cannot hold more than 5 products at a time")
+                // monitize user hold count
+                let canHold = true;
+                const holders = (()=> {
+                    if(product.holders){
+                        if(!product.holders.includes(userId)){
+                            return product.holder + `, ${userId}`;
                         }else{
-                            saveHoldData(doc.data().count);
+                            canHold = false;
                         }
                     }else{
-                        holdCounterRef.doc(userId).set({count: 0});
-                        saveHoldData(0);
+                        return userId;
                     }
-                }).catch(({message})=>{
-                    createError(message);
-                });
+                })();
+                // check if user hold limit is exceeded - no
+                // warn user on exceeded hold limit - yes
+                if(canHold){
+                    productService.products.update(product._id, {...product, heldBy: userId, holders, status: 1})
+                    .then(product=>{
+                        // do something here
+                        notifyHold(product._id);
+                    }).catch(error=>{
+                        console.log(error.message);
+                    });
+                }else{
+                    createError("Sorry, you can only hold product once.");
+                }
             }else{
                 createError("Item is being held by someone else!", 3000);
-            }            
+            }
         }
     }
 
      const unholdProduct = (userId, product) => {
         if(userId && product){
-            // reduce user hold counter
-            holdCounterRef.doc(userId).get().then((doc)=>{
-                holdCounterRef.doc(userId).update({count: doc.data().count - 1})
-            }).catch(({message})=>{
-                createError(message);
-            });
-               
-            productsRef.doc(product.id).update({heldBy: "", status: 0, purchaseRequests: []})
+
+            // monitize user hold count              
+            productService.products.update(product._id, {...product, heldBy: "", status: 0})
             .then(_=>{
                 // do something here
                 notifyUnheld(product.id);
             }).catch(error=>{
-                createError(error.message);
+                console.log(error.message);
             })
         }
     }
@@ -297,7 +307,7 @@ function ProductsProvider({ children }) {
             unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
             cancelRequestPurchase, like, addToWishList, share, getProductById, 
             comment, increaseWatch, reduceWatch, getProductByReqId, acceptPurchaseRequest,
-            denyPurchaseRequest
+            denyPurchaseRequest, getProductComments
         }}>
             {children}
         </ProductsContext.Provider>
