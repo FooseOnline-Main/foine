@@ -7,7 +7,6 @@
 #homepage .page-body {
   flex: 1;
   overflow: auto;
-  scroll-snap-type: y mandatory;
 }
 
 #homepage .page-body::-webkit-scrollbar {
@@ -17,8 +16,4 @@
 #homepage .page-body::-webkit-scrollbar-thumb {
   border-radius: 10px;
   background-color: #aaa;
-}
-
-#homepage .page-body > div {
-  scroll-snap-align: start;
 }

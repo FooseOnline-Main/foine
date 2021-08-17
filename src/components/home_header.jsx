@@ -5,6 +5,7 @@ import { FaBell, FaEye } from '@meronex/icons/fa';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
 import { useNotification } from '../providers/notificationProvider';
+import { MdcAccountOutline, MdcBellOutline, MdcChevronDown, MdcEyeOutline } from '@meronex/icons/mdc';
 
 const HomeHeader = ({onSearch}) => {
     const {unread} = useNotification();
@@ -12,35 +13,34 @@ const HomeHeader = ({onSearch}) => {
 
     const renderAuth = ()=>{
         return <Fragment>
+        <Link to='/watchlist' className='profile-button'>
+            <MdcEyeOutline size={22} color="#555" />
+        </Link>
+        <Link to="/notifications" className='profile-button'>
+            <MdcBellOutline size={21} color="#555" />
+            {unread.length ? <div className="tag">{unread.length}</div> : <Fragment></Fragment>}
+        </Link>
         {!user.isAnonymous ? 
         <Fragment>
             <Link to='/profile' className='profile-button'>
-                <AiOutlineUser size={15} color="#eee" />
-                <b style={{marginLeft: 5}}>My Profile</b>
+                <MdcAccountOutline size={22} color="#eee" />
             </Link>
         </Fragment> : 
-        <Fragment>
-            <Link to='/login' className='profile-button auth'>
-                <b>Login</b>
-            </Link>
-            <Link to='/signup' className='profile-button auth'>
-                <b><pre>Signup</pre></b>
-            </Link>
-        </Fragment>}
-        <Link to='/watchlist' className='profile-button'>
-            <FaEye size={18} color="#eee" />
-            <b style={{marginLeft: 5}}>WatchList</b>
-        </Link>
-        <Link to="/notifications" className='profile-button'>
-            <FaBell size={16} color="#eee" />
-            {unread.length ? <div className="tag">{unread.length}</div> : <Fragment></Fragment>}
-        </Link>
+        <button className='profile-button'>
+            <MdcAccountOutline size={22} color="#555" />
+            <MdcChevronDown size={18} color="#555" />
+            <div className="drop-down">
+                <Link to="/login" className="item">Log In</Link>
+                <Link to="/signup" className="item">Signup</Link>
+            </div>
+        </button>}
+        
         </Fragment>
     }
 
     return (
         <div className='home-header'>
-            <h4 style={{color: "#fff"}}><pre>FOINE.COM</pre></h4>
+            <h4 style={{color: "#222"}}><pre>FOINE</pre></h4>
             <div className="search-form">
                 <AiOutlineSearch size={20} color="#555" />
                 <input onChange={({target: {value}})=> onSearch(value)} type="text" placeholder='Search by name or category' aria-placeholder="Search by name or category" className="search-input"/>
@@ -48,10 +48,11 @@ const HomeHeader = ({onSearch}) => {
             {renderAuth()}
             <style jsx>{`
                 .home-header{
-                    padding: 10px 5%;
+                    padding: 10px 2.5%;
                     display: flex;
                     align-items: center;
-                    background: #222;
+                    background: #fff;
+                    color: #222;
                 }
 
                 .home-header .search-form{
@@ -85,7 +86,42 @@ const HomeHeader = ({onSearch}) => {
                     justify-content: center;
                     font-size: 12px;
                     font-family: var(--font-bold);
-                    color: #ccc;
+                    color: #222;
+                    cursor: pointer;
+                    border: none;
+                    background: transparent;
+                }
+
+                .profile-button .drop-down{
+                    position: absolute;
+                    top: 130%;
+                    right: 0;
+                    padding: 5px 0;
+                    transform: translateY(10px);
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: all .15s linear;
+                    background: #fff;
+                    box-shadow: 0 0 10px 1px #00000010;
+                    border-radius: 10px;
+                    z-index: 10;
+                    min-width: 100px;
+                    overflow: hidden;
+                }
+
+                .profile-button:focus .drop-down,
+                .profile-button .drop-down:hover{
+                    opacity: 1;
+                    pointer-events: all;
+                    transform: translateY(0px);
+                }
+
+                .profile-button .drop-down .item{
+                    padding: 10px 10px;
+                    white-space: nowrap;
+                    font-size: 12px;
+                    border: none;
+                    color: #777;
                 }
 
                 .profile-button .tag{

@@ -6,14 +6,23 @@ import React, {Fragment} from 'react';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 import { useState } from 'react';
-import { MdcChevronDoubleDown, MdcChevronDoubleUp, MdcChevronDownCircle, MdcChevronDownCircleOutline, MdcChevronUpCircle, MdcChevronUpCircleOutline } from '@meronex/icons/mdc';
+import { MdcChevronDownCircle, MdcChevronUpCircle } from '@meronex/icons/mdc';
+import { useEffect } from 'react';
 
-const LiveFeedCard = ({feed}) => {
+const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {user} = useAuth();
     const {holdProduct, unholdProduct, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const productId = feed._id;
     const [showButtons, setShowButtons] = useState(false);
+
+    useEffect(() => {
+        if(expanded){
+            setShowButtons(true);
+        }else{
+            setShowButtons(false);
+        }
+    }, [expanded]);
 
     const onViewItem = ()=>{
         // set current open feed
@@ -90,7 +99,7 @@ const LiveFeedCard = ({feed}) => {
                     <hr />
                     {showButtons ? 
                     <MdcChevronUpCircle onClick={()=> setShowButtons(!showButtons)} style={{cursor: "pointer"}} size={20} color="#555" /> : 
-                    <MdcChevronDownCircle onClick={()=> setShowButtons(!showButtons)} style={{cursor: "pointer"}} size={20} color="#555" />}
+                    <MdcChevronDownCircle onClick={()=> {onExpand(); setShowButtons(!showButtons)}} style={{cursor: "pointer"}} size={20} color="#555" />}
                     <hr />
                 </div>
                 {/* add section */}
@@ -231,6 +240,7 @@ const LiveFeedCard = ({feed}) => {
 
                     .feed-card .details{
                         padding: 10px;
+                        padding-bottom: 0px;
                     }
                 }
 
