@@ -195,10 +195,9 @@ const LiveFeedCard = ({feed}) => {
 
                 @media(max-width: 650px){
                     .feed-card .feed-img{
-                        max-width: calc(100% - 10px);
-                        margin: 5px auto;
-                        margin-top: 5px;
-                        margin-left: 5px;
+                        max-width: 100%;
+                        margin: 0px;
+                        box-shadow: none;
                     }
 
                     .feed-card .details{
