@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react';
 import LiveFeedCard from './feed_card';
 import { useProducts } from '../providers/productProvider';
 import Loader from './simple_loader';
+import { AiOutlineSearch } from '@meronex/icons/ai';
+import { MdcHumanFemale, MdcHumanMale } from '@meronex/icons/mdc';
+import {Link} from 'react-router-dom';
 
 const LiveFeedSection = () => {
     const {products, fetchProducts, loading} = useProducts();
@@ -58,12 +61,22 @@ const LiveFeedSection = () => {
 
     return (
         <div className='feed-section'>
-            <div className="live-notice">
-                <div>
+            <div className="tab-header">
+                <div className="live-notice">
                     <div className="indicator"></div>
-                    <p>Live Feed</p>
+                    <p>Live</p>
                 </div>
-                <hr />
+                <div className="options-tab">
+                    <SearchBox />
+                    <Link to="#" className="option">
+                        <MdcHumanMale size={20} />
+                        <span>Male</span>
+                    </Link>
+                    <Link to="#" className="option">
+                        <MdcHumanFemale size={20} />
+                        <span>Female</span>
+                    </Link>
+                </div>
             </div>
             <div className="inner" onScroll={handleFeedScroll} id="scroll-feed">
                 {products.map((feed, id)=>(<LiveFeedCard feed={feed} key={id} />))}
@@ -79,14 +92,15 @@ const LiveFeedSection = () => {
                     flex-direction: column;
                     background: #fafafa;
                     overflow: auto;
+                    --space-x: 2.5%;
                 }
                 .feed-section .inner{
-                    padding: 20px 5%;
+                    padding: 20px var(--space-x);
                     justify-self: stretch;
                     flex: 1;
                     display: column;
                     columns: 4;
-                    column-gap: 2.5%;
+                    column-gap: var(--space-x);
                     overflow: auto;
                 }
 
@@ -103,14 +117,14 @@ const LiveFeedSection = () => {
                     }
                 }
 
-                .feed-section .live-notice{
-                    padding: 10px 5%;
+                .feed-section .tab-header{
+                    padding: 10px var(--space-x);
                     display: flex;
-                    align-items: center;
-                    justify-content: start;
+                    align-items: stretch;
+                    column-gap: 5px;
                 }
 
-                .feed-section .live-notice > div{
+                .feed-section .tab-header .live-notice{
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -118,18 +132,35 @@ const LiveFeedSection = () => {
                     border-radius: 20px;
                     background: #222;
                     color: #fff;
+                    align-self: center;
                 }
 
-                .feed-section .live-notice hr{
+                .feed-section .options-tab{
                     flex: 1;
-                    border: none;
-                    border-top: 1px solid;
-                    border-color: #efefef;
+                    display: flex;
+                    align-items: center;
+                    column-gap: 10px;
+                    align-self: stretch;
+                    overflow: auto;
+                    padding: 5px 10px;
+                    padding-right: 5px;
+                }
 
+                .feed-section .options-tab .option{
+                    display: flex;
+                    align-items: center;
+                    column-gap: 5px;
+                    padding: 10px;
+                    border-radius: 20px;
+                    background: #fff;
+                    box-shadow: 0 0 5px 1px #00000010;
+                    font-size: 12px;
+                    cursor: pointer;
+                    color: #222;
                 }
 
                 .feed-section .live-notice p{
-                    font-size: 13px;
+                    font-size: 12px;
                 }
 
                 .feed-section .live-notice .indicator{
@@ -168,49 +199,55 @@ const LiveFeedSection = () => {
                     }
                 }
 
-                .feed-section .vanishing-point{
-                    position: absolute;
-                    top: 0;
-                    bottom: 0;
-                    width: 80px;
-                    pointer-events: none;
-                    display: none;
-                }
-
-                .feed-section .vanishing-point.left{
-                    background: linear-gradient(to right, white, transparent);
-                    left: 0;
-                }
-                .feed-section .vanishing-point.right{
-                    background: linear-gradient(to left, white, transparent);
-                    right: 0;
-                }
-
                 .feed-section .inner::-webkit-scrollbar{
                     display: none;
-                }
-
-                @media(max-width: 800px){
-                    .feed-section .vanishing-point{
-                        position: absolute;
-                        top: 0;
-                        bottom: 0;
-                        width: 40px;
-                        pointer-events: none;
-                    }
-                }
-                @media(max-width: 500px){
-                    .feed-section .vanishing-point{
-                        position: absolute;
-                        top: 0;
-                        bottom: 0;
-                        width: 20px;
-                        pointer-events: none;
-                    }
                 }
             `}</style>
         </div>
     );
 };
+
+const SearchBox = ({onValueChange})=>{
+    return <div className="search-box">
+        <AiOutlineSearch size={20} />
+        <input type="text" />
+        <style jsx>{`
+            .search-box{
+                display: flex;
+                align-items: center;
+                align-self: stretch;
+                padding: 0 10px;
+                padding-right: 0px;
+                background: #fff;
+                border-radius: 20px;
+                box-shadow: 0 0 5px 1px #00000010;
+                margin-left: -50px;
+                transition: all .25s linear;
+            }
+
+            @media(max-width: 600px){
+                .search-box{
+                    margin-left: 0;
+                }
+            }
+
+            .search-box input{
+                border: none;
+                background: transparent;
+                align-self: stretch;
+                padding: 0px 10px;
+                padding-right: 0;
+                outline: none;
+                font-size: 12px;
+                width: 0px;
+                transition: all .3s linear;
+            }
+
+            .search-box:hover input{
+                width: 150px;
+            }
+        `}</style>
+    </div>
+}
 
 export default LiveFeedSection;
