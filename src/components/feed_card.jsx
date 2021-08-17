@@ -227,6 +227,16 @@ const LiveFeedCard = ({feed}) => {
                     font-family: 'gilroyBold'
                 }
 
+                @media(max-width: 650px){
+                    .feed-card h3{
+                        font-size: 0.9em;
+                    }
+
+                    .feed-card p{
+                        font-size: 0.7em;
+                    }
+                }
+
                 .feed-card .status{
                     position: absolute;
                     top: 20px;

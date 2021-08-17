@@ -108,7 +108,7 @@ const HomeHeader = ({onSearch}) => {
 
                 @media(max-width: 600px){
                     .home-header{
-                        margin-bottom: 60px;
+                        margin-bottom: 0px;
                     }
                     .home-header h4{
                         margin-right: auto;
@@ -118,6 +118,7 @@ const HomeHeader = ({onSearch}) => {
                         top: calc(100% + 10px);
                         width: 90%;
                         left: 0;
+                        display: none;
                     }
                     .profile-button:not(:last-child){
                         margin-right: 15px;
