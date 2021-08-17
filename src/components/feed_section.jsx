@@ -98,6 +98,8 @@ const LiveFeedSection = () => {
                 @media(max-width: 650px){
                     .feed-section .inner{
                         columns: 2;
+                        padding: 10px 2%;
+                        column-gap: 1.5%;
                     }
                 }
 

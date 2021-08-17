@@ -112,13 +112,12 @@ const LiveFeedCard = ({feed}) => {
             <style jsx>{`
                 .feed-card{
                     min-height: 250px;
-                    margin-bottom: 30px;
                     break-inside: avoid;
                     box-shadow: 0 0 20px 1px #00000010;
                     overflow: hidden;
                     padding: 0px;
                     border-radius: 20px;
-                    margin-bottom: 30px;
+                    margin-bottom: 15px;
                     background: #fff;
                     animation: slide-up .5s ease-in;
                     -webkit-animation: slide-up .5s ease-in;
@@ -192,6 +191,19 @@ const LiveFeedCard = ({feed}) => {
                     justify-content: space-between;
                     font-size: 16px;
                     background: #fff;
+                }
+
+                @media(max-width: 650px){
+                    .feed-card .feed-img{
+                        max-width: calc(100% - 10px);
+                        margin: 5px auto;
+                        margin-top: 5px;
+                        margin-left: 5px;
+                    }
+
+                    .feed-card .details{
+                        padding: 10px;
+                    }
                 }
 
                 .details .flex{
