@@ -5,7 +5,7 @@ import { useProducts } from '../providers/productProvider';
 import Loader from './simple_loader';
 import { AiOutlineSearch } from '@meronex/icons/ai';
 import { MdcHumanFemale, MdcHumanMale } from '@meronex/icons/mdc';
-import {Link} from 'react-router-dom';
+import {Link, NavLink} from 'react-router-dom';
 
 const LiveFeedSection = () => {
     const {products, fetchProducts, loading} = useProducts();
@@ -68,14 +68,14 @@ const LiveFeedSection = () => {
                 </div>
                 <div className="options-tab">
                     <SearchBox />
-                    <Link to="#" className="option">
-                        <MdcHumanMale size={20} />
-                        <span>Male</span>
-                    </Link>
-                    <Link to="#" className="option">
+                    <NavLink to="/g_spec/female" className="option">
                         <MdcHumanFemale size={20} />
                         <span>Female</span>
-                    </Link>
+                    </NavLink>
+                    <NavLink to="/g_spec/male" className="option">
+                        <MdcHumanMale size={20} />
+                        <span>Male</span>
+                    </NavLink>                    
                 </div>
             </div>
             <div className="inner" onScroll={handleFeedScroll} id="scroll-feed">
@@ -154,10 +154,21 @@ const LiveFeedSection = () => {
                     border-radius: 20px;
                     background: #fff;
                     box-shadow: 0 0 5px 1px #00000010;
-                    font-size: 12px;
+                    font-size: 0px;
                     cursor: pointer;
                     color: #222;
+                    transition: all .25s linear;
                 }
+
+                .feed-section .options-tab .option.active{
+                    background: var(--dark-color);
+                    color: #fff;
+                }
+
+                .feed-section .options-tab .option.active span{
+                    font-size: 12px;
+                }
+
 
                 .feed-section .live-notice p{
                     font-size: 12px;

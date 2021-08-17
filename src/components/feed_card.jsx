@@ -5,12 +5,15 @@ import { Link } from 'react-router-dom';
 import React, {Fragment} from 'react';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
+import { useState } from 'react';
+import { MdcChevronDoubleDown, MdcChevronDoubleUp, MdcChevronDownCircle, MdcChevronDownCircleOutline, MdcChevronUpCircle, MdcChevronUpCircleOutline } from '@meronex/icons/mdc';
 
 const LiveFeedCard = ({feed}) => {
     const {user} = useAuth();
     const {holdProduct, unholdProduct, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const productId = feed._id;
+    const [showButtons, setShowButtons] = useState(false);
 
     const onViewItem = ()=>{
         // set current open feed
@@ -77,16 +80,22 @@ const LiveFeedCard = ({feed}) => {
             {/* details */}
             <div className="details" onClick={onViewItem}>
                 <Link to={`/preview-product/${feed._id}`} >
-                    <h3>{feed.name}</h3>
+                    {/* <h3>{feed.name}</h3> */}
                     <div className="flex">
                         <p>{feed.size} Size</p>
                         <p style={{color: "var(--dark-color)"}}><small>GHC</small><span>{parseFloat(feed.price).toFixed(2)}</span></p>
                     </div>
                 </Link>
-
+                <div className="buttons-toggler">
+                    <hr />
+                    {showButtons ? 
+                    <MdcChevronUpCircle onClick={()=> setShowButtons(!showButtons)} style={{cursor: "pointer"}} size={20} color="#555" /> : 
+                    <MdcChevronDownCircle onClick={()=> setShowButtons(!showButtons)} style={{cursor: "pointer"}} size={20} color="#555" />}
+                    <hr />
+                </div>
                 {/* add section */}
                 {feed.status !== 2 ? 
-                <div className="add-section">
+                <div className={`add-section ${showButtons ? "show" : ""}`}>
                     {feed.heldBy === user.uid ? <Fragment></Fragment> :
                     // <label htmlFor={feed._id} className="add-to-watchlist">
                     //     <input type="checkbox" checked={isWatching(feed._id)} name="add-watchlist" className="add-watchlist" id={feed._id} onChange={handleAddToWatchlist} />
@@ -156,12 +165,27 @@ const LiveFeedCard = ({feed}) => {
 
                 .feed-card .watch-count span{font-size: 13px}
 
+                .feed-card .buttons-toggler{
+                    display: flex;
+                    align-items: center;
+                    column-gap: 5px;
+                }
+                .feed-card .buttons-toggler hr{
+                    flex: 1;
+                    border: none;
+                    border-top: 1px solid #f5f5f5;
+                }
+
                 .feed-card .add-section{
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     margin-top: 10px;
                     column-gap: 5%;
+                    overflow: hidden;
+                }
+                .feed-card .add-section.show{
+                    padding-bottom: 20px;
                 }
                 
                 .feed-card .add-section button{
@@ -172,7 +196,13 @@ const LiveFeedCard = ({feed}) => {
                     cursor: pointer;
                     background: transparent;
                     box-sizing: content-box;
+                    margin-top: -50px;
+                    transition: all .15s linear;
                 }
+                .feed-card .add-section.show button{
+                    margin-top: 0px;
+                }   
+                
                 .feed-card .add-section button.watch{
                     flex: 1;
                     background: var(--dark-color);
@@ -184,8 +214,7 @@ const LiveFeedCard = ({feed}) => {
                 }
 
                 .feed-card .details{
-                    padding: 20px;
-                    padding-top: 0;
+                    padding: 0 20px;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
