@@ -60,21 +60,25 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  --padding-x: 5%;
+  overflow: auto;
 }
 
 .watchlist-page .body,
 .checkout-page .body {
   flex: 1;
-  overflow: auto;
 }
 
 .watchlist-page .body::-webkit-scrollbar,
-.checkout-page .body::-webkit-scrollbar {
+.checkout-page .body::-webkit-scrollbar,
+.checkout-page::-webkit-scrollbar {
   width: 5px;
   background: transparent;
 }
 .watchlist-page .body::-webkit-scrollbar-thumb,
-.checkout-page .body::-webkit-scrollbar-thumb {
+.checkout-page
+  .body::-webkit-scrollbar-thumb
+  .checkout-page::-webkit-scrollbar-thumb {
   width: 5px;
   background: #ddd;
   border-radius: 10px;
@@ -82,7 +86,7 @@
 
 .watchlist-page .footer,
 .checkout-page .footer {
-  padding: 20px var(--padding-x);
+  padding: 10px var(--padding-x);
   border-top: 1px solid #eee;
   display: flex;
   align-items: center;

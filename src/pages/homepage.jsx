@@ -46,15 +46,15 @@ const HomePage = () => {
                 <Route path="/signup">
                     <SignupForm />
                 </Route>
-                <Route path="/watchlist">
-                    <CheckoutPopup />
-                </Route>
                 <Route path="/preview-product/:id">
                     <ProductViewPage />
                 </Route>
                 <Route path="/notifications">
                     <NotificationPopup />
                 </Route>
+                {/* <Route path="/watchlist">
+                    <CheckoutPopup />
+                </Route> */}
                 <Route path="/negotiate/:reqId">
                     <NegotiationPopup />
                 </Route>

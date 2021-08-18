@@ -118,7 +118,7 @@ const WatchlistItem = ({item})=>{
     )
 }
 
-const CheckoutPage = ({onClose})=>{
+export const CheckoutPage = ({onClose})=>{
     const [deliveryId, setDeliveryId] = useState(0);
     const [deliveryAddress, setDeliveryAddress] = useState("");
     const {markProductsAsSold, getProductById} = useProducts();
@@ -144,12 +144,6 @@ const CheckoutPage = ({onClose})=>{
         setTotalPayment(getCheckoutTally() + deliveryFee);
     }, [deliveryFee]);
 
-    useEffect(() => {
-        if(checkOut.length < 1){
-            history.replace('/watchlist');
-        }
-        document.body.style.overflow = "hidden";
-    }, []);
 
     function getCheckoutTally(){
         let output = 0;
@@ -206,7 +200,7 @@ const CheckoutPage = ({onClose})=>{
     }
 
     return <form onSubmit={handleCheckout} className="checkout-page">
-        {loading && <Loader expand={true} />}
+        {loading && <Loader />}
         <Route exact path="/watchlist/checkout/verify-otp">
             <Popup onClose={history.goBack} child={<OTPVerification data={OTPData} onSuccess={handleOTPComplete} />} />
         </Route>
@@ -215,11 +209,6 @@ const CheckoutPage = ({onClose})=>{
         </Route>
         {message.error && <PromptPopup onClose={()=> setMessage({...message, error: ""})} type="failure" message={message.error} />}
         {message.success && <PromptPopup onClose={()=> setMessage({...message, success: ""})} type="success" message={message.success} />}
-        
-        <div className="header">
-            <h3>Checkout</h3>
-            <div onClick={onClose} className="close-btn">{'<'}</div>
-        </div>
         <div className="body">
             <ProductsViewForCheckout checkoutProducts={getProductsForCheckout()} />
             <div className="delivery-address">

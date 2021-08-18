@@ -1,11 +1,9 @@
-import { AiOutlineSearch, AiOutlineUser } from '@meronex/icons/ai';
+import { AiOutlineSearch } from '@meronex/icons/ai';
 import React, {Fragment} from 'react';
-
-import { FaBell, FaEye } from '@meronex/icons/fa';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
 import { useNotification } from '../providers/notificationProvider';
-import { MdcAccountOutline, MdcBellOutline, MdcChevronDown, MdcEyeOutline } from '@meronex/icons/mdc';
+import { MdcAccountCircleOutline, MdcAccountOutline, MdcBell, MdcCartOutline, MdcChevronDown } from '@meronex/icons/mdc';
 
 const HomeHeader = ({onSearch}) => {
     const {unread} = useNotification();
@@ -13,21 +11,18 @@ const HomeHeader = ({onSearch}) => {
 
     const renderAuth = ()=>{
         return <Fragment>
-        {/* <Link to='/watchlist' className='profile-button'>
-            <MdcEyeOutline size={22} color="#555" />
-        </Link> */}
         <Link to="/notifications" className='profile-button'>
-            <MdcBellOutline size={21} color="#555" />
+            <MdcBell size={22} color="#555" />
             {unread.length ? <div className="tag">{unread.length}</div> : <Fragment></Fragment>}
         </Link>
         {!user.isAnonymous ? 
         <Fragment>
             <Link to='/profile' className='profile-button'>
-                <MdcAccountOutline size={22} color="#eee" />
+                <MdcAccountCircleOutline size={25} color="#eee" />
             </Link>
         </Fragment> : 
         <button className='profile-button'>
-            <MdcAccountOutline size={22} color="#555" />
+            <MdcAccountCircleOutline size={25} color="#555" />
             <MdcChevronDown size={18} color="#555" />
             <div className="drop-down">
                 <Link to="/login" className="item">Log In</Link>
@@ -40,7 +35,9 @@ const HomeHeader = ({onSearch}) => {
 
     return (
         <div className='home-header'>
-            <h4 style={{color: "#222"}}><pre>FOINE</pre></h4>
+            <h4 style={{color: "#222", whiteSpace: "nowrap"}}> 
+                <span>FOINE</span> 
+            </h4>
             <div className="search-form">
                 <AiOutlineSearch size={20} color="#555" />
                 <input onChange={({target: {value}})=> onSearch(value)} type="text" placeholder='Search by name or category' aria-placeholder="Search by name or category" className="search-input"/>
@@ -51,6 +48,7 @@ const HomeHeader = ({onSearch}) => {
                     padding: 10px 2.5%;
                     display: flex;
                     align-items: center;
+                    column-gap: 20px;
                     background: #fff;
                     color: #222;
                 }
@@ -62,7 +60,6 @@ const HomeHeader = ({onSearch}) => {
                     display: flex;
                     align-items: center;
                     padding: 0 15px;
-                    margin: 0 5%;
                 }
 
                 .search-form input{
@@ -136,10 +133,6 @@ const HomeHeader = ({onSearch}) => {
                     min-width: 20px;
                     text-align: center;
                     color: #fff;
-                }
-
-                .profile-button:not(:last-child){
-                    margin-right: 20px;
                 }
 
                 @media(max-width: 600px){
