@@ -62,6 +62,12 @@ const HomeHeader = ({onSearch}) => {
                     padding: 0 15px;
                 }
 
+                @media(max-width: 500px){
+                    .home-header .search-form{
+                        display: none;
+                    }
+                }
+
                 .search-form input{
                     border: none;
                     background: transparent;
