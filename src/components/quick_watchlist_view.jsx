@@ -111,7 +111,7 @@ const QuickWatchlistView = () => {
                     max-height: 0%;
                     background: #fff;
                     transition: max-height .25s ease-out;
-                    width: 97.5%;
+                    width: 90%;
                     max-width: 700px;
                     border-radius: 20px 20px 0 0;
                     box-shadow: 0 0 10px 5px #0002;
