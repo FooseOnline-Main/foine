@@ -13,9 +13,9 @@ const HomeHeader = ({onSearch}) => {
 
     const renderAuth = ()=>{
         return <Fragment>
-        <Link to='/watchlist' className='profile-button'>
+        {/* <Link to='/watchlist' className='profile-button'>
             <MdcEyeOutline size={22} color="#555" />
-        </Link>
+        </Link> */}
         <Link to="/notifications" className='profile-button'>
             <MdcBellOutline size={21} color="#555" />
             {unread.length ? <div className="tag">{unread.length}</div> : <Fragment></Fragment>}
@@ -148,13 +148,6 @@ const HomeHeader = ({onSearch}) => {
                     }
                     .home-header h4{
                         margin-right: auto;
-                    }
-                    .home-header .search-form{
-                        position: absolute;
-                        top: calc(100% + 10px);
-                        width: 90%;
-                        left: 0;
-                        display: none;
                     }
                     .profile-button:not(:last-child){
                         margin-right: 15px;

@@ -10,12 +10,11 @@ const QuickWatchlistView = () => {
     const {getProductById, reduceWatch} = useProducts();
     const {removeFromWatchlist, watchlist, checkOut} = useWatchlist();
     const {user} = useAuth();
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const [amount, setAmount] = useState(getCheckoutTally())
 
     useEffect(() => {
         setAmount(getCheckoutTally());
-        setOpen(true);
         const timeout = setTimeout(()=>setOpen(false), 2000)        
         return ()=>{
             clearTimeout(timeout)
@@ -32,6 +31,7 @@ const QuickWatchlistView = () => {
 
     return (
         <div className={`quick-watchlist-view ${open ? "show" : ""}`}>
+            <div onClick={()=> setOpen(!open)} className={`overlay ${open ? "show" : ""}`}></div>
             <div onClick={()=> setOpen(!open)} className="toggler">{open ? "Hide WatchList" : "Show WatchList"}</div>
             <div className="body-wrap">
                 <div className="watchlist-list">
@@ -66,6 +66,20 @@ const QuickWatchlistView = () => {
                     border-top: 1px solid #eee;
                     transition: all .1s linear;
                     z-index: 10;
+                }
+
+                .quick-watchlist-view .overlay{
+                    position: fixed;
+                    top: 0; right: 0;
+                    left: 0; bottom: 0;
+                    transition: all .15s linear;
+                    pointer-events: none;
+                }
+                .quick-watchlist-view .overlay.show{
+                    backdrop-filter: blur(2px);
+                    -webkit-backdrop-filter: blur(2px);
+                    background: #0001;
+                    pointer-events: all;
                 }
 
                 .quick-watchlist-view .toggler{
