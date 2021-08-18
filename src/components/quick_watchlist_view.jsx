@@ -52,10 +52,10 @@ const QuickWatchlistView = () => {
                         )}
                         {checkOut.length < 1 ? <EmptyView message="Checkout watchlist is empty" useIcon={false} /> : <Fragment></Fragment>}
                     </div>
-                    {checkOut.length > 0 ?<div className="checkout-btn-box">
+                    {/* {checkOut.length > 0 ?<div className="checkout-btn-box">
                         <p><small>GHC</small><big>{parseFloat(amount).toFixed(2)}</big></p>
                         <Link to="/watchlist/checkout" className="btn">Checkout</Link>
-                    </div> : <Fragment></Fragment>}
+                    </div> : <Fragment></Fragment>} */}
                 </div>
                 <CheckoutPage />
             </div>
