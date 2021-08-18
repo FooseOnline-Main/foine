@@ -200,7 +200,7 @@ export const CheckoutPage = ({onClose})=>{
     }
 
     return <form onSubmit={handleCheckout} className="checkout-page">
-        {loading && <Loader />}
+        {loading && <Loader expand={true} />}
         <Route exact path="/watchlist/checkout/verify-otp">
             <Popup onClose={history.goBack} child={<OTPVerification data={OTPData} onSuccess={handleOTPComplete} />} />
         </Route>
