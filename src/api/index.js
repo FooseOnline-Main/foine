@@ -30,3 +30,40 @@ export async function confirmOTP(otp, reference){
         return {response: e.response, message: e.message}
     }
 }
+
+export async function signIn(body){
+    try {
+        return await client.post('/user/signin', JSON.stringify(body));
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+export async function signUp(body){
+    try {
+        return await client.post('/user/signup', JSON.stringify(body));
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+export async function requestHoldProduct(body){
+    try {
+        return await client.post('/products/hold', JSON.stringify(body));
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+export async function getUserDetails(token){
+    try {
+        return await client.get('/user/getdetails', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    } catch (err) {
+        console.log(err.message)
+        return err;
+    }
+}

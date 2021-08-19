@@ -1,8 +1,6 @@
 import React, { useState, useContext } from 'react';
-import { useEffect } from 'react';
-import { app } from '../feathers';
+import { v4 } from 'uuid';
 import firebase from '../firebase';
-import { useAuth } from './authProvider';
 import { useError } from './errorProvider';
 
 const WatchlistContext = React.createContext();
@@ -15,17 +13,9 @@ function WatchlistProvider({ children }) {
     const [watchlist, setWatchlist] = useState([]);
     const [checkOut, setCheckOut] = useState([]);
     const [loading, setLoading] = useState(false);
-    const {user} = useAuth();
     const {createError} = useError();
 
-    const watchlistService = app.service("watchlist");
-
-    useEffect(() => {
-        getWatchlist(user.uid);
-        watchlistService.on("updated", ()=>getWatchlist(user.uid));
-        watchlistService.on("deleted", ()=>getWatchlist(user.uid));
-        return () => {};
-    }, []);
+    const watchlistRef = firebase.firestore().collection('watchlist');
 
     const isWatching = (prodId)=>{
         let output = false;
@@ -37,30 +27,48 @@ function WatchlistProvider({ children }) {
         return output;
     }
 
-    const getWatchlist = (userId)=>{
-        if(userId){
-            watchlistService.find({query: {userId}})
-            .then(({data})=>{
-                setWatchlist(data || [])
-                setCheckOut(data.map(item=> item.productId) || [])
-            }).catch(({message})=>{
-                createError(message);
-            });
+    const getWatchlist = (key)=>{
+        setLoading(true);
+        if(key){
+            watchlistRef.where("userId", "==", key).onSnapshot(snapshot=>{
+                setWatchlist(snapshot.docs.map(doc=> doc.data()) || [])
+                setCheckOut(snapshot.docs.map(doc=> doc.data().productId) || [])
+            })
         }
     }
 
     const addToWatchlist = (key, itemId)=>{
+        setLoading(true);
         if(itemId != null && !watchlist.includes(itemId)){
-            const newWatch = {userId: key, productId: itemId};
-            watchlistService.create(newWatch);
+            const docId = v4();
+            const newWatch = {id: docId, userId: key, productId: itemId};
+            watchlistRef.doc(docId).set(newWatch)
+            .then(_=>{
+                // setWatchlist([...watchlist, newWatch]);
+                // setCheckOut([...checkOut, itemId])
+                setLoading(false);
+            })
+            .catch(({message})=>{
+                createError(message);
+                setLoading(false);
+            })
         }
     }
 
     const removeFromWatchlist = (prodId)=>{
         setLoading(true);
-        const watchId = watchlist.filter(item=> item.productId === prodId)[0]._id;
+        const watchId = watchlist.filter(item=> item.productId === prodId)[0].id;
         if(watchId && watchlist.length > 0){
-            watchlistService.remove(watchId);
+            watchlistRef.doc(watchId).delete()
+            .then(_=>{
+                // setWatchlist(watchlist.filter(watch=> watch.id !== watchId));
+                // setCheckOut(checkOut.filter(item=> item !== watchId));
+                setLoading(false);
+            })
+            .catch(({message})=>{
+                setLoading(false);
+                createError(message);
+            })
         }
     }
 
@@ -79,7 +87,10 @@ function WatchlistProvider({ children }) {
         // remove checkedout watchlist items
         watchlist.forEach(item=> {
             if(checkOut.includes(item.productId)){
-                watchlistService.remove(item._id);
+                watchlistRef.doc(item.id).delete()
+                .catch(error=> {
+                    console.log(error);
+                })
             }
         });
     }

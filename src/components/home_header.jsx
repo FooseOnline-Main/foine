@@ -15,12 +15,7 @@ const HomeHeader = ({onSearch}) => {
             <MdcBell size={22} color="#555" />
             {unread.length ? <div className="tag">{unread.length}</div> : <Fragment></Fragment>}
         </Link>
-        {!user.isAnonymous ? 
-        <Fragment>
-            <Link to='/profile' className='profile-button'>
-                <MdcAccountCircleOutline size={25} color="#eee" />
-            </Link>
-        </Fragment> : 
+        {user.isAnonymous ? 
         <button className='profile-button'>
             <MdcAccountCircleOutline size={25} color="#555" />
             <MdcChevronDown size={18} color="#555" />
@@ -28,7 +23,13 @@ const HomeHeader = ({onSearch}) => {
                 <Link to="/login" className="item">Log In</Link>
                 <Link to="/signup" className="item">Signup</Link>
             </div>
-        </button>}
+        </button> :
+        <Fragment>
+            <Link to='/profile' className='profile-button'>
+                <MdcAccountCircleOutline size={25} color="#555" />
+            </Link>
+        </Fragment>
+        }
         
         </Fragment>
     }

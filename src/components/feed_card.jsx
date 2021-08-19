@@ -13,7 +13,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {user} = useAuth();
     const {holdProduct, unholdProduct, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
-    const productId = feed._id;
+    const productId = feed.id;
     const [showButtons, setShowButtons] = useState(false);
 
     useEffect(() => {
@@ -31,7 +31,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
     }
 
     const handleAddToWatchlist = ()=>{
-        if(isWatching(feed._id)){
+        if(isWatching(feed.id)){
             reduceWatch(feed);
             removeFromWatchlist(productId);
         }else{
@@ -68,7 +68,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
 
     return (
         <div className='feed-card'>
-            <Link to={`/preview-product/${feed._id}`}>
+            <Link to={`/preview-product/${feed.id}`}>
                 <div style={{width: "100%", background: "#fff", overflow: "visible"}}>
                     <img src={feed.imageUrl} className="feed-img" alt={feed.name} />
                 </div>
@@ -88,7 +88,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
 
             {/* details */}
             <div className="details" onClick={onViewItem}>
-                <Link to={`/preview-product/${feed._id}`} >
+                <Link to={`/preview-product/${feed.id}`} >
                     {/* <h3>{feed.name}</h3> */}
                     <div className="flex">
                         <p>{feed.size} Size</p>
@@ -106,16 +106,16 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                 {feed.status !== 2 ? 
                 <div className={`add-section ${showButtons ? "show" : ""}`}>
                     {feed.heldBy === user.uid ? <Fragment></Fragment> :
-                    // <label htmlFor={feed._id} className="add-to-watchlist">
-                    //     <input type="checkbox" checked={isWatching(feed._id)} name="add-watchlist" className="add-watchlist" id={feed._id} onChange={handleAddToWatchlist} />
-                    //     <span>{isWatching(feed._id) ? "Unwatch" : "Watch"}</span>
+                    // <label htmlFor={feed.id} className="add-to-watchlist">
+                    //     <input type="checkbox" checked={isWatching(feed.id)} name="add-watchlist" className="add-watchlist" id={feed.id} onChange={handleAddToWatchlist} />
+                    //     <span>{isWatching(feed.id) ? "Unwatch" : "Watch"}</span>
                     // </label>
-                    <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed._id) ? "Unwatch" : "Watch"}</button>
+                    <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
                     }
 
                     {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                    // <label htmlFor={`${feed._id}request`} className="request">
-                    //     <input type="checkbox" checked={requestedPurchase()} name="request" className="request" id={`${feed._id}request`} onChange={handleRequestPurchase} />
+                    // <label htmlFor={`${feed.id}request`} className="request">
+                    //     <input type="checkbox" checked={requestedPurchase()} name="request" className="request" id={`${feed.id}request`} onChange={handleRequestPurchase} />
                     //     <span>{requestedPurchase() ? "Requested" : "Request"}</span>
                     // </label>
                     <button onClick={handleRequestPurchase}>{requestedPurchase() ? "Requested" : "Request"}</button>

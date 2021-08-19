@@ -5,11 +5,14 @@ import Loader from './simple_loader';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 import { AiOutlineFileText, AiOutlineInfoCircle, AiOutlineLogout, AiOutlineShoppingCart, AiOutlineStar, AiOutlineUser } from '@meronex/icons/ai';
+import { useCheckAuth } from '../hooks/auth';
 
 const ProfilePopup = () => {
     const {user, logout, loading} = useAuth();
     const {watchlist} = useWatchlist();
     const history = useHistory();
+    useCheckAuth();
+
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
@@ -36,7 +39,7 @@ const ProfilePopup = () => {
                     <div className="profile-img">
                         <AiOutlineUser size={30} color="#aaa" />
                     </div>
-                    <h3>{user.displayName}</h3>
+                    <h3>{user.username}</h3>
                     <p>{user.email}</p>
                 </div>
                 <div className="option-list">
@@ -51,13 +54,6 @@ const ProfilePopup = () => {
                             <AiOutlineShoppingCart size={20} color="#555" />
                             <b>My Cart</b>
                             <span className="tag">{watchlist.length}</span>
-                        </p>
-                    </Link>
-                    <Link className="option" to="/profile/option">
-                        <p>
-                            <AiOutlineStar size={20} color="#555" />
-                            <b>My Wish List</b>
-                            <span className="tag">0</span>
                         </p>
                     </Link>
                     <Link className="option" to="/profile/option">

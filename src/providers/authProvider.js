@@ -1,6 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { getUserDetails, signIn, signUp } from '../api';
 // import { v4 } from 'uuid';
 import firebase from '../firebase';
+import { useJWT } from '../hooks';
+import { useAuthentication } from '../hooks/auth';
 import { useError } from './errorProvider';
 
 const AuthContext = React.createContext();
@@ -10,25 +14,39 @@ export function useAuth() {
 }
 
 function AuthProvider({ children }) {
+    const [jwt, setJwt] = useJWT();
     const [user, setUser] = useState({});
     const [loading, setLoading] = useState(false);
     const {error, createError} = useError()
 
     // initializing firestore refs
-    // const store = firebase.firestore();
     const fireAuth = firebase.auth();
 
-    useEffect(() => {
+    useEffect(async () => {
         setLoading(true);
-        const unsubscribe = fireAuth.onAuthStateChanged(result=>{
-            setLoading(false);
-            if(result){
-                setUser(result);
-            }else{
-                signInAnonymously();
+
+        if(jwt){
+            const {data} = await getUserDetails(jwt);
+            console.log(data);
+
+            if (data && data.success) {
+                setLoading(false);
+                setUser({...data.user});
+            } else {
+                setLoading(false);
+                window.localStorage.removeItem('_fu_jwt');
             }
-        })
-        return unsubscribe;
+        }else{
+            const unsubscribe = fireAuth.onAuthStateChanged(result=>{
+                setLoading(false);
+                if(result){
+                    setUser(result);
+                }else{
+                    signInAnonymously();
+                }
+            })
+            return unsubscribe;
+        }
     }, [fireAuth]);
 
     const signInAnonymously = ()=>{
@@ -37,44 +55,55 @@ function AuthProvider({ children }) {
         .finally(()=> setLoading(false));
     }
 
-    const login = ({email, password}) => {
+    const login = async ({email, password}) => {
         setLoading(true);
-        fireAuth.signInWithEmailAndPassword(email, password)
-        .catch(({message})=>{ createError(message); })
-        .finally(()=>{ setLoading(false); })
-    }
+        const {data} = await signIn({email, password});
+        console.log({email, password});
 
-    const signup = (data) => {
-        setLoading(true);
-        if(data.password === data.c_password){
-            fireAuth.createUserWithEmailAndPassword(data.email, data.password)
-            .then(({user})=>{
-                user.updateProfile({displayName: data.username, phoneNumber: data.phone})
-                .catch(({message})=>{ createError(message); });
-            })
-            .catch(({message})=>{ createError(message); })
-            .finally(()=>{
-                setLoading(false);
-            });
+        if(data.success){
+            setLoading(false);
+            setUser(data.user)
+            setJwt(data.user.token)
         }else{
             setLoading(false);
-            createError("Passwords does not match", 2000)
+            createError(data.message);
+        }
+    }
+
+    const signup = async (fields) => {
+        if(fields.password === fields.c_password){
+            if(fields.password.length > 8){
+                setLoading(true);
+                
+                delete fields.c_password
+                const {data} = await signUp(fields);
+        
+                if(data.success){
+                    setLoading(false);
+                    setUser(data.user)
+                    setJwt(data.user.token)
+                }else{
+                    setLoading(false);
+                    createError(data.message)
+                }
+            }else{
+                createError("Password is too short. ( >= 8 chars)")
+            }
+        }else{
+            createError("Passwords do not match")
         }
     }
 
     const logout = () => {
-        setLoading(true);
-        // Sign out here
-        fireAuth.signOut()        
-        .then(()=> setLoading(false))
-        .catch(({message})=> createError(message))
-        .finally(()=>{ setLoading(false); })
+        setUser({});
+        setJwt("");
+        window.location.href = "/";
     }
 
     return (
         <AuthContext.Provider value={{
             user, loading, error,
-            login, signup, logout,
+            login, signup, logout
         }}>
             {children}
         </AuthContext.Provider>

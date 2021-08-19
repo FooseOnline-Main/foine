@@ -3,14 +3,11 @@ import '../css/home.css';
 import React, { Fragment, useState } from 'react';
 import { Route, useHistory } from "react-router-dom";
 
-import CheckoutPopup from '../components/cart-checkout-popup';
 import FloatNotifications from '../components/float_notifications';
 import ErrorPopup from '../components/error-popup';
-import GalleryViewSection from '../components/gallery-view-section';
 import HomeHeader from '../components/home_header';
 import LiveFeedSection from '../components/feed_section';
 import LoginForm from '../components/login_form';
-import PrivateRoute from '../hooks/private_router';
 import ProductViewPage from '../components/product_view_page';
 import ProfilePopup from '../components/profile_popup';
 import QuickWatchlistView from '../components/quick_watchlist_view';
@@ -36,7 +33,6 @@ const HomePage = () => {
                 <HomeHeader onSearch={handleSearch} />
                 <div className="page-body">
                     <LiveFeedSection />
-                    {/* <GalleryViewSection searchValue={searchString}/> */}
                 </div>
                 <QuickWatchlistView />
                 <FloatNotifications />
@@ -52,13 +48,10 @@ const HomePage = () => {
                 <Route path="/notifications">
                     <NotificationPopup />
                 </Route>
-                {/* <Route path="/watchlist">
-                    <CheckoutPopup />
-                </Route> */}
                 <Route path="/negotiate/:reqId">
                     <NegotiationPopup />
                 </Route>
-                <PrivateRoute path="/profile" component={ProfilePopup} />
+                <Route path="/profile" component={ProfilePopup} />
                 <ErrorPopup />
             </Fragment>
         </div>

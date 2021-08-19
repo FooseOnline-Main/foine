@@ -1,14 +1,13 @@
-// import axios from 'axios';
-
-import React, { useContext, useState } from 'react';
-import { useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { v4 } from 'uuid';
-import { app } from '../feathers';
+import { requestHoldProduct } from '../api';
+
 import firebase from '../firebase';
 import { useError } from './errorProvider';
 import {useNotification} from './notificationProvider';
 
 const ProductsContext = React.createContext();
+
 export function useProducts() {
     return useContext(ProductsContext);
 }
@@ -37,69 +36,49 @@ export const getStatus = (status)=>{
 }
 
 function ProductsProvider({ children }) {
-    // feathers services
-    const productService = {
-        categories: app.service('categories'),
-        products: app.service('products'),
-        comments: app.service('/product/comments'),
-        holders: app.service('/product/holders')
-    };
-
-    // provider state
-    const {createError} = useError();
-    const [loading, setLoading] = useState(false);
-    const {notifyHold, notifyPurchaseRequest, notifyAcceptedRequest, notifyDeniedRequest, notifyUnheld} = useNotification();
     const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-        
-    // firebase references
+    const [categories, setCategories] = useState([]); 
+    const [loading, setLoading] = useState(false);
+    const {createError} = useError();
+    const {notifyHold, notifyPurchaseRequest, notifyAcceptedRequest, notifyDeniedRequest, notifyUnheld} = useNotification();
+
     const productsRef = firebase.firestore().collection('products');
-    // const catsRef = firebase.firestore().collection('categories');
-    // const holdCounterRef = firebase.firestore().collection('holdCounter');
-    
-    useEffect(async () => {
-        // fetch products and categories
+    const catsRef = firebase.firestore().collection('categories');
+    const holdCounterRef = firebase.firestore().collection('holdCounter');
+
+    useEffect(()=>{
         fetchProducts();
-        productService.categories.find().then(({data})=> setCategories(data));
+    }, [])
 
-        // add listener to product service
-        productService.products.on("updated", fetchProducts)
-        return () => {};
-    }, []);
-
-    const fetchProducts = async (skip)=>{
+    const fetchProducts = async ()=>{
         setLoading(true);
-        const limit = (skip || 0) + 8;
-        // console.log(`Skipping ${skip} products and fetching ${limit}`);
-        productService.products.find({query: {$limit: limit, $skip: skip || 0}})
-        .then(({data})=> {
+        // make api call to fetch products from db
+        catsRef.get().then(item=>{
+            setCategories(item.docs.map(doc=> doc.data()) || []);
+        }).catch(({message})=>{
+            createError(message);
+        })
+
+        productsRef.onSnapshot(snapshot=>{
+            setProducts(snapshot.docs.map(doc=> doc.data()) || []);
             setLoading(false);
-            setProducts([...products, ...data])
-        });
+            snapshot.docChanges(item=>{
+                setProducts(item.docs.map(doc=> doc.data()) || []);
+            });
+        });       
     }
 
-    const getProductById = async (id)=>{
-        const product = products.filter(product=> product._id === id)[0];
-        const comments = await getProductComments(id);
-
-        return {...product, comments};
+    const getProductById = (id)=>{
+        return products.filter(product=> product.id === id)[0];
     }
 
     const fetchProductById = async (id)=>{
         setLoading(true);
-        const product = await productService.products.get(id);
-        const comments = await getProductComments(id);
-
-        return {...product, comments};
-    }
-
-    const getProductComments = async (productId)=>{
-        const {data} = await productService.comments.find({query: {productId}});
-        return data;
+        const prodSnapshot = await productsRef.doc(id).get();
+        return prodSnapshot.data();
     }
 
     const getProductByReqId = (reqId)=>{
-        // Do something here
         let output = null;
         products.forEach(product=> {
             product.purchaseRequests.forEach(request=>{
@@ -129,8 +108,7 @@ function ProductsProvider({ children }) {
     }
 
     const increaseWatch = (product)=>{
-        // productsRef.doc(product.id).update({watchCount: (product.watchCount + 1)})
-        productService.products.update(product._id, {...product, watchCount: (product.watchCount + 1)})
+        productsRef.doc(product.id).update({watchCount: (product.watchCount + 1)})
         .catch(error=>{
             createError(error.message, 2000);
         })
@@ -138,8 +116,7 @@ function ProductsProvider({ children }) {
 
     const reduceWatch = (product)=>{
         if(product.watchCount){
-            // productsRef.doc(product.id).update({watchCount: (product.watchCount - 1)})
-            productService.products.update(product._id, {...product, watchCount: (product.watchCount - 1)})
+            productsRef.doc(product.id).update({watchCount: (product.watchCount - 1)})
             .catch(error=>{
                 createError(error.message, 2000);
             })
@@ -202,50 +179,28 @@ function ProductsProvider({ children }) {
     }
 
     const holdProduct = async (userId, product) => {
-        if(product && userId){
-            if(product.status === 0){
-                // monitize user hold count
-                let canHold = true;
-                const holders = (()=> {
-                    if(product.holders){
-                        if(!product.holders.includes(userId)){
-                            return product.holder + `, ${userId}`;
-                        }else{
-                            canHold = false;
-                        }
-                    }else{
-                        return userId;
-                    }
-                })();
-                // check if user hold limit is exceeded - no
-                // warn user on exceeded hold limit - yes
-                if(canHold){
-                    productService.products.update(product._id, {...product, heldBy: userId, holders, status: 1})
-                    .then(product=>{
-                        // do something here
-                        notifyHold(product._id);
-                    }).catch(error=>{
-                        console.log(error.message);
-                    });
-                }else{
-                    createError("Sorry, you can only hold product once.");
-                }
-            }else{
-                createError("Item is being held by someone else!", 3000);
-            }
+        const {data} = await requestHoldProduct({userId, product});
+        
+        if(!data.status){
+            createError(data.message);
         }
     }
 
      const unholdProduct = (userId, product) => {
         if(userId && product){
-
-            // monitize user hold count              
-            productService.products.update(product._id, {...product, heldBy: "", status: 0})
+            // reduce user hold counter
+            holdCounterRef.doc(userId).get().then((doc)=>{
+                holdCounterRef.doc(userId).update({count: doc.data().count - 1})
+            }).catch(({message})=>{
+                createError(message);
+            });
+               
+            productsRef.doc(product.id).update({heldBy: "", status: 0, purchaseRequests: []})
             .then(_=>{
                 // do something here
                 notifyUnheld(product.id);
             }).catch(error=>{
-                console.log(error.message);
+                createError(error.message);
             })
         }
     }
@@ -307,7 +262,7 @@ function ProductsProvider({ children }) {
             unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
             cancelRequestPurchase, like, addToWishList, share, getProductById, 
             comment, increaseWatch, reduceWatch, getProductByReqId, acceptPurchaseRequest,
-            denyPurchaseRequest, getProductComments
+            denyPurchaseRequest
         }}>
             {children}
         </ProductsContext.Provider>
