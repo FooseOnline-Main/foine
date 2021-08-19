@@ -50,7 +50,7 @@ const QuickWatchlistView = () => {
                                 </div>
                             </div>}
                         )}
-                        {checkOut.length < 1 ? <EmptyView message="Checkout watchlist is empty" useIcon={false} /> : <Fragment></Fragment>}
+                        {checkOut.length < 1 ? <EmptyView message="Your cart is empty" useIcon={false} /> : <Fragment></Fragment>}
                     </div>
                 </div>
                 <CheckoutPage />
