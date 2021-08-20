@@ -100,7 +100,6 @@ function ProductsProvider({ children }) {
     }
 
     const fetchProductById = async (id)=>{
-        setLoading(true);
         const prodSnapshot = await productsRef.doc(id).get();
         return prodSnapshot.data();
     }
@@ -139,7 +138,7 @@ function ProductsProvider({ children }) {
     }
 
     const getRequestById = (reqId)=>{
-        return purchaseReqRef.doc(reqId).get(res=> res.data());
+        return purchaseReqRef.doc(reqId).get().then(res=> res.data());
     }
 
     const requestPurchase = (userId, product) => {
@@ -187,7 +186,8 @@ function ProductsProvider({ children }) {
             const request = purchaseReqRef
             .where("userId", "==", userId)
             .where("productId", "==", product.id)
-            .get(res=> res.data())
+            .get()
+            .then(res=> res.docs()[0])
              
             purchaseReqRef.doc(request.id)
             .delete()

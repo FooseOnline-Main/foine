@@ -12,26 +12,29 @@ const NegotiationPopup = () => {
     const {reqId} = useParams();
     const history = useHistory();
     const {createError} = useError();
-    const {products, getProductById, getRequestById, acceptPurchaseRequest, denyPurchaseRequest } = useProducts();
-    const [product, setProduct] = useState();
-    const [request, setRequest] = useState();
+    const {products, fetchProductById, getRequestById, acceptPurchaseRequest, denyPurchaseRequest } = useProducts();
+    const [product, setProduct] = useState(null);
+    const [request, setRequest] = useState(null);
     const [charge, setCharge] = useState(0);
     const [loading, setLoading] = useState(true);
     const [loadSuccess, setLoadSuccess] = useState(false);
 
     useEffect(() => {
         (async ()=>{
-            if(products.length > 0){
-                const result = getRequestById(reqId);
-                if(result){
-                    setRequest(result)
-                    setProduct(getProductById(result.productId));
-                    return setLoading(false);
-                }
-                history.replace('/');
+            const requestRes = await getRequestById(reqId);
+            if(requestRes){
+                return setRequest(()=> requestRes);
             }
+            history.replace("/");
         })()
     }, []);
+
+    useEffect(async () => {
+        if(request){
+            setProduct(await fetchProductById(request.productId));
+            return setLoading(false);
+        }
+    }, [request]);
 
     useEffect(() => {
         if(request && request.accepted){
@@ -63,11 +66,9 @@ const NegotiationPopup = () => {
         </div>
     }
 
-    return (
-        <div className="nego-popup">
+    return ((product && request) ? <div className="nego-popup">
             <div onClick={()=>history.replace('/')} className="close-bg"></div>
             <div className="inner">
-                {loading && !product && !request ? <Loader /> : 
                 <Fragment>
                     <div className="img-box">
                         <img src={product.imageUrl} alt={product.name} />
@@ -107,9 +108,9 @@ const NegotiationPopup = () => {
                             </Fragment>}
                         </div>
                     </div>
-                </Fragment>}
+                </Fragment>
             </div>
-        </div>
+        </div> : <Loader expand={true} />
     );
 }
 
