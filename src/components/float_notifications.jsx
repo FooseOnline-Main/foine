@@ -49,12 +49,18 @@ const QuickNote = ({note, onRemoveNote})=>{
     const [holdOn, setHoldOn] = useState(true);
     const [timeout, setQuickTimeout] = useState(null);
     const {fetchProductById} = useProducts();
+    const [product, setProduct] = useState(null);
 
-    useEffect(() => {
+    useEffect(async () => {
         setQuickTimeout(setTimeout(()=>{
             setHoldOn(false);
             onRemoveNote(note);
         }, 3000));
+
+        if(note.other && note.other.productId){
+            const res = await fetchProductById(note.other.productId);
+            setProduct(()=> res);
+        }
 
         return ()=>{
             clearTimeout(timeout);
@@ -68,9 +74,8 @@ const QuickNote = ({note, onRemoveNote})=>{
         }, 3000))
     }
 
-    const renderIconImageSide = async ()=>{
-        if(note.type === "PURCHASE_REQUEST"){
-            const product = await fetchProductById(note.other.productId);
+    const renderIconImageSide = ()=>{
+        if(product){ 
             return <img src={product.imageUrl} alt={product.name} />
         }else{
             return <figure>
