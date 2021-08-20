@@ -22,10 +22,10 @@ const NegotiationPopup = () => {
     useEffect(() => {
         (async ()=>{
             if(products.length > 0){
-                const result = getProductById(reqId);
+                const result = getRequestById(reqId);
                 if(result){
-                    setProduct(result);
-                    setRequest(getRequestById(reqId))
+                    setRequest(result)
+                    setProduct(getProductById(result.productId));
                     return setLoading(false);
                 }
                 history.replace('/');
