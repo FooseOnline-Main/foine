@@ -253,7 +253,7 @@ export const CheckoutPage = ({onClose})=>{
                     </div>
                     <select name="area-range" onChange={({target})=> {setDeliveryFee(target.value === "" ? 0 : parseFloat(target.value));}} id="area-range">
                         <option value="">Select your region</option>
-                        {regions.map(region=> <option value="5.00">{region}</option>)}
+                        {regions.map((region, key)=> <option key={key} value="5.00">{region}</option>)}
                     </select>
                 </div> : <Fragment></Fragment>}
             </div>
@@ -263,7 +263,7 @@ export const CheckoutPage = ({onClose})=>{
                 </div>
                 <div className="choose-delivery">
                     {providers.map((provider, id)=> 
-                    <div className={`${providerId === id ? 'selected' : ''}`} onClick={()=>{setProviderId(id)}}>
+                    <div key={id} className={`${providerId === id ? 'selected' : ''}`} onClick={()=>{setProviderId(id)}}>
                         {provider.name}
                     </div>)}
                 </div>
@@ -408,7 +408,7 @@ const ProductsViewForCheckout = ({checkoutProducts})=>{
     return <div className="products-view">
         <div onClick={()=> setHide(!hide)} className="toggler">{hide ? 'See Products' : 'Hide Products'}</div>
         <div className={`items-container ${hide ? "hidden" : ''}`}>
-            {checkoutProducts.map(item=> <div className='item'>
+            {checkoutProducts.map((item, key)=> <div key={key} className='item'>
                 <img src={item.imageUrl} width={50} height={50} style={{objectFit: "cover"}} alt={item.name} />
                 <div className="info">
                     <p><b>{item.name}</b></p>

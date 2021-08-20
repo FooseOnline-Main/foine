@@ -90,7 +90,7 @@ const ProductViewPage = () => {
                         </button>}
                         {product.status !== 2 ? <button onClick={handleWatch} id="add-to-watchlist">
                             {watching ? <FaEyeSlash size={20} color="#fff" /> : <FaEye size={20} color="#fff" />}
-                            <span>{watching ? 'Unwatch Item' : 'Watch Item'}</span>
+                            <span>{watching ? 'Return Item' : 'Buy Item'}</span>
                         </button> : <Fragment></Fragment>}
                     </div>
                     <div className="comment-section">
