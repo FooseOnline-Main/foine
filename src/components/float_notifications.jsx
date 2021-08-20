@@ -48,7 +48,7 @@ const FloatNotifications = () => {
 const QuickNote = ({note, onRemoveNote})=>{
     const [holdOn, setHoldOn] = useState(true);
     const [timeout, setQuickTimeout] = useState(null);
-    const {getProductById} = useProducts();
+    const {fetchProductById} = useProducts();
 
     useEffect(() => {
         setQuickTimeout(setTimeout(()=>{
@@ -70,7 +70,7 @@ const QuickNote = ({note, onRemoveNote})=>{
 
     const renderIconImageSide = ()=>{
         if(note.type === "PURCHASE_REQUEST"){
-            const product = getProductById(note.other.productId);
+            const product = fetchProductById(note.other.productId);
             return <img src={product.imageUrl} alt={product.name} />
         }else{
             return <figure>

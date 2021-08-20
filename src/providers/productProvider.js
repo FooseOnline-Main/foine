@@ -38,6 +38,7 @@ export const getStatus = (status)=>{
 function ProductsProvider({ children }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]); 
+    const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(false);
     const {createError} = useError();
     const {notifyHold, notifyPurchaseRequest, notifyAcceptedRequest, notifyDeniedRequest, notifyUnheld} = useNotification();
@@ -53,6 +54,18 @@ function ProductsProvider({ children }) {
         }).catch(({message})=>{
             createError(message);
         })
+
+        purchaseReqRef.onSnapshot(res=>{
+            const data = res.docs.map(doc=> doc.data());
+            setRequests(()=> data || []);
+            console.log({data});
+            res.docChanges(item=> {
+                const changes = item.docs.map(doc=> doc.data());
+                console.log({changes});
+                setRequests(()=> changes || [])
+            })
+        });
+
         fetchProducts();
     }, [])
 
@@ -141,7 +154,7 @@ function ProductsProvider({ children }) {
         return purchaseReqRef.doc(reqId).get().then(res=> res.data());
     }
 
-    const requestPurchase = (userId, product) => {
+    const requestPurchase = (userId, product, callback=()=>{}) => {
         if(product && userId){
             const requestId = v4();
             purchaseReqRef.doc(requestId)
@@ -153,6 +166,7 @@ function ProductsProvider({ children }) {
                 accepted: false
             }).then(_=>{
                 notifyPurchaseRequest(product.heldBy, product.id, requestId);
+                callback();
             }).catch(error=>{
                 createError(error.message, 2000);
             })
@@ -181,16 +195,18 @@ function ProductsProvider({ children }) {
         });
     }
 
-    const cancelRequestPurchase = (userId, product) => {
+    const cancelRequestPurchase = (userId, product, callback=()=>{}) => {
         if(product && userId){
-            const request = purchaseReqRef
-            .where("userId", "==", userId)
+            purchaseReqRef
+            .where("requestee", "==", userId)
             .where("productId", "==", product.id)
             .get()
-            .then(res=> res.docs()[0])
-             
-            purchaseReqRef.doc(request.id)
-            .delete()
+            .then(res=> {
+                callback();
+                res.docs.length && 
+                purchaseReqRef.doc(res.docs[0].data().id).delete();
+            })
+            .catch(({message})=> console.log(message))
         }
     }
 
@@ -275,12 +291,12 @@ function ProductsProvider({ children }) {
     
     return (
         <ProductsContext.Provider value={{
-            products, categories, loading,
+            products, categories, loading, requests,
             fetchProducts, getProducts, holdProduct, fetchProductById, 
             unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
             cancelRequestPurchase, like, addToWishList, share, getProductById, 
             comment, increaseWatch, reduceWatch, getRequestById, acceptPurchaseRequest,
-            denyPurchaseRequest
+            denyPurchaseRequest 
         }}>
             {children}
         </ProductsContext.Provider>

@@ -11,10 +11,11 @@ import { useEffect } from 'react';
 
 const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {user} = useAuth();
-    const {holdProduct, unholdProduct, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
+    const {holdProduct, unholdProduct, requests, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
     const productId = feed.id;
     const [showButtons, setShowButtons] = useState(false);
+    const [requested, setRequested] = useState(false);
 
     useEffect(() => {
         if(expanded){
@@ -23,6 +24,11 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
             setShowButtons(false);
         }
     }, [expanded]);
+
+    useEffect(async ()=> {
+        const bool = await requestedPurchase();
+        setRequested(()=> bool);
+    }, [requests]);
 
     const onViewItem = ()=>{
         // set current open feed
@@ -49,22 +55,24 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
     }
 
     const handleRequestPurchase = ()=>{
-        if(requestedPurchase()){
+        if(requested){
             cancelRequestPurchase(user.uid, feed);
         }else{
             requestPurchase(user.uid, feed);
         }
     }
 
-    const requestedPurchase = ()=>{
+    const requestedPurchase = async ()=>{
         let output = false;
-        // feed.purchaseRequests.forEach(request=>{
-        //     if(request.userId === user.uid){
-        //         output = true;
-        //     }
-        // });
+        requests.forEach(req=>{
+            if(req.requestee === user.uid && req.productId === feed.id){
+                output = true;
+            }
+        });
         return output;
     }
+
+    console.log({requested}, {requests});
 
     return (
         <div className='feed-card'>
@@ -109,11 +117,10 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
                     }
                     {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                    <button onClick={handleRequestPurchase}>{requestedPurchase() ? "Requested" : "Request"}</button>
+                    <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
                      : 
                     <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
                     }
-
                 </div> : 
                 <Fragment></Fragment>}
             </div>
