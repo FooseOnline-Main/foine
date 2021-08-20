@@ -62,7 +62,7 @@ const NegotiationPopup = () => {
         return <div id="success">
             <AiOutlineCheckCircle style={{marginBottom: 10}} size={80} color="limegreen"/>
             <p>You have successfully accepted this purchase request.</p>
-            <p>You have gained GHC1.00 free discount</p>
+            <p>You have gained Ghc {parseFloat(request.charge.toString()).toFixed(2)} free discount</p>
         </div>
     }
 
@@ -79,8 +79,11 @@ const NegotiationPopup = () => {
                                 <h4>{request.accepted ? "Accepted Successfully" : "Confirm Request"}</h4>
                                 <span style={{color: "var(--dark-color)"}}><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></span>
                             </div>
-                        </div>
-                        <div className="options">
+                        </div>                        
+                        <div className="content">
+                            {loadSuccess ? <Loader /> : request.accepted ? renderSuccess() : 
+                            <Fragment>
+                            <div className="options">
                             <h5>Select an option below:</h5>
                             <div onClick={()=> setCharge(()=> 0)} className="option">
                                 {charge === 0 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
@@ -99,8 +102,6 @@ const NegotiationPopup = () => {
                                 <span>Charge an amount of Ghc 3.35</span>
                             </div>
                         </div>
-                        <div className="content">
-                            {loadSuccess ? <Loader /> : request.accepted ? renderSuccess() : <Fragment>
                             {request.accepted ? <Fragment></Fragment> : <div className="actions">
                                 <div onClick={handleAccept} id="accept"><p>Accept</p></div>
                                 <div onClick={handleDeny} id="deny"><p>Deny</p></div>
