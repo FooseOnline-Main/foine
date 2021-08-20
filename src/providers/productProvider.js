@@ -45,6 +45,7 @@ function ProductsProvider({ children }) {
     const productsRef = firebase.firestore().collection('products');
     const catsRef = firebase.firestore().collection('categories');
     const holdCounterRef = firebase.firestore().collection('holdCounter');
+    const purchaseReqRef = firebase.firestore().collection('purchaseRequests');
 
     useEffect(()=>{
         catsRef.get().then(item=>{
@@ -104,18 +105,6 @@ function ProductsProvider({ children }) {
         return prodSnapshot.data();
     }
 
-    const getProductByReqId = (reqId)=>{
-        let output = null;
-        products.forEach(product=> {
-            product.purchaseRequests.forEach(request=>{
-                if(request.id === reqId){
-                    output = product;
-                }
-            })
-        });
-        return output;
-    }
-
     const searchProducts = (searchString)=>{
         if(searchString && searchString !== ""){
             return products.filter(product=>
@@ -149,19 +138,20 @@ function ProductsProvider({ children }) {
         }
     }
 
+    const getRequestById = (reqId)=>{
+        return purchaseReqRef.doc(reqId).get(res=> res.data());
+    }
+
     const requestPurchase = (userId, product) => {
         if(product && userId){
             const requestId = v4();
-            productsRef.doc(product.id).update({
-                purchaseRequests: [
-                    ...product.purchaseRequests, 
-                    {
-                        id: requestId,
-                        userId,
-                        accepted: false,
-                        interest: 0,
-                    }
-                ]
+            purchaseReqRef.doc(requestId)
+            .set({
+                id: requestId,
+                productId: product.id,
+                requestee: userId,
+                holder: product.heldBy,
+                accepted: false
             }).then(_=>{
                 notifyPurchaseRequest(product.heldBy, product.id, requestId);
             }).catch(error=>{
@@ -170,24 +160,23 @@ function ProductsProvider({ children }) {
         }
     }
 
-    const acceptPurchaseRequest = (product, requestId)=>{
-        let request = product.purchaseRequests.filter(req=> req.id === requestId)[0];
-        request = {...request, interest: 1, accepted: true};
-        productsRef.doc(product.id).update({purchaseRequests: [request]})
+    const acceptPurchaseRequest = (product, charge, reqId, callback=()=>{})=>{
+        let request = purchaseReqRef.doc(reqId).get().then(res=> res.data());
+        purchaseReqRef.doc(reqId).update({charge, accepted: true})
         .then(_=>{
             notifyAcceptedRequest(request.userId, product.id, product.name);
+            callback()
         }).catch(({message})=>{
             createError(message, 2000)
         });
     }
 
-    const denyPurchaseRequest = (product, requestId)=>{
-        const request = product.purchaseRequests.filter(req=> req.id === requestId)[0];
-        productsRef.doc(product.id).update({
-            purchaseRequests: product.purchaseRequests.filter(req=> req.id !== requestId)
-        })
+    const denyPurchaseRequest = (product, requestId, callback=()=>{})=>{
+        let request = purchaseReqRef.doc(requestId).get().then(res=> res.data());
+        purchaseReqRef.doc(requestId).delete()
         .then(_=>{
             notifyDeniedRequest(request.userId, product.name);
+            callback();
         }).catch(({message})=>{
             createError(message, 2000)
         });
@@ -195,22 +184,23 @@ function ProductsProvider({ children }) {
 
     const cancelRequestPurchase = (userId, product) => {
         if(product && userId){
-            const newProductsRequests = product.purchaseRequests.filter(request=> request.userId !== userId);
-            productsRef.doc(product.id).update({
-                purchaseRequests: newProductsRequests
-            }).catch(error=>{
-                createError(error.message, 2000);
-            })
+            const request = purchaseReqRef
+            .where("userId", "==", userId)
+            .where("productId", "==", product.id)
+            .get(res=> res.data())
+             
+            purchaseReqRef.doc(request.id)
+            .delete()
         }
     }
 
     const holdProduct = async (userId, product) => {
         const {data} = await requestHoldProduct({userId, product});
         
-        if(!data.status){
-            createError(data.message);
-        }else{
+        if(data.status){
             notifyHold(product.id);
+        }else{
+            createError(data.message);
         }
     }
 
@@ -289,7 +279,7 @@ function ProductsProvider({ children }) {
             fetchProducts, getProducts, holdProduct, fetchProductById, 
             unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
             cancelRequestPurchase, like, addToWishList, share, getProductById, 
-            comment, increaseWatch, reduceWatch, getProductByReqId, acceptPurchaseRequest,
+            comment, increaseWatch, reduceWatch, getRequestById, acceptPurchaseRequest,
             denyPurchaseRequest
         }}>
             {children}

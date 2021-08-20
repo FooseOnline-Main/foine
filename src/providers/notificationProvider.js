@@ -47,6 +47,7 @@ function NotificationProvider({ children }) {
         watchlistRef.where("productId", "==", productId).get()
         .then(result=> {
             const usersToNotify = result.docs.map(doc=> doc.data().userId);
+            console.log(usersToNotify);
             usersToNotify.forEach(userId=>{
                 const isMe = userId === user.uid;
                 if(!isMe){

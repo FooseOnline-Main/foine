@@ -5,25 +5,27 @@ import '../css/negotiation.css';
 import { useEffect } from 'react';
 import Loader from './simple_loader';
 import { AiOutlineCheckCircle } from '@meronex/icons/ai';
+import { MdcCheckCircle, MdcCheckCircleOutline } from '@meronex/icons/mdc';
 import { useError } from '../providers/errorProvider';
 
 const NegotiationPopup = () => {
     const {reqId} = useParams();
     const history = useHistory();
     const {createError} = useError();
-    const {products, getProductByReqId, acceptPurchaseRequest, denyPurchaseRequest } = useProducts();
+    const {products, getProductById, getRequestById, acceptPurchaseRequest, denyPurchaseRequest } = useProducts();
     const [product, setProduct] = useState();
     const [request, setRequest] = useState();
+    const [charge, setCharge] = useState(0);
     const [loading, setLoading] = useState(true);
     const [loadSuccess, setLoadSuccess] = useState(false);
 
     useEffect(() => {
         (async ()=>{
             if(products.length > 0){
-                const result = getProductByReqId(reqId);
+                const result = getProductById(reqId);
                 if(result){
                     setProduct(result);
-                    setRequest(result.purchaseRequests.filter(req=> req.id === reqId)[0])
+                    setRequest(getRequestById(reqId))
                     return setLoading(false);
                 }
                 history.replace('/');
@@ -43,12 +45,14 @@ const NegotiationPopup = () => {
             setLoadSuccess(false);
           return createError("You have already accepted this purchase request.");
         }
-        acceptPurchaseRequest(product, reqId);
+        acceptPurchaseRequest(
+            product, charge, reqId, 
+            ()=> setRequest(()=> {return {...request, accepted: true}})
+        );
     }
 
     const handleDeny = ()=>{
-        denyPurchaseRequest(product, reqId);
-        history.replace('/');
+        denyPurchaseRequest(product, reqId, ()=> history.replace('/'));
     }
 
     const renderSuccess = ()=>{
@@ -69,30 +73,33 @@ const NegotiationPopup = () => {
                         <img src={product.imageUrl} alt={product.name} />
                     </div>
                     <div className="confirm-box">
-                        <div className="head">
-                            <h2>{request.accepted ? "Accepted Successfully" : "Confirm Request"}</h2>
+                        <div className="head">                            
                             <div className="details">
-                                <h4>{product.name}</h4>
+                                <h4>{request.accepted ? "Accepted Successfully" : "Confirm Request"}</h4>
                                 <span style={{color: "var(--dark-color)"}}><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></span>
+                            </div>
+                        </div>
+                        <div className="options">
+                            <h5>Select an option below:</h5>
+                            <div onClick={()=> setCharge(()=> 0)} className="option">
+                                {charge === 0 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
+                                <span>Let go free of charge</span>
+                            </div>
+                            <div onClick={()=> setCharge(()=> 1)} className="option">
+                                {charge === 1 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
+                                <span>Charge an amount of Ghc 1.00</span>
+                            </div>
+                            <div onClick={()=> setCharge(()=> 2.3)} className="option">
+                                {charge === 2.3 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
+                                <span>Charge an amount of Ghc 2.30</span>
+                            </div>
+                            <div onClick={()=> setCharge(()=> 3.35)} className="option">
+                                {charge === 3.35 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
+                                <span>Charge an amount of Ghc 3.35</span>
                             </div>
                         </div>
                         <div className="content">
                             {loadSuccess ? <Loader /> : request.accepted ? renderSuccess() : <Fragment>
-                            <b style={{fontSize: 14, marginTop: "auto"}}>Benefits of accepting request:</b>
-                            <div className="benefits">
-                                <div className="benefit">
-                                    <AiOutlineCheckCircle size={20} color="var(--dark-color)" /> 
-                                    <span>You get to charge an amount between GHC1-5</span>
-                                </div>
-                                <div className="benefit">
-                                    <AiOutlineCheckCircle size={20} color="var(--dark-color)" /> 
-                                    <span>Charge will be kept in your wallet for purchase discount</span>
-                                </div>
-                                <div className="benefit">
-                                    <AiOutlineCheckCircle size={20} color="var(--dark-color)" /> 
-                                    <span>You get 10 points for your kindness</span>
-                                </div>
-                            </div>
                             {request.accepted ? <Fragment></Fragment> : <div className="actions">
                                 <div onClick={handleAccept} id="accept"><p>Accept</p></div>
                                 <div onClick={handleDeny} id="deny"><p>Deny</p></div>
