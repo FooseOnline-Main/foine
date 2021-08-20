@@ -87,7 +87,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
             </div> : <Fragment></Fragment>}
 
             {/* details */}
-            <div className="details" onClick={onViewItem}>
+            <div  onMouseOut={()=> setShowButtons(false)} onMouseOver={()=> {onExpand(); setShowButtons(true)}} className="details" onClick={onViewItem}>
                 <Link to={`/preview-product/${feed.id}`} >
                     {/* <h3>{feed.name}</h3> */}
                     <div className="flex">
@@ -98,29 +98,19 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                 <div className="buttons-toggler">
                     <hr />
                     {showButtons ? 
-                    <MdcChevronUpCircle onClick={()=> setShowButtons(!showButtons)} style={{cursor: "pointer"}} size={20} color="#555" /> : 
-                    <MdcChevronDownCircle onClick={()=> {onExpand(); setShowButtons(!showButtons)}} style={{cursor: "pointer"}} size={20} color="#555" />}
+                    <MdcChevronUpCircle style={{cursor: "pointer"}} size={20} color="#555" /> : 
+                    <MdcChevronDownCircle style={{cursor: "pointer"}} size={20} color="#555" />}
                     <hr />
                 </div>
                 {/* add section */}
                 {feed.status !== 2 ? 
                 <div className={`add-section ${showButtons ? "show" : ""}`}>
-                    {feed.heldBy === user.uid ? <Fragment></Fragment> :
-                    // <label htmlFor={feed.id} className="add-to-watchlist">
-                    //     <input type="checkbox" checked={isWatching(feed.id)} name="add-watchlist" className="add-watchlist" id={feed.id} onChange={handleAddToWatchlist} />
-                    //     <span>{isWatching(feed.id) ? "Unwatch" : "Watch"}</span>
-                    // </label>
+                    {feed.heldBy ? <Fragment></Fragment> :
                     <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
                     }
-
                     {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                    // <label htmlFor={`${feed.id}request`} className="request">
-                    //     <input type="checkbox" checked={requestedPurchase()} name="request" className="request" id={`${feed.id}request`} onChange={handleRequestPurchase} />
-                    //     <span>{requestedPurchase() ? "Requested" : "Request"}</span>
-                    // </label>
                     <button onClick={handleRequestPurchase}>{requestedPurchase() ? "Requested" : "Request"}</button>
                      : 
-
                     <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
                     }
 
