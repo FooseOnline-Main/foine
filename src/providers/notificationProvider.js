@@ -54,11 +54,15 @@ function NotificationProvider({ children }) {
                     notificationsRef.doc(noteId).set({
                         createdAt: Date.now(),
                         id: noteId,
-                        message: "Someone is holding an item you are watching. Make sure to check your watchlist to verify.",
-                        title: "Hold Alert",
+                        message: "Someone is holding on to an item you added to your cart. Checkout this item and request if you really want it.",
+                        title: "Look Sharp!😨",
                         to: userId,
                         type: "HOLD_ALERT",
-                        read: false
+                        read: false,
+                        other: {
+                            productId,
+                            link: "/preview-product/"+productId
+                        }
                     }).catch(({message})=>{
                         createError(message);
                     })
@@ -79,10 +83,14 @@ function NotificationProvider({ children }) {
                         createdAt: Date.now(),
                         id: noteId,
                         message: "Someone just unheld an item you are watching. You have the chance to purchase now, don't waste this opportunity.",
-                        title: "Chance Alert",
+                        title: "Opportunity Time🥳",
                         to: userId,
                         type: "HOLD_ALERT",
-                        read: false
+                        read: false,
+                        other: {
+                            productId,
+                            link: "/preview-product/"+productId
+                        }
                     }).catch(({message})=>{
                         createError(message);
                     })
@@ -98,7 +106,7 @@ function NotificationProvider({ children }) {
                 createdAt: Date.now(),
                 id: noteId,
                 message: "Someone wants to buy a product you are holding. Would you like to accept this request?",
-                title: "Purchase Request",
+                title: "New Purchase Request🎫",
                 to: productHolderId,
                 type: "PURCHASE_REQUEST",
                 read: false,
@@ -118,7 +126,7 @@ function NotificationProvider({ children }) {
             createdAt: Date.now(),
             id: noteId,
             message: `Your request to purchase ${productName} has been accepted by holder. You can now go ahead and purchase with an interest of GH1.00`,
-            title: "Purchase Request Accepted",
+            title: "Purchase Request Accepted🎉",
             to: userId,
             type: "ACCEPTED_REQUEST",
             read: false,
@@ -137,7 +145,7 @@ function NotificationProvider({ children }) {
             createdAt: Date.now(),
             id: noteId,
             message: `Sorry to inform you, but your request to purchase ${productName} has been denied by holder.`,
-            title: "Purchase Request Denied",
+            title: "Purchase Request Denied😥",
             to: userId,
             type: "DENIED_REQUEST",
             read: false,

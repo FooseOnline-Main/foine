@@ -4,7 +4,9 @@ import { Link, useHistory } from 'react-router-dom';
 import { useNotification } from '../providers/notificationProvider';
 import EmptyView from './empty_view';
 import { FaBellSlash } from '@meronex/icons/fa';
+import { FiBell } from '@meronex/icons/fi';
 import { AiFillCloseCircle, AiFillDownCircle, AiFillUpCircle, AiOutlineCheckSquare, AiOutlineDelete } from '@meronex/icons/ai';
+import { useProducts } from '../providers/productProvider';
 
 const NotificationPopup = () => {
     const history = useHistory();
@@ -23,15 +25,15 @@ const NotificationPopup = () => {
                 {notifications.length > 0 && <div className={`promptier ${showPrompt ? 'show' : ''}`}>Slide notification left or right</div>}
                 <header>
                     <h3>Notifications</h3>
-                    <AiFillCloseCircle onClick={history.goBack} style={{cursor: "pointer"}} size={25} color="#777" />
+                    <AiFillCloseCircle onClick={history.goBack} style={{cursor: "pointer"}} size={25} color="#eee" />
                 </header>
                 <div className="items">
                     {notifications.length ? 
-                    notifications.map((notification)=> 
-                    <NotificationItem data={notification} onDelete={deleteNotification} onMarkRead={markAsRead} />
+                    notifications.map((notification, key)=> 
+                    <NotificationItem data={notification} key={key} onDelete={deleteNotification} onMarkRead={markAsRead} />
                     ) 
                     : 
-                    <EmptyView message="No notifications available" useIcon={true} icon={<FaBellSlash size={100} color="#ddd"/>} />}
+                    <EmptyView message="No notifications available" useIcon={true} icon={<FiBell size={100} color="#ddd"/>} />}
                 </div>
             </div>
             <style jsx>{`
@@ -65,32 +67,32 @@ const NotificationPopup = () => {
                     justify-content: space-between;
                 }
 
-
                 .note-popup .overlay{
                     position: absolute;
                     top: 0; left: 0;
                     right: 0; bottom: 0;
-                    background-color: #0000003a;
-                    backdrop-filter: blur(1px);
-                    -webkit-backdrop-filter: blur(1px);
+                    background-color: #000000aa;
+                    backdrop-filter: blur(5px);
+                    -webkit-backdrop-filter: blur(5px);
                     cursor: pointer;
                 }
 
                 .note-popup .inner{
                     height: 100%;
                     width: 100%;
-                    background: #fff;
+                    background: transparent;
                     max-width: 500px;
-                    margin-left: auto;
+                    margin: 0 auto;
                     animation: slide-in-left .15s ease-out;
                     display: flex;
                     flex-direction: column;
+                    background: linear-gradient(to right bottom, #ffffff10, #ffffff20);
                 }
 
                 .note-popup .inner header{
-                    border-bottom: 1px solid #eee;
                     padding: 15px 5%;
-                    color: #222;
+                    color: #fff;
+                    font-size: 15px;
                 }
 
                 .note-popup .inner .items{
@@ -106,11 +108,13 @@ const NotificationPopup = () => {
 
 const NotificationItem = ({data: notification, onDelete: deleteNotification, onMarkRead: markAsRead})=>{
     const x = useMotionValue(50)
+    const {getProductById} = useProducts();
     const promise = {delete: false, markRead: false};
     const background = useTransform(
-        x, [-50, 50], ["#FF3838", "#222222"])
+        x, [-50, 50], ["#FF383800", "#22222200"])
     const constraintRef = useRef({left: 0, right: 0});
     const hasLink = notification.other && notification.other.link;
+    const product = notification.other && getProductById(notification.other.productId || "");
        
     const handleDragEnd = (e, {point: {x: endPoint}}) =>{
         promise.delete && deleteNotification(notification.id);
@@ -158,27 +162,51 @@ const NotificationItem = ({data: notification, onDelete: deleteNotification, onM
             </div>
         </motion.div>
         <motion.div layout drag="x" onDrag={handleDrag} onDragEnd={handleDragEnd} className={`item ${!notification.read ? "unread" : ""}`} dragConstraints={{left: 0, right: 0}}>
-            <motion.div className="title-box">
+            <div className="icon">
+                {product ? <img src={product.imageUrl} /> : <FiBell size={30} />  }
+            </div>
+            <div className="details">
+                <motion.div className="title-box">
+                    {hasLink ? 
+                    <Link to={notification.other.link} className="title">{notification.title}</Link> : 
+                    <motion.h4 className="title">{notification.title}</motion.h4>
+                    }
+                    { notification.message.length > 100 ? viewFull ? <AiFillUpCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <AiFillDownCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <Fragment></Fragment>}
+                </motion.div>
                 {hasLink ? 
-                <Link to={notification.other.link} className="title">{notification.title}</Link> : 
-                <motion.h4 className="title">{notification.title}</motion.h4>
+                    <Link to={notification.other.link} className="message">{viewFull ? notification.message : reduceMessage(notification.message)}</Link> : 
+                    <motion.p className="message">{viewFull ? notification.message : reduceMessage(notification.message)}</motion.p>
                 }
-                { notification.message.length > 100 ? viewFull ? <AiFillUpCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <AiFillDownCircle size={20} onClick={()=> setViewFull(!viewFull)} style={{cursor: "pointer"}} color="#777" /> : <Fragment></Fragment>}
-            </motion.div>
-            {hasLink ? 
-                <Link to={notification.other.link} className="message">{viewFull ? notification.message : reduceMessage(notification.message)}</Link> : 
-                <motion.p className="message">{viewFull ? notification.message : reduceMessage(notification.message)}</motion.p>
-            }
+            </div>
         </motion.div>
         <style jsx>{`
             .wrapper{
                 overflow: hidden;
+                padding: 5px 10px;
             }
             .wrapper .item{
-                padding: 10px 5%;
+                padding: 10px;
                 background: #fff;
-                border-bottom: 1px solid #f5f5f5;
-                box-shadow: 0 0 15px 8px #0000001f;
+                display: flex;
+                column-gap: 10px;
+                border-radius: 10px;
+            }
+
+            .wrapper .item .icon{
+                padding: 0 10px;
+            }
+
+            .wrapper .item .details{
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .wrapper .item img{
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 10px;
             }
 
             .wrapper .item.unread{
@@ -206,10 +234,12 @@ const NotificationItem = ({data: notification, onDelete: deleteNotification, onM
             .wrapper .title-box{
                 display: flex;
                 justify-content: space-between;
+                align-self: stretch;
+                padding-bottom: 5px;
             }
 
             .wrapper .title{
-                font-size: 14px;
+                font-size: 13px;
                 color: #222;
                 font-weight: bold;
             }

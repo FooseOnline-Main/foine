@@ -74,7 +74,7 @@ const QuickNote = ({note, onRemoveNote})=>{
             return <img src={product.imageUrl} alt={product.name} />
         }else{
             return <figure>
-                <BiBell size={30} color="#ccc" />
+                <BiBell size={20} color="var(--dark-color)" />
             </figure>
         }
     }
@@ -87,11 +87,7 @@ const QuickNote = ({note, onRemoveNote})=>{
         >
             {renderIconImageSide()}
             <div className="info">
-                {note ? <Fragment><h4>{note.title}</h4>
-                <p>{note.message}</p></Fragment> : <Fragment></Fragment>}
-                {note.other && note.other.link ? <div className="links-box">
-                    <Link to={note.other.link}>Check Now</Link>
-                </div> : <Fragment></Fragment>}
+                <h4>{note.title}</h4>
             </div>
         </motion.div>
     )

@@ -210,7 +210,7 @@ function ProductsProvider({ children }) {
         if(!data.status){
             createError(data.message);
         }else{
-            createError(data.message);
+            notifyHold(product.id);
         }
     }
 
