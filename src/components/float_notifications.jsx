@@ -68,9 +68,9 @@ const QuickNote = ({note, onRemoveNote})=>{
         }, 3000))
     }
 
-    const renderIconImageSide = ()=>{
+    const renderIconImageSide = async ()=>{
         if(note.type === "PURCHASE_REQUEST"){
-            const product = fetchProductById(note.other.productId);
+            const product = await fetchProductById(note.other.productId);
             return <img src={product.imageUrl} alt={product.name} />
         }else{
             return <figure>
