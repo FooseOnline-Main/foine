@@ -47,25 +47,51 @@ function ProductsProvider({ children }) {
     const holdCounterRef = firebase.firestore().collection('holdCounter');
 
     useEffect(()=>{
+        catsRef.get().then(item=>{
+            setCategories(item.docs.map(doc=> doc.data()) || []);
+        }).catch(({message})=>{
+            createError(message);
+        })
         fetchProducts();
     }, [])
 
     const fetchProducts = async ()=>{
         setLoading(true);
         // make api call to fetch products from db
-        catsRef.get().then(item=>{
-            setCategories(item.docs.map(doc=> doc.data()) || []);
-        }).catch(({message})=>{
-            createError(message);
-        })
-
-        productsRef.onSnapshot(snapshot=>{
-            setProducts(snapshot.docs.map(doc=> doc.data()) || []);
-            setLoading(false);
-            snapshot.docChanges(item=>{
-                setProducts(item.docs.map(doc=> doc.data()) || []);
-            });
-        });       
+        if(products.length < 1){
+            productsRef
+            .orderBy("created_at")
+            .limit(5)
+            .onSnapshot(snapshot=>{
+                setLoading(false);
+                setProducts(()=> snapshot.docs.map(doc=> doc.data()) || []);
+                snapshot.docChanges(item=>{
+                    setProducts(()=>item.docs.map(doc=> doc.data()) || []);
+                });
+            });       
+        }else{
+            productsRef
+            .orderBy("created_at")
+            .startAfter(products[products.length - 1].created_at)
+            .limit(5)
+            .onSnapshot(snapshot=>{
+                setLoading(false);
+                if(snapshot.docs){
+                    const resultProducts = []
+                    snapshot.docs.forEach(doc=> {
+                        const product = doc.data();
+                        if(!products.includes(product)){
+                            resultProducts.push(product)
+                        }
+                    });
+                    
+                    setProducts(()=> [...products, ...resultProducts]);
+                    snapshot.docChanges(item=>{
+                        setProducts(item.docs.map(doc=> doc.data()) || []);
+                    });
+                }
+            });  
+        }
     }
 
     const getProductById = (id)=>{
@@ -182,6 +208,8 @@ function ProductsProvider({ children }) {
         const {data} = await requestHoldProduct({userId, product});
         
         if(!data.status){
+            createError(data.message);
+        }else{
             createError(data.message);
         }
     }

@@ -126,8 +126,8 @@ export const CheckoutPage = ({onClose})=>{
     const [deliveryFee, setDeliveryFee] = useState(0)
     const [totalPayment, setTotalPayment] = useState(getCheckoutTally() + deliveryFee);
     const [providerId, setProviderId] = useState(0);
-    const [phone, setPhone] = useState("");
     const {user} = useAuth();
+    const [phone, setPhone] = useState(user.isAnonymous ? "" : user.phone);
     const history = useHistory();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(null);
@@ -268,14 +268,17 @@ export const CheckoutPage = ({onClose})=>{
                     </div>)}
                 </div>
             </div>
+
             <div className="email-setup">
                 <div className='label'>
                     Phone Number
                 </div>
-                <div className="email-input">
+                {user.isAnonymous ? <div className="email-input">
                     <input autoFocus required value={phone} name="phone" type="text" placeholder="Enter your phone number" onChange={({target: {value}})=> setPhone(value)} />
-                </div>
-            </div>
+                </div>: 
+                <div></div>}
+            </div> 
+            
             <div className="amount-payable">
                 <div className='label'>
                     Amount Payable

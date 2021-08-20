@@ -49,7 +49,7 @@ export async function signUp(body){
 
 export async function requestHoldProduct(body){
     try {
-        return await client.post('/products/hold', JSON.stringify(body));
+        return await client.post('/product/hold', JSON.stringify(body));
     } catch (e) {
         console.log(e)
     }
