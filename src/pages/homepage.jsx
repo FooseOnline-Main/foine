@@ -51,7 +51,9 @@ const HomePage = () => {
                 <Route path="/negotiate/:reqId">
                     <NegotiationPopup />
                 </Route>
-                <Route path="/profile" component={ProfilePopup} />
+                <Route path="/profile" >
+                    <ProfilePopup />
+                </Route>
                 <ErrorPopup />
             </Fragment>
         </div>
