@@ -121,7 +121,7 @@ const WatchlistItem = ({item})=>{
 export const CheckoutPage = ({onClose})=>{
     const [deliveryId, setDeliveryId] = useState(0);
     const [deliveryAddress, setDeliveryAddress] = useState("");
-    const {markProductsAsSold, getProductById} = useProducts();
+    const {markProductsAsSold, fetchProductById} = useProducts();
     const {clearCheckedOut, checkOut} = useWatchlist();
     const [deliveryFee, setDeliveryFee] = useState(0)
     const [totalPayment, setTotalPayment] = useState(getCheckoutTally() + deliveryFee);
@@ -145,19 +145,19 @@ export const CheckoutPage = ({onClose})=>{
     }, [deliveryFee]);
 
 
-    function getCheckoutTally(){
+     function getCheckoutTally(){
         let output = 0;
-        checkOut.forEach(itemId=>{
-            output += parseFloat(getProductById(itemId).price);
+        checkOut.forEach(async itemId=>{
+            output += parseFloat(await fetchProductById(itemId).price);
         });
         return output;
     }
 
-    function getProductsForCheckout(){
+     function getProductsForCheckout(){
         let output = [];
 
-        checkOut.forEach(itemId=>{
-            output.push(getProductById(itemId));
+        checkOut.forEach(async itemId=>{
+            output.push(await fetchProductById(itemId));
         })
 
         return output;

@@ -12,6 +12,7 @@ export function useWatchlist() {
 function WatchlistProvider({ children }) {
     const [watchlist, setWatchlist] = useState([]);
     const [checkOut, setCheckOut] = useState([]);
+    const [quickCheckout, setQuickCheckout] = useState([]);
     const [loading, setLoading] = useState(false);
     const {createError} = useError();
 
@@ -31,8 +32,11 @@ function WatchlistProvider({ children }) {
         setLoading(true);
         if(key){
             watchlistRef.where("userId", "==", key).onSnapshot(snapshot=>{
-                setWatchlist(snapshot.docs.map(doc=> doc.data()) || [])
-                setCheckOut(snapshot.docs.map(doc=> doc.data().productId) || [])
+                setWatchlist(snapshot.docs.map(doc=> doc.data()))
+                setCheckOut(snapshot.docs.map(doc=> doc.data().productId))
+                const result = snapshot.docs.filter(doc=> doc.data().endedAt)
+                console.log("Items left: ", result.length)
+                setQuickCheckout(result.map(doc=> doc.data()))
             })
         }
     }
@@ -97,7 +101,7 @@ function WatchlistProvider({ children }) {
 
     return (
         <WatchlistContext.Provider value={{
-            watchlist, loading, checkOut,
+            watchlist, loading, checkOut, quickCheckout,
             addToWatchlist, removeFromWatchlist, 
             removeFromCheckout, addToCheckout,
             clearCheckedOut, getWatchlist, isWatching

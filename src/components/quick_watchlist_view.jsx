@@ -8,7 +8,7 @@ import { useWatchlist } from '../providers/watchlistProvider';
 import CheckoutPopup, { CheckoutPage } from './cart-checkout-popup';
 
 const QuickWatchlistView = () => {
-    const {getProductById, reduceWatch, unholdProduct} = useProducts();
+    const {fetchProductById, reduceWatch, unholdProduct} = useProducts();
     const {removeFromWatchlist, watchlist, checkOut} = useWatchlist();
     const {user} = useAuth();
     const [open, setOpen] = useState(false);
@@ -25,7 +25,7 @@ const QuickWatchlistView = () => {
     function getCheckoutTally(){
         let output = 0.00;
         checkOut.forEach(itemId=>{
-            output += parseFloat(getProductById(itemId).price);
+            output += parseFloat(fetchProductById(itemId).price);
         });
         return output;
     }
@@ -45,19 +45,8 @@ const QuickWatchlistView = () => {
                 </div>
                 <div className="body-wrap">
                     <div className="watchlist-list">
-                        {watchlist.map((item, index)=> {
-                            const product = getProductById(item.productId);
-                            const held = product.status === 1;
-                            const heldByMe = product.heldBy === user.uid;
-                            return <div key={index} className={`item ${ (held && !heldByMe) ? "held" : ""}`}>
-                                <Link to={"/preview-product/" + product.id}>
-                                    <img src={product.imageUrl} alt="watchlist item" />
-                                </Link>
-                                <div onClick={()=> handleRemove(product)} className="remove-btn">
-                                    <AiOutlineClose color="white" size={10} />
-                                </div>
-                            </div>}
-                        )}
+                        {watchlist.map((item, index)=> 
+                        <WatchItem userId={user.uid} onRemove={handleRemove} key={index} data={item} />)}
                         {checkOut.length < 1 ? <EmptyView message="Your cart is empty" useIcon={false} /> : <Fragment></Fragment>}
                     </div>
                 </div>
@@ -211,6 +200,31 @@ const QuickWatchlistView = () => {
             `}</style>
         </div>
     );
+}
+
+const WatchItem = ({data, onRemove, userId})=>{
+    const [product, setProduct] = useState(null);
+    const [held, setHeld] = useState(false);
+    const [heldByMe, setHeldByMe] = useState(false);
+    const {fetchProductById} = useProducts();
+
+    useEffect(async ()=>{
+        const result = await fetchProductById(data.productId);
+        if(result){
+            setProduct(result);
+            setHeld(result.status === 1);
+            setHeldByMe(result.heldBy === userId);
+        }
+    }, [])
+
+    return product ? <div className={`item ${ (held && !heldByMe) ? "held" : ""}`}>
+        <Link to={"/preview-product/" + product.id}>
+            <img src={product.imageUrl} alt="watchlist item" />
+        </Link>
+        <div onClick={()=> onRemove(product)} className="remove-btn">
+            <AiOutlineClose color="white" size={10} />
+        </div>
+    </div> : <Fragment />
 }
 
 export default QuickWatchlistView;

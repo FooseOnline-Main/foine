@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, Fragment} from "react";
 import {
   BrowserRouter as Router,
   Switch,
@@ -9,10 +9,11 @@ import AddProdPage from "./pages/addprod";
 import { useWatchlist } from "./providers/watchlistProvider";
 import { useAuth } from "./providers/authProvider";
 import Loader from "./components/simple_loader";
+import QuickPay from "./components/quick-pay";
 
 function App() {
   const {user} = useAuth();
-  const {getWatchlist} = useWatchlist();
+  const {getWatchlist, quickCheckout} = useWatchlist();
 
   useEffect(() => {
       getWatchlist(user.uid);
@@ -31,6 +32,7 @@ function App() {
           </Route>
         </Switch>
     </Router>}
+    {quickCheckout.length > 0 ? <QuickPay data={quickCheckout} /> : <Fragment></Fragment>}
     </div>
   );
 }
