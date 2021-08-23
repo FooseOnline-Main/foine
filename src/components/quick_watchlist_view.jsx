@@ -8,7 +8,7 @@ import { useWatchlist } from '../providers/watchlistProvider';
 import CheckoutPopup, { CheckoutPage } from './cart-checkout-popup';
 
 const QuickWatchlistView = () => {
-    const {getProductById, reduceWatch} = useProducts();
+    const {getProductById, reduceWatch, unholdProduct} = useProducts();
     const {removeFromWatchlist, watchlist, checkOut} = useWatchlist();
     const {user} = useAuth();
     const [open, setOpen] = useState(false);
@@ -16,10 +16,10 @@ const QuickWatchlistView = () => {
 
     useEffect(() => {
         setAmount(getCheckoutTally());
-        const timeout = setTimeout(()=>setOpen(false), 2000)        
-        return ()=>{
-            clearTimeout(timeout)
-        }        
+        // const timeout = setTimeout(()=>setOpen(false), 2000)        
+        // return ()=>{
+        //     clearTimeout(timeout)
+        // }        
     }, [checkOut]);
 
     function getCheckoutTally(){
@@ -30,11 +30,19 @@ const QuickWatchlistView = () => {
         return output;
     }
 
+    const handleRemove = (product)=>{
+        if (product.heldBy === user.uid) unholdProduct(user.uid, product); 
+        reduceWatch(product); 
+        removeFromWatchlist(product.id);
+    }
+
     return (
-        <div className={`quick-watchlist-view ${open ? "show" : ""}`}>
+        <div className={`quick-watchlist-view ${open ? "show" : ""} ${watchlist.length > 0 ? "max" : ""}`}>
             <div onClick={()=> setOpen(false)} className="overlay"></div>
             <div className="inner-wrapper">
-                <div onClick={()=> setOpen(!open)} className="toggler">{open ? "Hide WatchList" : "Show WatchList"}</div>
+                <div onClick={()=> setOpen(!open)} className="toggler">
+                    {open ? "Hide" : "Show"} Cart {watchlist.length > 0 ? `(${watchlist.length})` : ""}
+                </div>
                 <div className="body-wrap">
                     <div className="watchlist-list">
                         {watchlist.map((item, index)=> {
@@ -45,7 +53,7 @@ const QuickWatchlistView = () => {
                                 <Link to={"/preview-product/" + product.id}>
                                     <img src={product.imageUrl} alt="watchlist item" />
                                 </Link>
-                                <div onClick={()=> {reduceWatch(product); removeFromWatchlist(product.id);}} className="remove-btn">
+                                <div onClick={()=> handleRemove(product)} className="remove-btn">
                                     <AiOutlineClose color="white" size={10} />
                                 </div>
                             </div>}
@@ -53,7 +61,7 @@ const QuickWatchlistView = () => {
                         {checkOut.length < 1 ? <EmptyView message="Your cart is empty" useIcon={false} /> : <Fragment></Fragment>}
                     </div>
                 </div>
-                <CheckoutPage />
+                {watchlist.length ? <CheckoutPage /> : <Fragment></Fragment>}
             </div>
             <style jsx>{`
                 .quick-watchlist-view{
@@ -69,6 +77,9 @@ const QuickWatchlistView = () => {
                 
                 .quick-watchlist-view.show{
                     pointer-events: all;
+                    max-height: 90px;
+                }
+                .quick-watchlist-view.show.max{
                     max-height: 100%;
                 }
 

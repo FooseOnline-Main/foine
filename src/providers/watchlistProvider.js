@@ -39,7 +39,7 @@ function WatchlistProvider({ children }) {
 
     const addToWatchlist = (key, itemId)=>{
         setLoading(true);
-        if(itemId != null && !watchlist.includes(itemId)){
+        if(itemId && !watchlist.includes(itemId)){
             const docId = v4();
             const newWatch = {id: docId, userId: key, productId: itemId};
             watchlistRef.doc(docId).set(newWatch)

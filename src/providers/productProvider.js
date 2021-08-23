@@ -215,6 +215,7 @@ function ProductsProvider({ children }) {
         
         if(data.status){
             notifyHold(product.id);
+            createError(data.message, 5000);
         }else{
             createError(data.message);
         }

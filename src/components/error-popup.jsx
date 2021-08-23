@@ -27,11 +27,13 @@ const ErrorPopup = () => {
                     align-items: center;
                     background: rgb(255, 80, 80);
                     color: #eee;
-                    font-size: 12px;
-                    max-width: 300px;
+                    font-size: 11px;
                     pointer-events: none;
                     animation: pop-in .15s ease-out;
                     -webkit-animation: pop-in .15s ease-out;
+                }
+                .error-popup .bubble p{
+                    white-space: nowrap;
                 }
                  @keyframes pop-in{
                     0%{

@@ -49,6 +49,8 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const handleHoldItem = ()=>{
         if(feed.heldBy !== ""){
             unholdProduct(user.uid, feed);
+            removeFromWatchlist(feed.id)
+            reduceWatch(feed);
         }else{
             holdProduct(user.uid, feed);
         }
@@ -71,8 +73,6 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
         });
         return output;
     }
-
-    console.log({requested}, {requests});
 
     return (
         <div className='feed-card'>
@@ -114,12 +114,15 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                 {feed.status !== 2 ? 
                 <div className={`add-section ${showButtons ? "show" : ""}`}>
                     {feed.heldBy ? <Fragment></Fragment> :
-                    <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
+                        <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
                     }
                     {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                    <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
+                        <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
                      : 
-                    <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
+                        <Fragment>
+                            <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
+                            {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=>{}}>Pay</button>}
+                        </Fragment>
                     }
                 </div> : 
                 <Fragment></Fragment>}
