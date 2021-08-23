@@ -134,7 +134,7 @@ const HomeHeader = ({onSearch}) => {
                     left: 50%;
                     padding: 0px 5px;
                     border-radius: 10px;
-                    border: 2px solid #222;
+                    border: 2px solid #fff;
                     background: orangered;
                     font-size: 9px;
                     min-width: 20px;

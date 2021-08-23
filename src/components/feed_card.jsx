@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {user} = useAuth();
     const {holdProduct, unholdProduct, requests, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
-    const {isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
+    const {isWatching, addToWatchlist, removeFromWatchlist, addForQuickCheckout} = useWatchlist();
     const productId = feed.id;
     const [showButtons, setShowButtons] = useState(false);
     const [requested, setRequested] = useState(false);
@@ -121,7 +121,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                      : 
                         <Fragment>
                             <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
-                            {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=>{}}>Pay</button>}
+                            {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=> addForQuickCheckout(user.uid, feed.id)}>Pay</button>}
                         </Fragment>
                     }
                 </div> : 

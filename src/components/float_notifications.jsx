@@ -38,8 +38,8 @@ const FloatNotifications = () => {
 
     return (
         <div className="quick-notifications">
-            {quickNotes.map((note, id)=>
-                <QuickNote key={id} note={note} onRemoveNote={removeQuickNote} />
+            {quickNotes.map((note)=>
+                <QuickNote key={note.id} note={note} onRemoveNote={removeQuickNote} />
             )}
         </div>
     );

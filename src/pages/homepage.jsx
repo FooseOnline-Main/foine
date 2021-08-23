@@ -1,6 +1,6 @@
 import '../css/home.css';
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Route, useHistory } from "react-router-dom";
 
 import FloatNotifications from '../components/float_notifications';
@@ -14,14 +14,23 @@ import QuickWatchlistView from '../components/quick_watchlist_view';
 import SignupForm from '../components/signup_form';
 import NotificationPopup from '../components/notification_popup';
 import NegotiationPopup from '../components/negotiation_popup';
+import QuickPay from '../components/quick-pay';
+import { useWatchlist } from '../providers/watchlistProvider';
 
 const HomePage = () => {
     const [searchString, setSearchString] = useState("");
+    const {quickCheckout} = useWatchlist();
     const history = useHistory();
 
     const handleSearch = (string)=>{
         setSearchString(string);
     }
+
+  useEffect(()=>{
+    if(quickCheckout.length > 0){
+      history.push("/quick-checkout")
+    }
+  }, [quickCheckout])
 
     history.listen(()=>{
         document.body.style.overflow = "auto";     
@@ -53,6 +62,9 @@ const HomePage = () => {
                 </Route>
                 <Route path="/profile" >
                     <ProfilePopup />
+                </Route>
+                <Route path="/quick-checkout">
+                    <QuickPay data={quickCheckout} />
                 </Route>
                 <ErrorPopup />
             </Fragment>

@@ -1,11 +1,20 @@
 import React, { Fragment, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+
 import { useAuth } from '../providers/authProvider';
 import { useProducts } from '../providers/productProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 
 const QuickPay = () => {
     const {quickCheckout} = useWatchlist();
+    const history = useHistory();
     
+    useEffect(() => {
+        if(quickCheckout.length < 1){
+            history.goBack();
+        }
+    }, [quickCheckout]);
+
     return (
         <div id="quick-pay">
             <div className="form-box">
@@ -50,11 +59,12 @@ const QuickPay = () => {
 const PayForm = ({page, data})=>{
     const {user} = useAuth();
     const {fetchProductById} = useProducts();
-    const {removeFromWatchlist} = useWatchlist();
+    const {removeFromWatchlist, emptyQuickCheckout} = useWatchlist();
     const currentTime = new Date().getTime();
     const [product, setProduct] = useState(null);
+    const hasExpired = Object.keys(data).includes("expired");
     const [timeLeft, setTimeLeft] = useState(
-        Math.floor((data.extraTime - currentTime)/1000)
+        Math.floor(((data.extraTime || data.expiresAt) - currentTime)/1000)
     );
     const [formData, setFormData] = useState({
         username: user.username || "",
@@ -85,15 +95,24 @@ const PayForm = ({page, data})=>{
         setFormData((old)=> {return {...old, [name]: value}});
     }
 
-    const renderSelect = (options=[], name="name", placeholder="Select an option")=>{
-        return <select value={formData[name]} onChange={(e)=> handleChange(e, name)} name={name} id={name}>
-                    <option selected value="">{placeholder}</option>
-                    {options.map((o, i)=> <option key={i} value={o.value}>{o.name}</option>)}
-                </select>
-    }
-
     const handleSubmit = (e)=>{
         e.preventDefault();
+    }
+
+    const handleCancel = (e)=>{
+        e.preventDefault(); 
+        if(hasExpired) {
+            removeFromWatchlist(data.productId) 
+        }else{
+            emptyQuickCheckout();
+        }
+    }
+
+    const renderSelect = (options=[], name="name", placeholder="Select an option")=>{
+        return <select value={formData[name]} onChange={(e)=> handleChange(e, name)} name={name} id={name}>
+            <option selected value="">{placeholder}</option>
+            {options.map((o, i)=> <option key={i} value={o.value}>{o.name}</option>)}
+        </select>
     }
 
     return <form onSubmit={handleSubmit} className="pay-form">
@@ -101,23 +120,28 @@ const PayForm = ({page, data})=>{
             <div className="timer">{timeLeft}s Left</div>
             {page ? <div className="page">{page}</div> : <Fragment />}
             <img src={product.imageUrl} alt="product" />
+            
             <div className="details">
                 <h2 className="price">Gh&cent; {parseFloat(product.price).toFixed(2)}</h2>
                 <input value={formData.name} onChange={(e)=> handleChange(e, "username")} placeholder="Name for delivery" type="text" />
+                
                 {renderSelect([
                     {name: "Pick Up", value: "pickup"},
                     {name: "Parcel Office", value: "parcel-office"},
                     {name: "Discounted Shipping", value: "discounted-shipping"},
                 ], "delivery", "Choose delivery method")}
+                
                 {renderSelect([
                     {name: "MTN", value: "mtn"},
                     {name: "Vodafone", value: "voda"},
                     {name: "Airtel/Tigo", value: "airtel-tigo"},
                 ], "service", "Choose provider")}
+                
                 <input value={formData.phone} onChange={(e)=> handleChange(e, "phone")} placeholder="Enter phone number" type="text" />
+                
                 <div className="buttons">
                     <button>Pay</button>
-                    <button onClick={(e)=>{e.preventDefault(); removeFromWatchlist(data.productId)}} className="cancel">Cancel</button>
+                    <button onClick={handleCancel} className="cancel">Cancel</button>
                 </div>
             </div>
         </div>}

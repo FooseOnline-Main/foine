@@ -34,12 +34,28 @@ function WatchlistProvider({ children }) {
             watchlistRef.where("userId", "==", key).onSnapshot(snapshot=>{
                 setWatchlist(snapshot.docs.map(doc=> doc.data()))
                 setCheckOut(snapshot.docs.map(doc=> doc.data().productId))
-                const result = snapshot.docs.filter(doc=> doc.data().endedAt)
-                console.log("Items left: ", result.length)
+                const result = snapshot.docs.filter(doc=> doc.data().expired)
                 setQuickCheckout(result.map(doc=> doc.data()))
             })
         }
     }
+
+    const addForQuickCheckout = (userId, productId)=>{
+        if(productId && userId){
+            watchlistRef
+            .where("userId", "==", userId)
+            .where("productId", "==", productId)
+            .get()
+            .then(res=>{
+                const item = res.docs[0];
+                if(item){
+                    setQuickCheckout([item.data()]);
+                }
+            })
+        }
+    }
+
+    const emptyQuickCheckout = ()=> setQuickCheckout([])
 
     const addToWatchlist = (key, itemId)=>{
         setLoading(true);
@@ -102,8 +118,8 @@ function WatchlistProvider({ children }) {
     return (
         <WatchlistContext.Provider value={{
             watchlist, loading, checkOut, quickCheckout,
-            addToWatchlist, removeFromWatchlist, 
-            removeFromCheckout, addToCheckout,
+            addToWatchlist, removeFromWatchlist, emptyQuickCheckout,
+            removeFromCheckout, addToCheckout, addForQuickCheckout,
             clearCheckedOut, getWatchlist, isWatching
         }}>
             {children}
