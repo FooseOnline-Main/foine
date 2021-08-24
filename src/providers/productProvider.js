@@ -58,7 +58,7 @@ function ProductsProvider({ children }) {
         purchaseReqRef.onSnapshot(res=>{
             const data = res.docs.map(doc=> doc.data());
             setRequests(()=> data || []);
-            console.log({data});
+
             res.docChanges(item=> {
                 const changes = item.docs.map(doc=> doc.data());
                 console.log({changes});
@@ -210,14 +210,16 @@ function ProductsProvider({ children }) {
         }
     }
 
-    const holdProduct = async (userId, product) => {
+    const holdProduct = async (userId, product, clb=()=>{}) => {
         const {data} = await requestHoldProduct({userId, product});
         
         if(data.status){
             notifyHold(product.id);
             createError(data.message, 5000);
+            clb();
         }else{
             createError(data.message);
+            clb();
         }
     }
 

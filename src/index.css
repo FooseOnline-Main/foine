@@ -149,14 +149,18 @@ h5 {
 }
 
 .loader-box .loader {
-  width: 30px;
-  height: 30px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
   border: 5px solid #ddd;
   border-top-color: #999;
   border-right-color: #999;
   animation: rotate 0.3s infinite linear;
   -webkit-animation: rotate 0.3s infinite linear;
+}
+.loader-box.expand .loader {
+  width: 30px;
+  height: 30px;
 }
 
 @keyframes rotate {

@@ -8,6 +8,7 @@ import { useWatchlist } from '../providers/watchlistProvider';
 import { useState } from 'react';
 import { MdcChevronDownCircle, MdcChevronUpCircle } from '@meronex/icons/mdc';
 import { useEffect } from 'react';
+import Loader from './simple_loader';
 
 const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {user} = useAuth();
@@ -16,6 +17,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const productId = feed.id;
     const [showButtons, setShowButtons] = useState(false);
     const [requested, setRequested] = useState(false);
+    const [holdLoading, setHoldLoading] = useState(false);
 
     useEffect(() => {
         if(expanded){
@@ -47,12 +49,13 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
     }
 
     const handleHoldItem = ()=>{
+        setHoldLoading(true);
         if(feed.heldBy !== ""){
             unholdProduct(user.uid, feed);
             removeFromWatchlist(feed.id)
             reduceWatch(feed);
         }else{
-            holdProduct(user.uid, feed);
+            holdProduct(user.uid, feed, ()=> setHoldLoading(false));
         }
     }
 
@@ -120,7 +123,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                         <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
                      : 
                         <Fragment>
-                            <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{(feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
+                            <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{holdLoading ? <Loader /> : (feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
                             {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=> addForQuickCheckout(user.uid, feed.id)}>Pay</button>}
                         </Fragment>
                     }
