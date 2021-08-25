@@ -15,7 +15,6 @@ function WatchlistProvider({ children }) {
     const [checkOut, setCheckOut] = useState([]);
     const [quickCheckout, setQuickCheckout] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [checkoutItem, setCheckoutItem] = useState(null);
     const {createError} = useError();
 
     const watchlistRef = firebase.firestore().collection('watchlist');

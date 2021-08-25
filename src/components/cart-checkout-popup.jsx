@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment, useRef } from 'react';
+import React, { useEffect, useState, Fragment, useRef, useMemo } from 'react';
 import { AiOutlineInfo } from '@meronex/icons/ai';
 import { useAuth } from '../providers/authProvider';
 import { useProducts } from '../providers/productProvider';
@@ -6,6 +6,7 @@ import { useWatchlist } from '../providers/watchlistProvider';
 import '../css/watchlist.css';
 import Loader from './simple_loader';
 import { confirmOTP, pay } from '../api';
+import { MdcCheckCircle } from '@meronex/icons/mdc';
 
 const regions = [
     "Ahafo", "Ashanti", "Bono", "Bono East", "Central", "Eastern", "Greater Accra", "North East", "Northern", "Oti", "Savannah", "Upper East", "Upper West", "Volta", "Western", "Western North"
@@ -26,6 +27,17 @@ export const CheckoutPage = ({onClose})=>{
     const [username, setUsername] = useState(user.isAnonymous ? "" : user.username);
     const [otp, setOtp] = useState("");
     const viewRef = useRef();
+    const success = useMemo(()=>{
+        let output = false;
+
+        watchlist.forEach(i=> {
+            if(i.userId === user.uid && i.paid){
+                output = true;
+            }
+        })
+
+        return output;
+    }, [watchlist])
     
     const deliveryTypes = [ "pick up", "door step", "discounted shipping" ]
 
@@ -60,6 +72,7 @@ export const CheckoutPage = ({onClose})=>{
                 size: product.size ,
                 price: product.price, 
                 imageUrl: product.imageUrl, 
+                sold: product.sold || false
             });
         })
 
@@ -125,10 +138,10 @@ export const CheckoutPage = ({onClose})=>{
             <h4 style={{marginBottom: 20}}>Finalize payment on your device by entering your PIN.</h4>
             <Loader />
         </div>}
-        {/* {data.paid ? <div style={{background: "#fff"}} className="overlay">
-            <MdcCheckCircle size={40} color="green" />
+        {success ? <div className="overlay">
+            <MdcCheckCircle size={80} color="#33d20b" />
             <h4>Payment Successful</h4>
-        </div> : <Fragment />} */}
+        </div> : <Fragment />}
         <div className="view" ref={viewRef}></div>
         <div className="body">
             <ProductsViewForCheckout checkoutProducts={getProductsForCheckout()} />

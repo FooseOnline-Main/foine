@@ -19,6 +19,8 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const [requested, setRequested] = useState(false);
     const [holdLoading, setHoldLoading] = useState(false);
 
+    useEffect(()=> setHoldLoading(false), [feed])
+
     useEffect(() => {
         if(expanded){
             setShowButtons(true);

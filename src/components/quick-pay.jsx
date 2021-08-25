@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { useAuth } from '../providers/authProvider';
@@ -61,7 +61,7 @@ const QuickPay = () => {
 const PayForm = ({page, data})=>{
     const {user} = useAuth();
     const {fetchProductById} = useProducts();
-    const {removeFromWatchlist, emptyQuickCheckout, makePayment, verifyOTP} = useWatchlist();
+    const {watchlist, removeFromWatchlist, emptyQuickCheckout, makePayment, verifyOTP} = useWatchlist();
     const currentTime = new Date().getTime();
     const [product, setProduct] = useState(null);
     const hasExpired = Object.keys(data).includes("expired");
@@ -69,6 +69,17 @@ const PayForm = ({page, data})=>{
         Math.floor(((data.extraTime || data.expiresAt) - currentTime)/1000)
     );
     const [status, setStatus] = useState(0);
+    const success = useMemo(()=>{
+        let output = false;
+
+        watchlist.forEach(i=> {
+            if(i.watchId === data.id && i.paid){
+                output = true;
+            }
+        })
+
+        return output;
+    }, [watchlist])
 
     const [otp, setOtp] = useState("");
     const [formData, setFormData] = useState({
@@ -83,15 +94,6 @@ const PayForm = ({page, data})=>{
             removeFromWatchlist(data.productId);
         }
     }, [timeLeft])
-
-    useEffect(() => {
-        if(data.paid){
-            removeFromWatchlist(data.productId);
-        }
-        if(data.failed){
-            setStatus(0);
-        }
-    }, [data]);
 
     useEffect(async () => {
         const interval = setInterval(()=>{
@@ -198,8 +200,8 @@ const PayForm = ({page, data})=>{
                     <h4 style={{marginBottom: 20}}>Finalize payment on your device by entering your PIN.</h4>
                     <Loader />
                 </div>}
-                {data.paid ? <div style={{background: "#fff"}} className="overlay">
-                    <MdcCheckCircle size={40} color="green" />
+                {success ? <div style={{background: "#fff"}} className="overlay">
+                    <MdcCheckCircle size={80} color="#33d20b" />
                     <h4>Payment Successful</h4>
                 </div> : <Fragment />}
             </div>
@@ -225,6 +227,7 @@ const PayForm = ({page, data})=>{
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
+                padding: 0 5%;
             }
 
             .pay-form .timer{
