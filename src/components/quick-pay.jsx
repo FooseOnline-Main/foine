@@ -69,6 +69,7 @@ const PayForm = ({page, data})=>{
         Math.floor(((data.extraTime || data.expiresAt) - currentTime)/1000)
     );
     const [status, setStatus] = useState(0);
+    const [loading, setLoading] = useState(false);
     const success = useMemo(()=>{
         let output = false;
 
@@ -77,6 +78,8 @@ const PayForm = ({page, data})=>{
                 output = true;
             }
         })
+
+        console.log(output);
 
         return output;
     }, [watchlist])
@@ -112,6 +115,7 @@ const PayForm = ({page, data})=>{
 
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        setLoading(true);
         let stat;
 
         switch(stat){
@@ -129,6 +133,7 @@ const PayForm = ({page, data})=>{
         }
         
         if(stat){
+            setLoading(false);
             switch(stat){
                 case "send_otp":
                     setStatus(1);
@@ -186,14 +191,14 @@ const PayForm = ({page, data})=>{
                 <input required value={formData.phone} onChange={(e)=> handleChange(e, "phone")} placeholder="Enter phone number" type="text" />
                 
                 <div className="buttons">
-                    <button>Pay</button>
+                    <button disabled={loading}>{loading ? <Loader /> : "Pay"}</button>
                     <button onClick={handleCancel} className="cancel">Cancel</button>
                 </div>
                 {status === 1 && <div className="overlay">
                     <h3 style={{marginBottom: 30}}>Enter the OTP code sent to your device.</h3>
                     <input required value={otp} onChange={({target: {value}})=> setOtp(value)} type="text" />
                     <div className="buttons">
-                        <button>Submit OTP</button>
+                        <button disabled={loading}>{loading ? <Loader /> : "Submit OTP"}</button>
                     </div>
                 </div>}
                 {status === 2 && <div className="overlay">
