@@ -106,23 +106,26 @@ function WatchlistProvider({ children }) {
         if(formData){
             const {watchId, username, delivery, amount, provider, phone} = formData;
             const temp = {
-                watchId, 
-                delivery,
-                userDetails: {id: userId, username, phone},
-                products,
-                amount,
-            };
-
+                    delivery,
+                    userDetails: {id: userId, username, phone},
+                    products,
+                    amount,
+                };
+            
             const {status, data} = await pay({provider, phone, amount});
-
+                
             if(status){
-                tempCheckoutRef.doc(watchId).set({...temp, reference: data.reference});
+                if(watchId){
+                    tempCheckoutRef.doc(watchId).set({...temp, watchId, reference: data.reference});
+                }else{
+                    tempCheckoutRef.doc(userId).set({...temp, reference: data.reference});
+                }
                 return data.status;
             }
         }
     }
 
-    const verifyOTP = async (otp, watchId, userId)=>{
+    const verifyOTP = async ({otp, watchId, userId})=>{
         if(otp){
             if(watchId){
                 const exists = await tempCheckoutRef.doc(watchId).get();
@@ -132,17 +135,12 @@ function WatchlistProvider({ children }) {
                     return status ? data.status : "";
                 }
             }else{
-                return tempCheckoutRef
-                .where("userId", "==", userId)
-                .get()
-                .then(async res=> {
-                    const doc = res.docs[0];
+                const exists = await tempCheckoutRef.doc(userId).get();
 
-                    if(doc){
-                        const {status, data} = await confirmOTP(otp, doc.data().reference);
-                        return status ? data.status : "";
-                    }
-                })
+                if(exists){
+                    const {status, data} = await confirmOTP(otp, exists.reference);
+                    return status ? data.status : "";
+                }
             }
         }
     }

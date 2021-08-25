@@ -1,11 +1,11 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useRef } from 'react';
 import { AiOutlineInfo } from '@meronex/icons/ai';
 import { useAuth } from '../providers/authProvider';
 import { useProducts } from '../providers/productProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 import '../css/watchlist.css';
 import Loader from './simple_loader';
-import { pay } from '../api';
+import { confirmOTP, pay } from '../api';
 
 const regions = [
     "Ahafo", "Ashanti", "Bono", "Bono East", "Central", "Eastern", "Greater Accra", "North East", "Northern", "Oti", "Savannah", "Upper East", "Upper West", "Volta", "Western", "Western North"
@@ -14,14 +14,21 @@ const regions = [
 export const CheckoutPage = ({onClose})=>{
     const [deliveryId, setDeliveryId] = useState(0);
     const [deliveryAddress, setDeliveryAddress] = useState("");
-    const {markProductsAsSold, fetchProductById} = useProducts();
-    const {clearCheckedOut, checkOut} = useWatchlist();
+    const {fetchProductById} = useProducts();
+    const {makePayment, verifyOTP, watchlist} = useWatchlist();
     const [deliveryFee, setDeliveryFee] = useState(0)
-    const [totalPayment, setTotalPayment] = useState(getCheckoutTally() + deliveryFee);
+    const [totalPayment, setTotalPayment] = useState(0);
     const [providerId, setProviderId] = useState(0);
+    const [status, setStatus] = useState(0);
     const {user} = useAuth();
     const [phone, setPhone] = useState(user.isAnonymous ? "" : user.phone);
     const [loading, setLoading] = useState(false);
+    const [username, setUsername] = useState(user.isAnonymous ? "" : user.username);
+    const [otp, setOtp] = useState("");
+    const viewRef = useRef();
+    
+    const deliveryTypes = [ "pick up", "door step", "discounted shipping" ]
+
     const providers = [
         {code: "mtn", name: 'MTN'}, 
         {code: "voda", name: "Vodafone"}, 
@@ -29,22 +36,31 @@ export const CheckoutPage = ({onClose})=>{
     ];
 
     useEffect(() => {
-        setTotalPayment(getCheckoutTally() + deliveryFee);
+        viewRef.current.scrollIntoView();
+    }, [status]);
+
+    useEffect(() => {
+        watchlist.forEach(async ({productId})=>{
+            const product = await fetchProductById(productId);
+            setTotalPayment(old=> (old + parseFloat(product.price)));
+        });
+    }, [watchlist]);
+
+    useEffect(() => {
+        setTotalPayment(old=> (old + deliveryFee));
     }, [deliveryFee]);
 
-    function getCheckoutTally(){
-        let output = 0;
-        checkOut.forEach(async itemId=>{
-            output += parseFloat(await fetchProductById(itemId).price);
-        });
-        return output;
-    }
-
-     function getProductsForCheckout(){
+    function getProductsForCheckout(){
         let output = [];
 
-        checkOut.forEach(async itemId=>{
-            output.push(await fetchProductById(itemId));
+        watchlist.forEach(async ({productId})=>{
+            const product = await fetchProductById(productId);
+            output.push({
+                id: product.id, 
+                size: product.size ,
+                price: product.price, 
+                imageUrl: product.imageUrl, 
+            });
         })
 
         return output;
@@ -54,23 +70,66 @@ export const CheckoutPage = ({onClose})=>{
         e.preventDefault();
         setLoading(true);
         // initialize paystack for payment
+        let stat;
         
-        const {status, data, error} = await pay({
-            provider: providers[providerId].code,
-            phone, 
-            amount: totalPayment * 100, 
-        });
-        console.log(data, error);
+        switch (status) {
+            case 1:
+                stat = await verifyOTP({otp, userId: user.uid});
+                break;               
         
-        if(status){
+            default:
+                stat = await makePayment(
+                    {
+                        provider: providers[providerId].code,
+                        phone, 
+                        amount: totalPayment * 100,
+                        username,
+                        delivery: {
+                            type: deliveryTypes[deliveryId], 
+                            address: deliveryAddress
+                        },
+                    }, 
+                    user.uid, 
+                    getProductsForCheckout()
+                );
+                break;
+        }
+
+        if(stat){
             setLoading(false);
-        }else{
-            setLoading(false);
+            switch(stat){
+                case "send_otp":
+                    setStatus(1);
+                    break;
+
+                case "pay_offline":
+                    setStatus(2)
+                    break;
+
+                default:
+                    setStatus(0)
+                    break;
+            }
         }
     }
 
-    return <form onSubmit={handleCheckout} className="checkout-page">
-        {loading && <Loader expand={true} />}
+    return <form style={{overflow: status ? "hidden" : "auto"}} onSubmit={handleCheckout} className="checkout-page">
+        {status === 1 && <div className="overlay">
+            <h3 style={{marginBottom: 30}}>Enter the OTP code sent to your device.</h3>
+            <input required value={otp} onChange={({target: {value}})=> setOtp(value)} type="text" />
+            <div className="buttons">
+                <button>{loading ? <Fragment>Please wait <Loader /></Fragment> : "Submit OTP"}</button>
+            </div>
+        </div>}
+        {status === 2 && <div className="overlay">
+            <h4 style={{marginBottom: 20}}>Finalize payment on your device by entering your PIN.</h4>
+            <Loader />
+        </div>}
+        {/* {data.paid ? <div style={{background: "#fff"}} className="overlay">
+            <MdcCheckCircle size={40} color="green" />
+            <h4>Payment Successful</h4>
+        </div> : <Fragment />} */}
+        <div className="view" ref={viewRef}></div>
         <div className="body">
             <ProductsViewForCheckout checkoutProducts={getProductsForCheckout()} />
             <div className="delivery-address">
@@ -133,12 +192,20 @@ export const CheckoutPage = ({onClose})=>{
 
             <div className="email-setup">
                 <div className='label'>
+                    Name For Delivery
+                </div>
+                {<div className="email-input">
+                    <input autoFocus required value={username} name="username" type="text" placeholder="Choose name for delivery" onChange={({target: {value}})=> setUsername(value)} />
+                </div>}
+            </div> 
+
+            <div className="email-setup">
+                <div className='label'>
                     Phone Number
                 </div>
-                {user.isAnonymous ? <div className="email-input">
+                {<div className="email-input">
                     <input autoFocus required value={phone} name="phone" type="text" placeholder="Enter your phone number" onChange={({target: {value}})=> setPhone(value)} />
-                </div>: 
-                <div></div>}
+                </div>}
             </div> 
             
             <div className="amount-payable">
@@ -152,7 +219,7 @@ export const CheckoutPage = ({onClose})=>{
                     </div>
                     <div className="payable">
                         <b>Product(s) Price</b>
-                        <span><small>GHC</small><big>{getCheckoutTally().toFixed(2)}</big></span>
+                        <span><small>GHC</small><big>{(totalPayment - deliveryFee).toFixed(2)}</big></span>
                     </div>
                     <div className="payable">
                         <b>Total Amount</b>
@@ -162,7 +229,9 @@ export const CheckoutPage = ({onClose})=>{
             </div>
         </div>
         <div className="footer">
-            <button type="submit" className="submit-btn" style={{marginRight: 0}}>Accept Checkout</button>
+            <button type="submit" className="submit-btn" style={{marginRight: 0}}>
+                {loading ? <Fragment>Please wait <Loader /></Fragment> : "Accept Checkout"}
+            </button>
         </div>
     </form>
 }

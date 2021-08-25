@@ -114,7 +114,7 @@ const PayForm = ({page, data})=>{
 
         switch(stat){
             case 1:
-                stat = await verifyOTP(otp, data.id, user.uid);
+                stat = await verifyOTP({otp, watchId: data.id, userId: user.uid});
                 break;
 
             default:
