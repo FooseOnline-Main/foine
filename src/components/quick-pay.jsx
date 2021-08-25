@@ -118,7 +118,11 @@ const PayForm = ({page, data})=>{
                 break;
 
             default:
-                stat = await makePayment({...formData, amount: parseFloat(product.price) * 100, watchId: data.id}, user.uid, product);
+                stat = await makePayment(
+                    {...formData, amount: parseFloat(product.price) * 100, watchId: data.id},
+                    user.uid,
+                    [{id: product.id, imageUrl: product.imageUrl, price: product.price, size: product.size}],
+                );
                 break;
         }
         

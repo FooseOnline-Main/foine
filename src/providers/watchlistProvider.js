@@ -102,14 +102,14 @@ function WatchlistProvider({ children }) {
         setCheckOut(newCheckoutList.filter(index=> index !== id));
     }
 
-    const makePayment = async (formData, userId, {id, imageUrl, price})=>{
+    const makePayment = async (formData, userId, products)=>{
         if(formData){
             const {watchId, username, delivery, amount, provider, phone} = formData;
             const temp = {
                 watchId, 
                 delivery,
                 userDetails: {id: userId, username, phone},
-                product: {id, imageUrl, price},
+                products,
                 amount,
             };
 
