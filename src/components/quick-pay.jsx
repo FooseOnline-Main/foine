@@ -65,22 +65,18 @@ const PayForm = ({page, data})=>{
     const currentTime = new Date().getTime();
     const [product, setProduct] = useState(null);
     const hasExpired = Object.keys(data).includes("expired");
+    const [status, setStatus] = useState(0);
+    const [loading, setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState(
         Math.floor(((data.extraTime || data.expiresAt) - currentTime)/1000)
     );
-    const [status, setStatus] = useState(0);
-    const [loading, setLoading] = useState(false);
     const success = useMemo(()=>{
         let output = false;
-
         watchlist.forEach(i=> {
-            if(i.watchId === data.id && i.paid){
-                output = true;
-            }
+            const found = product && (i.productId === product.id) && i.paid;
+            if(found){ output = true; }
+            console.log(found);
         })
-
-        console.log(output);
-
         return output;
     }, [watchlist])
 
@@ -89,7 +85,7 @@ const PayForm = ({page, data})=>{
         username: user.username || "",
         delivery: "",
         provider: "",
-        phone: user.phoneNumber || "",
+        phone: user.phone || "",
     });
 
     useEffect(()=> {
