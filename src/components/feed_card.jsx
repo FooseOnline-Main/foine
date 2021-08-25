@@ -89,7 +89,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
             </div>
 
             {/* feed status */}
-            <div style={{background: getStatus(feed.status).color}} className="status">{getStatus(feed.status).value}</div>
+            <div style={{background: getStatus(feed.sold ? 2 : feed.status).color}} className="status">{getStatus(feed.sold ? 2 : feed.status).value}</div>
 
             {/* watch count */}
             {feed.watchCount ? <div className="watch-count">
@@ -106,29 +106,32 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                         <p style={{color: "var(--dark-color)"}}><small>GHC</small><span>{parseFloat(feed.price).toFixed(2)}</span></p>
                     </div>
                 </Link>
-                <div className="buttons-toggler">
-                    <hr />
-                    {showButtons ? 
-                    <MdcChevronUpCircle style={{cursor: "pointer"}} size={20} color="#555" /> : 
-                    <MdcChevronDownCircle style={{cursor: "pointer"}} size={20} color="#555" />}
-                    <hr />
-                </div>
+                
                 {/* add section */}
-                {feed.status !== 2 ? 
-                <div className={`add-section ${showButtons ? "show" : ""}`}>
-                    {feed.heldBy ? <Fragment></Fragment> :
-                        <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
-                    }
-                    {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                        <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
-                     : 
-                        <Fragment>
-                            <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{holdLoading ? <Loader /> : (feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
-                            {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=> addForQuickCheckout(user.uid, feed.id)}>Pay</button>}
-                        </Fragment>
-                    }
-                </div> : 
-                <Fragment></Fragment>}
+                {feed.sold ? <Fragment></Fragment> :
+                <Fragment>
+                    <div className="buttons-toggler">
+                        <hr />
+                        {showButtons ? 
+                        <MdcChevronUpCircle style={{cursor: "pointer"}} size={20} color="#555" /> : 
+                        <MdcChevronDownCircle style={{cursor: "pointer"}} size={20} color="#555" />}
+                        <hr />
+                    </div>
+                    <div className={`add-section ${showButtons ? "show" : ""}`}>
+                        {feed.heldBy ? <Fragment></Fragment> :
+                            <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
+                        }
+                        {feed.status === 1 && !(feed.heldBy === user.uid) ? 
+                            <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
+                        : 
+                            <Fragment>
+                                <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{holdLoading ? <Loader /> : (feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
+                                {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=> addForQuickCheckout(user.uid, feed.id)}>Pay</button>}
+                            </Fragment>
+                        }
+                    </div>
+                </Fragment>
+                }
             </div>
             <style jsx>{`
                 .feed-card{

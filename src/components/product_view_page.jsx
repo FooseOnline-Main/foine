@@ -10,12 +10,18 @@ import '../css/product_preview.css';
 
 const ProductViewPage = () => {
     const params = useParams();
-    const {products, comment, fetchProductById, getProductById, holdProduct, getProductComments, unholdProduct, increaseWatch, reduceWatch} = useProducts();
-    const {watchlist, isWatching, addToWatchlist, removeFromWatchlist} = useWatchlist();
+    const {products, comment, requests, requestPurchase, cancelRequestPurchase, fetchProductById, getProductById, holdProduct, unholdProduct, increaseWatch, reduceWatch} = useProducts();
+    const {watchlist, isWatching, addToWatchlist, addForQuickCheckout, removeFromWatchlist} = useWatchlist();
     const {user} = useAuth();
     const [watching, setWatching] = useState(false);
     const [commentMsg, setCommentMsg] = useState("");
     const [product, setProduct] = useState();
+    const [requested, setRequested] = useState(false);
+
+    useEffect(async ()=> {
+        const bool = await requestedPurchase();
+        setRequested(()=> bool);
+    }, [requests]);
 
     useEffect(() => {
         (async function(){
@@ -26,9 +32,25 @@ const ProductViewPage = () => {
             }
             setWatching(isWatching(params.id));
         })()
-
-        console.log(product);
     }, [watchlist, products]);
+
+    const requestedPurchase = async ()=>{
+        let output = false;
+        requests.forEach(req=>{
+            if(req.requestee === user.uid && req.productId === product.id){
+                output = true;
+            }
+        });
+        return output;
+    }
+    
+    const handleRequestPurchase = ()=>{
+        if(requested){
+            cancelRequestPurchase(user.uid, product);
+        }else{
+            requestPurchase(user.uid, product);
+        }
+    }
 
     const handleComment = (e)=>{
         e.preventDefault();
@@ -76,7 +98,7 @@ const ProductViewPage = () => {
                             <h2 style={{marginBottom: 30}}>{product.name}</h2>
                             <div style={{marginBottom: 10}}>
                                 <span className="tag" style={{marginRight: 10}}>{product.size} Size</span>
-                                <span style={{background: getStatus(product.status).color, color: "#fff"}} className="tag">{getStatus(product.status).value}</span>
+                                <span style={{background: getStatus(product.sold ? 2 : product.status).color, color: "#fff"}} className="tag">{getStatus(product.sold ? 2 : product.status).value}</span>
                             </div>
                         </div>
                         <div>
@@ -84,19 +106,31 @@ const ProductViewPage = () => {
                         </div>               
                     </div>
                     <div className="purchase-actions">
-                        {product.heldBy !== "" && !(product.heldBy === user.uid) ? <Fragment></Fragment> : <button onClick={()=> product.heldBy !== "" ? unholdProduct(user.uid, product) : holdProduct(user.uid, product)} id="hold">
-                            <FaStopwatch size={18} color="#fff" />
-                            <span>{product.heldBy !== "" ? "Unhold Item" : "Hold Item"}</span>
-                        </button>}
-                        {product.status !== 2 ? <button onClick={handleWatch} id="add-to-watchlist">
-                            {watching ? <FaEyeSlash size={20} color="#fff" /> : <FaEye size={20} color="#fff" />}
-                            <span>{watching ? 'Return Item' : 'Buy Item'}</span>
-                        </button> : <Fragment></Fragment>}
+                        {product.sold ? <Fragment></Fragment> : 
+                        <Fragment>
+                            {product.status === 1 && !(product.heldBy === user.uid) ? 
+                                <button style={{flex: 1}} onClick={handleRequestPurchase} id="hold">{requested ? "Cancel Request" : "Request"}</button> :
+                                <Fragment>
+                                    <button onClick={()=> product.heldBy !== "" ? unholdProduct(user.uid, product) : holdProduct(user.uid, product)} id="hold">
+                                        <FaStopwatch size={18} color="#fff" />
+                                        <span>{product.heldBy === "" ? "Hold" : "Drop"}</span>
+                                    </button>
+                                    {product.heldBy === "" ? <Fragment></Fragment> : 
+                                    <button onClick={()=> addForQuickCheckout(user.uid, product.id)} id="add-to-watchlist">Pay Now</button>}
+                                </Fragment>
+                            }
+                            {/* Buy buttons */}
+                            {product.heldBy ? <Fragment /> : <button onClick={handleWatch} id="add-to-watchlist">
+                                {watching ? <FaEyeSlash size={20} color="#fff" /> : <FaEye size={20} color="#fff" />}
+                                <span>{watching ? 'Return' : 'Buy'}</span>
+                            </button>}
+                        </Fragment>
+                        }
                     </div>
                     <div className="comment-section">
-                        <form onSubmit={handleComment} className="comment-input">
+                        {product.sold ? <Fragment></Fragment> : <form onSubmit={handleComment} className="comment-input">
                             <input type="text" value={commentMsg} onChange={({target: {value}})=> setCommentMsg(value)} placeholder="Leave a comment..." />
-                        </form>
+                        </form>}
                         <div className="comments-list">
                             {product.comments.map((comment, key) => <Comment key={key} comment={comment}/>)}
                         </div>
