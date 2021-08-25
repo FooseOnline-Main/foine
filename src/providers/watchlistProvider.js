@@ -102,21 +102,21 @@ function WatchlistProvider({ children }) {
         setCheckOut(newCheckoutList.filter(index=> index !== id));
     }
 
-    const makePayment = async (formData, userId, product)=>{
+    const makePayment = async (formData, userId, {id, imageUrl, price})=>{
         if(formData){
             const {watchId, username, delivery, amount, provider, phone} = formData;
             const temp = {
                 watchId, 
-                userId,
                 delivery,
-                userDetails: {username, phone},
+                userDetails: {id: userId, username, phone},
+                product: {id, imageUrl, price},
                 amount,
             };
 
             const {status, data} = await pay({provider, phone, amount});
 
             if(status){
-                tempCheckoutRef.doc(watchId).set({...temp, reference: data.reference, product});
+                tempCheckoutRef.doc(watchId).set({...temp, reference: data.reference});
                 return data.status;
             }
         }
