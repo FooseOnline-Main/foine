@@ -11,11 +11,9 @@ const client = axios.create({
 });
 
 export async function pay(body){
+    body = {...body, email: "myfoine@gmail.com", paymentMethod: "mobile_money"}
     try {
-        const {data} = await client.post('/transactions/charge', JSON.stringify({
-            ...body, 
-            email: "myfoine@gmail.com", 
-        }));
+        const {data} = await client.post('/transaction/charge', JSON.stringify(body));
         return data;
     } catch (e) {
         return {response: e.response, message: e.message}
@@ -24,7 +22,7 @@ export async function pay(body){
 
 export async function confirmOTP(otp, reference){
     try {
-        const {data} = await client.post('/transactions/verify-otp', JSON.stringify({otp, reference}));
+        const {data} = await client.post('/transaction/verify-otp', JSON.stringify({otp, reference}));
         return data;
     } catch (e) {
         return {response: e.response, message: e.message}

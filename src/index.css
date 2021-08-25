@@ -130,7 +130,6 @@ h5 {
 }
 
 .loader-box {
-  height: 100%;
   display: flex;
   align-self: stretch;
   justify-self: stretch;
@@ -139,6 +138,7 @@ h5 {
 }
 
 .loader-box.expand {
+  height: 100%;
   position: fixed;
   top: 0;
   left: 0;

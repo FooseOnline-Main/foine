@@ -4,6 +4,8 @@ import { useHistory } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
 import { useProducts } from '../providers/productProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
+import { MdcCheckCircle } from '@meronex/icons/mdc'
+import Loader from './simple_loader';
 
 const QuickPay = () => {
     const {quickCheckout} = useWatchlist();
@@ -59,19 +61,21 @@ const QuickPay = () => {
 const PayForm = ({page, data})=>{
     const {user} = useAuth();
     const {fetchProductById} = useProducts();
-    const {removeFromWatchlist, emptyQuickCheckout} = useWatchlist();
+    const {removeFromWatchlist, emptyQuickCheckout, makePayment, verifyOTP} = useWatchlist();
     const currentTime = new Date().getTime();
     const [product, setProduct] = useState(null);
     const hasExpired = Object.keys(data).includes("expired");
     const [timeLeft, setTimeLeft] = useState(
         Math.floor(((data.extraTime || data.expiresAt) - currentTime)/1000)
     );
+    const [status, setStatus] = useState(0);
+
+    const [otp, setOtp] = useState("");
     const [formData, setFormData] = useState({
         username: user.username || "",
         delivery: "",
-        service: "",
+        provider: "",
         phone: user.phoneNumber || "",
-        price: 10
     });
 
     useEffect(()=> {
@@ -79,6 +83,15 @@ const PayForm = ({page, data})=>{
             removeFromWatchlist(data.productId);
         }
     }, [timeLeft])
+
+    useEffect(() => {
+        if(data.paid){
+            removeFromWatchlist(data.productId);
+        }
+        if(data.failed){
+            setStatus(0);
+        }
+    }, [data]);
 
     useEffect(async () => {
         const interval = setInterval(()=>{
@@ -95,8 +108,35 @@ const PayForm = ({page, data})=>{
         setFormData((old)=> {return {...old, [name]: value}});
     }
 
-    const handleSubmit = (e)=>{
+    const handleSubmit = async (e)=>{
         e.preventDefault();
+        let stat;
+
+        switch(stat){
+            case 1:
+                stat = await verifyOTP(otp, data.id, user.uid);
+                break;
+
+            default:
+                stat = await makePayment({...formData, amount: parseFloat(product.price) * 100, watchId: data.id}, user.uid);
+                break;
+        }
+        
+        if(stat){
+            switch(stat){
+                case "send_otp":
+                    setStatus(1);
+                    break;
+
+                case "pay_offline":
+                    setStatus(2)
+                    break;
+
+                default:
+                    setStatus(0)
+                    break;
+            }
+        }
     }
 
     const handleCancel = (e)=>{
@@ -109,7 +149,7 @@ const PayForm = ({page, data})=>{
     }
 
     const renderSelect = (options=[], name="name", placeholder="Select an option")=>{
-        return <select value={formData[name]} onChange={(e)=> handleChange(e, name)} name={name} id={name}>
+        return <select required value={formData[name]} onChange={(e)=> handleChange(e, name)} name={name} id={name}>
             <option selected value="">{placeholder}</option>
             {options.map((o, i)=> <option key={i} value={o.value}>{o.name}</option>)}
         </select>
@@ -117,13 +157,13 @@ const PayForm = ({page, data})=>{
 
     return <form onSubmit={handleSubmit} className="pay-form">
         {product !== null && <div className="product-details">
-            <div className="timer">{timeLeft}s Left</div>
+            <div className="timer">{data.expired ? "Extra" : ""} {timeLeft}s Left</div>
             {page ? <div className="page">{page}</div> : <Fragment />}
             <img src={product.imageUrl} alt="product" />
             
             <div className="details">
                 <h2 className="price">Gh&cent; {parseFloat(product.price).toFixed(2)}</h2>
-                <input value={formData.name} onChange={(e)=> handleChange(e, "username")} placeholder="Name for delivery" type="text" />
+                <input required value={formData.name} onChange={(e)=> handleChange(e, "username")} placeholder="Name for delivery" type="text" />
                 
                 {renderSelect([
                     {name: "Pick Up", value: "pickup"},
@@ -133,25 +173,54 @@ const PayForm = ({page, data})=>{
                 
                 {renderSelect([
                     {name: "MTN", value: "mtn"},
-                    {name: "Vodafone", value: "voda"},
-                    {name: "Airtel/Tigo", value: "airtel-tigo"},
-                ], "service", "Choose provider")}
+                    {name: "Vodafone", value: "vod"},
+                    {name: "Airtel/Tigo", value: "tgo"},
+                ], "provider", "Choose provider")}
                 
-                <input value={formData.phone} onChange={(e)=> handleChange(e, "phone")} placeholder="Enter phone number" type="text" />
+                <input required value={formData.phone} onChange={(e)=> handleChange(e, "phone")} placeholder="Enter phone number" type="text" />
                 
                 <div className="buttons">
                     <button>Pay</button>
                     <button onClick={handleCancel} className="cancel">Cancel</button>
                 </div>
+                {status === 1 && <div className="overlay">
+                    <h3 style={{marginBottom: 30}}>Enter the OTP code sent to your device.</h3>
+                    <input required value={otp} onChange={({target: {value}})=> setOtp(value)} type="text" />
+                    <div className="buttons">
+                        <button>Submit OTP</button>
+                    </div>
+                </div>}
+                {status === 2 && <div className="overlay">
+                    <h4 style={{marginBottom: 20}}>Finalize payment on your device by entering your PIN.</h4>
+                    <Loader />
+                </div>}
+                {data.paid ? <div style={{background: "#fff"}} className="overlay">
+                    <MdcCheckCircle size={40} color="green" />
+                    <h4>Payment Successful</h4>
+                </div> : <Fragment />}
             </div>
         </div>}
         <style jsx>{`
             .pay-form{
                 min-width: 100%;
+                min-height: 200px;
                 padding: 20px 5%;
                 font-size: 14px;
                 scroll-snap-align: start;
                 margin-top: 20px;
+            }
+
+            .pay-form .overlay{
+                position: absolute;
+                top: 0;
+                left: 0; 
+                width: 100%; height: 100%;
+                background: #ffffffc0;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
 
             .pay-form .timer{
@@ -181,7 +250,16 @@ const PayForm = ({page, data})=>{
             }
             .pay-form .details{
                 justify-self: stretch;
+                align-self: stretch;
                 flex: 1;
+            }
+            .pay-form .details.center{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                column-gap: 10px;
             }
             .pay-form .price{
                 font-size: 1.8rem;

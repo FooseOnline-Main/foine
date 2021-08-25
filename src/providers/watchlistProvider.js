@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { v4 } from 'uuid';
+import { confirmOTP, pay } from '../api';
 import firebase from '../firebase';
 import { useError } from './errorProvider';
 
@@ -14,9 +15,11 @@ function WatchlistProvider({ children }) {
     const [checkOut, setCheckOut] = useState([]);
     const [quickCheckout, setQuickCheckout] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [checkoutItem, setCheckoutItem] = useState(null);
     const {createError} = useError();
 
     const watchlistRef = firebase.firestore().collection('watchlist');
+    const tempCheckoutRef = firebase.firestore().collection('tempCheckout');
 
     const isWatching = (prodId)=>{
         let output = false;
@@ -64,8 +67,6 @@ function WatchlistProvider({ children }) {
             const newWatch = {id: docId, userId: key, productId: itemId};
             watchlistRef.doc(docId).set(newWatch)
             .then(_=>{
-                // setWatchlist([...watchlist, newWatch]);
-                // setCheckOut([...checkOut, itemId])
                 setLoading(false);
             })
             .catch(({message})=>{
@@ -81,8 +82,6 @@ function WatchlistProvider({ children }) {
         if(watchId && watchlist.length > 0){
             watchlistRef.doc(watchId).delete()
             .then(_=>{
-                // setWatchlist(watchlist.filter(watch=> watch.id !== watchId));
-                // setCheckOut(checkOut.filter(item=> item !== watchId));
                 setLoading(false);
             })
             .catch(({message})=>{
@@ -91,16 +90,61 @@ function WatchlistProvider({ children }) {
             })
         }
     }
+    
+    const addToCheckout = (id)=>{
+        const newCheckoutList = checkOut;
+        newCheckoutList.push(id);
+        setCheckOut(newCheckoutList.map(item=> item));
+    }
 
     const removeFromCheckout = (id)=>{
         const newCheckoutList = checkOut;
         setCheckOut(newCheckoutList.filter(index=> index !== id));
     }
 
-    const addToCheckout = (id)=>{
-        const newCheckoutList = checkOut;
-        newCheckoutList.push(id);
-        setCheckOut(newCheckoutList.map(item=> item));
+    const makePayment = async (formData, userId)=>{
+        if(formData){
+            const {watchId, username, delivery, amount, provider, phone} = formData;
+            const temp = {
+                watchId, 
+                userId,
+                delivery,
+                userDetails: {username, phone},
+                amount,
+            };
+
+            const {status, data} = await pay({provider, phone, amount});
+
+            if(status){
+                tempCheckoutRef.doc(watchId).set({...temp, reference: data.reference});
+                return data.status;
+            }
+        }
+    }
+
+    const verifyOTP = async (otp, watchId, userId)=>{
+        if(otp){
+            if(watchId){
+                const exists = await tempCheckoutRef.doc(watchId).get();
+                
+                if(exists){
+                    const {status, data} = await confirmOTP(otp, exists.reference);
+                    return status ? data.status : "";
+                }
+            }else{
+                return tempCheckoutRef
+                .where("userId", "==", userId)
+                .get()
+                .then(async res=> {
+                    const doc = res.docs[0];
+
+                    if(doc){
+                        const {status, data} = await confirmOTP(otp, doc.data().reference);
+                        return status ? data.status : "";
+                    }
+                })
+            }
+        }
     }
 
     const clearCheckedOut = ()=>{
@@ -120,7 +164,7 @@ function WatchlistProvider({ children }) {
             watchlist, loading, checkOut, quickCheckout,
             addToWatchlist, removeFromWatchlist, emptyQuickCheckout,
             removeFromCheckout, addToCheckout, addForQuickCheckout,
-            clearCheckedOut, getWatchlist, isWatching
+            clearCheckedOut, getWatchlist, isWatching, makePayment, verifyOTP
         }}>
             {children}
         </WatchlistContext.Provider>
