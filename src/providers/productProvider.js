@@ -65,7 +65,7 @@ function ProductsProvider({ children }) {
 
     const fetchRequests = (userId)=>{
         if(userId){
-            purchaseReqRef.where("requestee", "==", userId).onSnapshot(res=>{
+            purchaseReqRef.onSnapshot(res=>{
                 const data = res.docs.map(doc=> doc.data());
                 setRequests(()=> data || []);
     
