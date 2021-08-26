@@ -53,6 +53,14 @@ export async function requestHoldProduct(body){
     }
 }
 
+export async function acceptRequest(body){
+    try {
+        return await client.post('/product/accept-request', JSON.stringify(body));
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 export async function getUserDetails(token){
     try {
         return await client.get('/user/getdetails', {

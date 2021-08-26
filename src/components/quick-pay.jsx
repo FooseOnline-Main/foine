@@ -120,7 +120,10 @@ const PayForm = ({page, data})=>{
 
             default:
                 stat = await makePayment(
-                    {...formData, amount: parseFloat(product.price) * 100, watchId: data.id},
+                    {...formData, 
+                        amount: (parseFloat(product.price) + (data.charge || 0)) * 100, 
+                        watchId: data.id
+                    },
                     user.uid,
                     [{id: product.id, imageUrl: product.imageUrl, price: product.price, size: product.size}],
                 );
@@ -168,7 +171,7 @@ const PayForm = ({page, data})=>{
             <img src={product.imageUrl} alt="product" />
             
             <div className="details">
-                <h2 className="price">Gh&cent; {parseFloat(product.price).toFixed(2)}</h2>
+                <h2 className="price">Gh&cent; {parseFloat(product.price).toFixed(2) + (data.charge || 0)}</h2>
                 <input required value={formData.name} onChange={(e)=> handleChange(e, "username")} placeholder="Name for delivery" type="text" />
                 
                 {renderSelect([

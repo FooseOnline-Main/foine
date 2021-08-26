@@ -59,11 +59,11 @@ function WatchlistProvider({ children }) {
 
     const emptyQuickCheckout = ()=> setQuickCheckout([])
 
-    const addToWatchlist = (key, itemId)=>{
+    const addToWatchlist = (userId, productId)=>{
         setLoading(true);
-        if(itemId && !watchlist.includes(itemId)){
+        if(productId && !watchlist.includes(productId)){
             const docId = v4();
-            const newWatch = {id: docId, userId: key, productId: itemId};
+            const newWatch = {id: docId, userId, productId};
             watchlistRef.doc(docId).set(newWatch)
             .then(_=>{
                 setLoading(false);
@@ -160,9 +160,9 @@ function WatchlistProvider({ children }) {
 
     return (
         <WatchlistContext.Provider value={{
-            watchlist, loading, checkOut, quickCheckout,
+            watchlist, loading, checkOut, quickCheckout, 
             addToWatchlist, removeFromWatchlist, emptyQuickCheckout,
-            removeFromCheckout, addToCheckout, addForQuickCheckout,
+            removeFromCheckout, addToCheckout, addForQuickCheckout, 
             clearCheckedOut, getWatchlist, isWatching, makePayment, verifyOTP
         }}>
             {children}

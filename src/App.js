@@ -10,13 +10,16 @@ import { useWatchlist } from "./providers/watchlistProvider";
 import { useAuth } from "./providers/authProvider";
 import Loader from "./components/simple_loader";
 import QuickPay from "./components/quick-pay";
+import { useProducts } from "./providers/productProvider";
 
 function App() {
   const {user} = useAuth();
   const {getWatchlist, quickCheckout} = useWatchlist();
+  const {fetchRequests} = useProducts();
 
   useEffect(() => {
       getWatchlist(user.uid);
+      fetchRequests(user.uid);
   }, [user]);
 
   return (

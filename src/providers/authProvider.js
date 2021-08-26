@@ -27,7 +27,6 @@ function AuthProvider({ children }) {
 
         if(jwt){
             const {data} = await getUserDetails(jwt);
-            console.log(data);
 
             if (data && data.success) {
                 setLoading(false);
@@ -58,7 +57,6 @@ function AuthProvider({ children }) {
     const login = async ({email, password}) => {
         setLoading(true);
         const {data} = await signIn({email, password});
-        console.log({email, password});
 
         if(data.success){
             setLoading(false);

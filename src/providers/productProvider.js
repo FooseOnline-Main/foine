@@ -1,8 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { v4 } from 'uuid';
-import { requestHoldProduct } from '../api';
+import { acceptRequest, requestHoldProduct } from '../api';
 
 import firebase from '../firebase';
+import { useAuth } from './authProvider';
 import { useError } from './errorProvider';
 import {useNotification} from './notificationProvider';
 
@@ -55,19 +56,24 @@ function ProductsProvider({ children }) {
             createError(message);
         })
 
-        purchaseReqRef.onSnapshot(res=>{
-            const data = res.docs.map(doc=> doc.data());
-            setRequests(()=> data || []);
-
-            res.docChanges(item=> {
-                const changes = item.docs.map(doc=> doc.data());
-                console.log({changes});
-                setRequests(()=> changes || [])
-            })
-        });
-
+        fetchRequests();
         fetchProducts();
     }, [])
+
+    const fetchRequests = (userId)=>{
+        if(userId){
+            purchaseReqRef.where("holder", "==", userId).onSnapshot(res=>{
+                const data = res.docs.map(doc=> doc.data());
+                setRequests(()=> data || []);
+    
+                res.docChanges(item=> {
+                    const changes = item.docs.map(doc=> doc.data());
+                    console.log({changes});
+                    setRequests(()=> changes || [])
+                })
+            });
+        }
+    }
 
     const fetchProducts = async ()=>{
         setLoading(true);
@@ -188,13 +194,15 @@ function ProductsProvider({ children }) {
         }
     }
 
-    const acceptPurchaseRequest = (product, charge, reqId, callback=()=>{})=>{
-        let request = purchaseReqRef.doc(reqId).get().then(res=> res.data());
-        purchaseReqRef.doc(reqId).update({charge, accepted: true})
-        .then(_=>{
-            notifyAcceptedRequest(request.userId, product.id, product.name);
-            callback()
-        }).catch(({message})=>{
+    const acceptPurchaseRequest = ({productId, charge, reqId, userId})=>{
+        return purchaseReqRef.doc(reqId).update({charge, accepted: true})
+        .then(async _=>{
+            const {status, message} = await acceptRequest({charge, userId, productId});
+            if(!status){
+                createError(message, 4000);
+            }
+        })
+        .catch(({message})=>{
             createError(message, 2000)
         });
     }
@@ -310,7 +318,7 @@ function ProductsProvider({ children }) {
     return (
         <ProductsContext.Provider value={{
             products, categories, loading, requests,
-            fetchProducts, getProducts, holdProduct, fetchProductById, 
+            fetchProducts, getProducts, holdProduct, fetchProductById, fetchRequests,
             unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
             cancelRequestPurchase, like, addToWishList, share, getProductById, 
             comment, increaseWatch, reduceWatch, getRequestById, acceptPurchaseRequest,
