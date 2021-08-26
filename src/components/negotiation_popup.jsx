@@ -66,6 +66,8 @@ const NegotiationPopup = () => {
         </div>
     }
 
+    console.log(request);
+
     return ((product && request) ? <div className="nego-popup">
             <div onClick={()=>history.replace('/')} className="close-bg"></div>
             <div className="inner">
@@ -77,7 +79,7 @@ const NegotiationPopup = () => {
                         <div className="head">                            
                             <div className="details">
                                 <h4>{request.accepted ? "Accepted Successfully" : "Confirm Request"}</h4>
-                                <span style={{color: "var(--dark-color)"}}><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></span>
+                                <span style={{color: "var(--dark-color)"}}><small>GHC</small><big>{parseFloat(product.price + charge).toFixed(2)}</big></span>
                             </div>
                         </div>                        
                         <div className="content">
@@ -89,18 +91,10 @@ const NegotiationPopup = () => {
                                 {charge === 0 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
                                 <span>Let go free of charge</span>
                             </div>
-                            <div onClick={()=> setCharge(()=> 1)} className="option">
-                                {charge === 1 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
-                                <span>Charge an amount of Ghc 1.00</span>
-                            </div>
-                            <div onClick={()=> setCharge(()=> 2.3)} className="option">
-                                {charge === 2.3 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
-                                <span>Charge an amount of Ghc 2.30</span>
-                            </div>
-                            <div onClick={()=> setCharge(()=> 3.35)} className="option">
-                                {charge === 3.35 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
-                                <span>Charge an amount of Ghc 3.35</span>
-                            </div>
+                            {request.charges.map((c, key)=> <div key={key} onClick={()=> setCharge(()=> parseFloat(c))} className="option">
+                                {charge === parseFloat(c) ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
+                                <span>Ghc {c}</span>
+                            </div>)}
                         </div>
                             {request.accepted ? <Fragment></Fragment> : <div className="actions">
                                 <div onClick={handleAccept} id="accept"><p>Accept</p></div>

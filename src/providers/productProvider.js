@@ -157,12 +157,27 @@ function ProductsProvider({ children }) {
     const requestPurchase = (userId, product, callback=()=>{}) => {
         if(product && userId){
             const requestId = v4();
+            // charges generator
+            const getCharges = ()=> {
+                const output = [];
+                const generateNumber = ()=>{
+                        let number = ((Math.random() + 0.1) * 5).toFixed(2);
+                        if(output.includes(number)){
+                            return generateNumber();
+                        }
+                        return number;
+                }
+                for (let x = 1; x <= 3; x++) { output.push(generateNumber()) }
+                return output;                        
+            }
+            // add purchase request
             purchaseReqRef.doc(requestId)
             .set({
                 id: requestId,
                 productId: product.id,
                 requestee: userId,
                 holder: product.heldBy,
+                charges: getCharges(),
                 accepted: false
             }).then(_=>{
                 notifyPurchaseRequest(product.heldBy, product.id, requestId);
