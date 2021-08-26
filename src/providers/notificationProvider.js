@@ -56,7 +56,7 @@ function NotificationProvider({ children }) {
                         createdAt: Date.now(),
                         id: noteId,
                         message: "Someone is holding on to an item you added to your cart. Checkout this item and request if you really want it.",
-                        title: "Look Sharp!😨",
+                        title: "Look Sharp! 😨",
                         to: userId,
                         type: "HOLD_ALERT",
                         read: false,
@@ -84,7 +84,7 @@ function NotificationProvider({ children }) {
                         createdAt: Date.now(),
                         id: noteId,
                         message: "Someone just unheld an item you are watching. You have the chance to purchase now, don't waste this opportunity.",
-                        title: "Opportunity Time🥳",
+                        title: "Opportunity Time 🥳",
                         to: userId,
                         type: "HOLD_ALERT",
                         read: false,
@@ -107,7 +107,7 @@ function NotificationProvider({ children }) {
                 createdAt: Date.now(),
                 id: noteId,
                 message: "Someone wants to buy a product you are holding. Would you like to accept this request?",
-                title: "New Purchase Request🎫",
+                title: "New Purchase Request 🎫",
                 to: productHolderId,
                 type: "PURCHASE_REQUEST",
                 read: false,
@@ -127,7 +127,7 @@ function NotificationProvider({ children }) {
             createdAt: Date.now(),
             id: noteId,
             message: `Your request to purchase ${productName} has been accepted by holder. You can now go ahead and purchase with an interest of GH1.00`,
-            title: "Purchase Request Accepted🎉",
+            title: "Purchase Request Accepted 🎉",
             to: userId,
             type: "ACCEPTED_REQUEST",
             read: false,
@@ -146,13 +146,55 @@ function NotificationProvider({ children }) {
             createdAt: Date.now(),
             id: noteId,
             message: `Sorry to inform you, but your request to purchase ${productName} has been denied by holder.`,
-            title: "Purchase Request Denied😥",
+            title: "Purchase Request Denied 😥",
             to: userId,
             type: "DENIED_REQUEST",
             read: false,
         }).catch(({message})=>{
             createError(message);
         })
+    }
+
+    const notifyRequestCheckoutSuccess = (productHolderId, productId, charge) => {
+        if(productHolderId){
+            const noteId = v4();
+            notificationsRef.doc(noteId).set({
+                createdAt: Date.now(),
+                id: noteId,
+                message: `You have gained Ghc ${charge} FOINE TOKEN 🎫 from a successful request checkout. Continue to share more, to gain more!🔥`,
+                title: "Request Checkout Success 🥳",
+                to: productHolderId,
+                type: "SUCCESSFUL_CHECKOUT",
+                read: false,
+                other: {
+                    productId,
+                    link: "/preview-product/"+productId
+                }
+            }).catch(({message})=>{
+                createError(message);
+            })
+        }
+    }
+
+    const notifyCancelRequestCheckout = (productHolderId, productId) => {
+        if(productHolderId){
+            const noteId = v4();
+            notificationsRef.doc(noteId).set({
+                createdAt: Date.now(),
+                id: noteId,
+                message: "A requestee cancelled checkout from a product he/she requested from you. Better luck next time.",
+                title: "Request Checkout Cancelled 💔",
+                to: productHolderId,
+                type: "CANCELLED_CHECKOUT",
+                read: false,
+                other: {
+                    productId,
+                    link: "/preview-product/"+productId
+                }
+            }).catch(({message})=>{
+                createError(message);
+            })
+        }
     }
 
     const markAsRead = (id)=>{
@@ -190,7 +232,7 @@ function NotificationProvider({ children }) {
             notifications, loading, unread, action, 
             notifyHold, notifyUnheld, deleteNotification, markAsRead,
             notifyPurchaseRequest, resetAction, notifyAcceptedRequest,
-            notifyDeniedRequest
+            notifyDeniedRequest, notifyCancelRequestCheckout, notifyRequestCheckoutSuccess
         }}>
             {children}
         </NotificationContext.Provider>

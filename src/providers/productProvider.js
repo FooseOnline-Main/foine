@@ -42,7 +42,10 @@ function ProductsProvider({ children }) {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(false);
     const {createError} = useError();
-    const {notifyHold, notifyPurchaseRequest, notifyAcceptedRequest, notifyDeniedRequest, notifyUnheld} = useNotification();
+    const {notifyHold, notifyPurchaseRequest, 
+        notifyCancelRequestCheckout, notifyDeniedRequest, 
+        notifyUnheld, notifyRequestCheckoutSuccess
+    } = useNotification();
 
     const productsRef = firebase.firestore().collection('products');
     const catsRef = firebase.firestore().collection('categories');
@@ -62,13 +65,12 @@ function ProductsProvider({ children }) {
 
     const fetchRequests = (userId)=>{
         if(userId){
-            purchaseReqRef.where("holder", "==", userId).onSnapshot(res=>{
+            purchaseReqRef.where("requestee", "==", userId).onSnapshot(res=>{
                 const data = res.docs.map(doc=> doc.data());
                 setRequests(()=> data || []);
     
                 res.docChanges(item=> {
                     const changes = item.docs.map(doc=> doc.data());
-                    console.log({changes});
                     setRequests(()=> changes || [])
                 })
             });
@@ -233,6 +235,42 @@ function ProductsProvider({ children }) {
         }
     }
 
+    const cancelRequestCheckout = ({userId, productId})=>{
+        if(userId, productId){
+            purchaseReqRef
+            .where("requestee", "==", userId)
+            .where("productId", "==", productId)
+            .get()
+            .then(({docs})=>{
+                const request = docs.map(i=> i.data())[0];
+                if(request){
+                    notifyCancelRequestCheckout(request.holder, productId);
+                }
+            })
+            .catch(({message})=>{
+                createError(message)
+            })
+        }
+    }
+
+    const acceptRequestCheckout = ({userId, productId, charge})=>{
+        if(userId, productId){
+            purchaseReqRef
+            .where("requestee", "==", userId)
+            .where("productId", "==", productId)
+            .get()
+            .then(({docs})=>{
+                const request = docs.map(i=> i.data())[0];
+                if(request){
+                    notifyRequestCheckoutSuccess(request.holder, productId, charge);
+                }
+            })
+            .catch(({message})=>{
+                createError(message)
+            })
+        }
+    }
+
     const holdProduct = async (userId, product, clb=()=>{}) => {
         const {data} = await requestHoldProduct({userId, product});
         
@@ -319,8 +357,8 @@ function ProductsProvider({ children }) {
         <ProductsContext.Provider value={{
             products, categories, loading, requests,
             fetchProducts, getProducts, holdProduct, fetchProductById, fetchRequests,
-            unholdProduct, markProductsAsSold, searchProducts, requestPurchase,
-            cancelRequestPurchase, like, addToWishList, share, getProductById, 
+            unholdProduct, markProductsAsSold, searchProducts, requestPurchase, cancelRequestCheckout,
+            cancelRequestPurchase, like, addToWishList, share, getProductById, acceptRequestCheckout,
             comment, increaseWatch, reduceWatch, getRequestById, acceptPurchaseRequest,
             denyPurchaseRequest 
         }}>

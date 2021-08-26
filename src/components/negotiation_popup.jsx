@@ -73,10 +73,13 @@ const NegotiationPopup = () => {
     }
 
     const renderSuccess = ()=>{
+        const message = (request.charge || charge) ? 
+        `You'll receive a FOINE TOKEN of ✨ ${<span>Gh&cent;</span>} ${request.charge || charge} ✨ once the requestee checks out`
+        : "Today must be the requestee's lucky day😀";
+
         return <div id="success">
             <AiOutlineCheckCircle style={{marginBottom: 10}} size={80} color="limegreen"/>
-            <p>You have successfully accepted this purchase request.</p>
-            <p>You have gained Ghc {request.charge || charge} free discount</p>
+            <p>You have successfully accepted this purchase request. {message}</p>
         </div>
     }
 

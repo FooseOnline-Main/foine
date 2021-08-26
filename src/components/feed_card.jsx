@@ -2,7 +2,7 @@ import { getStatus, useProducts } from '../providers/productProvider';
 
 import { AiOutlineCheck, AiOutlineEye } from '@meronex/icons/ai';
 import { Link } from 'react-router-dom';
-import React, {Fragment} from 'react';
+import React, {Fragment, useMemo} from 'react';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 import { useState } from 'react';
@@ -16,8 +16,16 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {isWatching, addToWatchlist, removeFromWatchlist, addForQuickCheckout} = useWatchlist();
     const productId = feed.id;
     const [showButtons, setShowButtons] = useState(false);
-    const [requested, setRequested] = useState(false);
     const [holdLoading, setHoldLoading] = useState(false);
+    const requested = useMemo(()=>{
+        let output = false;
+        requests.forEach(req=>{
+            if(req.requestee === user.uid && req.productId === feed.id){
+                output = true;
+            }
+        });
+        return output;
+    }, [requests]);
 
     useEffect(()=> setHoldLoading(false), [feed])
 
@@ -28,11 +36,6 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
             setShowButtons(false);
         }
     }, [expanded]);
-
-    useEffect(async ()=> {
-        const bool = await requestedPurchase();
-        setRequested(()=> bool);
-    }, [requests]);
 
     const onViewItem = ()=>{
         // set current open feed
@@ -67,16 +70,6 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
         }else{
             requestPurchase(user.uid, feed);
         }
-    }
-
-    const requestedPurchase = async ()=>{
-        let output = false;
-        requests.forEach(req=>{
-            if(req.requestee === user.uid && req.productId === feed.id){
-                output = true;
-            }
-        });
-        return output;
     }
 
     return (
