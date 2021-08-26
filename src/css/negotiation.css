@@ -90,13 +90,31 @@
   margin-left: 10px;
 }
 
+.nego-popup .confirm-box .options {
+  display: flex;
+  column-gap: 10px;
+  flex-wrap: wrap;
+  flex-direction: column;
+  padding-bottom: 10px;
+}
+
 .nego-popup .confirm-box .options .option {
-  padding: 5px 0;
+  padding: 10px;
   display: flex;
   align-items: center;
   column-gap: 10px;
   font-size: 12.5px;
+  border-radius: 10px;
   cursor: pointer;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  border: 2px solid #efefef;
+  margin-top: 10px;
+}
+.nego-popup .confirm-box .options .option.selected {
+  border-color: var(--dark-color);
 }
 
 .nego-popup .inner .benefits {

@@ -46,7 +46,7 @@ const NegotiationPopup = () => {
         setLoadSuccess(true);
         if(request.accepted){
             setLoadSuccess(false);
-          return createError("You have already accepted this purchase request.");
+            return createError("You have already accepted this purchase request.");
         }
         acceptPurchaseRequest(
             product, charge, reqId, 
@@ -79,19 +79,19 @@ const NegotiationPopup = () => {
                         <div className="head">                            
                             <div className="details">
                                 <h4>{request.accepted ? "Accepted Successfully" : "Confirm Request"}</h4>
-                                <span style={{color: "var(--dark-color)"}}><small>GHC</small><big>{parseFloat(product.price + charge).toFixed(2)}</big></span>
+                                <span style={{color: "var(--dark-color)"}}><small>GHC</small><big>{(parseFloat(product.price) + charge).toFixed(2)}</big></span>
                             </div>
                         </div>                        
                         <div className="content">
                             {loadSuccess ? <Loader /> : request.accepted ? renderSuccess() : 
                             <Fragment>
-                            <div className="options">
                             <h5>Select an option below:</h5>
-                            <div onClick={()=> setCharge(()=> 0)} className="option">
+                            <div className="options">
+                            <div onClick={()=> setCharge(()=> 0)} className={`option ${charge === 0 ? "selected" : ""}`}>
                                 {charge === 0 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
                                 <span>Let go free of charge</span>
                             </div>
-                            {request.charges.map((c, key)=> <div key={key} onClick={()=> setCharge(()=> parseFloat(c))} className="option">
+                            {request.charges.map((c, key)=> <div key={key} onClick={()=> setCharge(()=> parseFloat(c))} className={`option ${charge === parseFloat(c) ? "selected" : ""}`}>
                                 {charge === parseFloat(c) ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
                                 <span>Ghc {c}</span>
                             </div>)}
