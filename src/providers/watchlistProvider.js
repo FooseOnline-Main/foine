@@ -130,14 +130,16 @@ function WatchlistProvider({ children }) {
                 const exists = await tempCheckoutRef.doc(watchId).get();
                 
                 if(exists){
-                    const {status, data} = await confirmOTP(otp, exists.reference);
+                    const response = await confirmOTP(otp, exists.data().reference);
+                    const {status, data} = response;
                     return status ? data.status : "";
                 }
             }else{
                 const exists = await tempCheckoutRef.doc(userId).get();
 
                 if(exists){
-                    const {status, data} = await confirmOTP(otp, exists.reference);
+                    const response = await confirmOTP(otp, exists.data().reference);
+                    const {status, data} = response;
                     return status ? data.status : "";
                 }
             }

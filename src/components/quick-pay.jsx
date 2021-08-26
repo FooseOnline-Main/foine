@@ -75,7 +75,6 @@ const PayForm = ({page, data})=>{
         watchlist.forEach(i=> {
             const found = product && (i.productId === product.id) && i.paid;
             if(found){ output = true; }
-            console.log(found);
         })
         return output;
     }, [watchlist])
@@ -114,7 +113,7 @@ const PayForm = ({page, data})=>{
         setLoading(true);
         let stat;
 
-        switch(stat){
+        switch(status){
             case 1:
                 stat = await verifyOTP({otp, watchId: data.id, userId: user.uid});
                 break;
