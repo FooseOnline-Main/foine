@@ -13,11 +13,13 @@ const NegotiationPopup = () => {
     const { requests } = useProducts();
     const pendingRequests = useMemo(()=>{
         return requests.filter(req=> req.holder === user.uid);
-    }, [])
+    }, [requests])
 
-    if(pendingRequests.length < 1){
-        history.replace("/");
-    }
+    useEffect(() => {
+        if(pendingRequests.length < 1){
+            history.replace("/");
+        }
+    }, [pendingRequests]);
 
     return (<div className="nego-popup">
             <div className="inner">
@@ -28,10 +30,11 @@ const NegotiationPopup = () => {
 }
 
 const ConfirmationBox = ({request, index, total})=>{
-    const history = useHistory();
     const [product, setProduct] = useState(null);
     const {addForQuickCheckout, removeFromWatchlist} = useWatchlist();
-    const { fetchProductById, unholdProduct, deleteRequest, acceptPurchaseRequest, cancelRequestPurchase } = useProducts();
+    const { fetchProductById, unholdProduct, acceptPurchaseRequest, cancelRequestPurchase } = useProducts();
+    const [loading, setLoading] = useState(false);
+    const [acceptLoading, setAcceptLoading] = useState(false);
 
     useEffect(async () => {
         if(request){
@@ -40,12 +43,15 @@ const ConfirmationBox = ({request, index, total})=>{
     }, [request]);
 
     const handleAccept = async ()=>{
+        setLoading(true);
+        setAcceptLoading(true);
         removeFromWatchlist(product.id);
         unholdProduct(request.holder, product);
         acceptPurchaseRequest({productId: product.id, reqId: request.id, userId: request.requestee})
     }
 
     const handlePayNow = ()=>{
+        setLoading(true);
         cancelRequestPurchase(request.requestee, product);
         addForQuickCheckout(request.holder, request.productId, true);
     }
@@ -66,10 +72,10 @@ const ConfirmationBox = ({request, index, total})=>{
                 <small>A customer is requesting for this product you are holding. Please checkout now or accept the request.</small>
                 <Fragment>
                     {<div className="actions">
-                        <button onClick={handlePayNow} id="accept">
+                        <button disabled={loading} onClick={handlePayNow} id="accept">
                         {<p>Pay Now</p>}
                         </button>
-                        <button onClick={handleAccept} id="deny"><p>Accept</p></button>
+                        <button disabled={loading} onClick={handleAccept} id="deny"><p>{acceptLoading ? "Accepting..." : "Accept"}</p></button>
                     </div>}
                 </Fragment>
             </div>

@@ -114,7 +114,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     </div>
                     <div className={`add-section ${showButtons ? "show" : ""}`}>
                         {feed.locked && !requested ?  
-                        <button className="lock-banner">Temporarily Locked! <br /> This item will be unlocked in some few seconds.</button> : 
+                        <div className="lock-warning">Temporarily Locked! <br /> This item will be unlocked in some few seconds.</div> : 
                         <Fragment>    
                             {feed.heldBy ? <Fragment></Fragment> :
                                 <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
@@ -146,7 +146,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     -webkit-animation: slide-up .5s ease-in;
                 }
 
-                .feed-card .lock-banner{
+                .feed-card .lock-warning{
                     background: #f56a3330;
                     color: var(--dark-color);
                     border-radius: 10px;
@@ -218,10 +218,15 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     cursor: pointer;
                     background: transparent;
                     box-sizing: content-box;
-                    margin-top: -80px;
                     transition: all .15s linear;
                 }
-                .feed-card .add-section.show button{
+                .feed-card .add-section button,
+                .feed-card .add-section .lock-warning{
+                    margin-top: -80px;
+                }
+                .feed-card .add-section.show button,
+                .feed-card .add-section.show .lock-warning
+                {
                     margin-top: 0px;
                 }   
                 
