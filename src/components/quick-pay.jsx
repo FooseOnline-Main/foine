@@ -149,7 +149,7 @@ const PayForm = ({page, data})=>{
     const handleCancel = (e)=>{
         e.preventDefault(); 
         unlockProduct(data.productId);
-        if(requested){
+        if(data.requested){
             joinHolders(data.userId, product);
         }        
         if(hasExpired) {
