@@ -6,7 +6,6 @@ import { useProducts } from '../providers/productProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 import { MdcCheckCircle } from '@meronex/icons/mdc'
 import Loader from './simple_loader';
-import { useNotification } from '../providers/notificationProvider';
 
 const QuickPay = () => {
     const {quickCheckout} = useWatchlist();
@@ -61,9 +60,8 @@ const QuickPay = () => {
 
 const PayForm = ({page, data})=>{
     const {user} = useAuth();
-    const {fetchProductById, acceptRequestCheckout, cancelRequestCheckout} = useProducts();
+    const {fetchProductById, unlockProduct, joinHolders} = useProducts();
     const {watchlist, removeFromWatchlist, emptyQuickCheckout, makePayment, verifyOTP} = useWatchlist();
-    const {notifyRequestCheckoutSuccess} = useNotification();
     const currentTime = new Date().getTime();
     const [product, setProduct] = useState(null);
     const hasExpired = Object.keys(data).includes("expired");
@@ -88,16 +86,6 @@ const PayForm = ({page, data})=>{
         provider: "",
         phone: user.phone || "",
     });
-
-    useEffect(() => {
-        if(success && data.charge){
-            acceptRequestCheckout({
-                userId: user.uid, 
-                productId: data.productId, 
-                charge: data.charge
-            });
-        }
-    }, [success]);
 
     useEffect(()=> {
         if(timeLeft <= 0){
@@ -133,7 +121,7 @@ const PayForm = ({page, data})=>{
             default:
                 stat = await makePayment(
                     {...formData, 
-                        amount: ((parseFloat(product.price) + (data.charge || 0)).toFixed(2)) * 100, 
+                        amount: (parseFloat(product.price).toFixed(2)) * 100, 
                         watchId: data.id
                     },
                     user.uid,
@@ -162,10 +150,11 @@ const PayForm = ({page, data})=>{
 
     const handleCancel = (e)=>{
         e.preventDefault(); 
+        if(data.requested){
+            unlockProduct(data.productId);
+            joinHolders(data.userId, product);
+        }
         if(hasExpired) {
-            if(data.charge !== null){
-                cancelRequestCheckout({userId: user.uid, productId: data.productId});
-            }
             removeFromWatchlist(data.productId) 
         }else{
             emptyQuickCheckout();
@@ -186,7 +175,7 @@ const PayForm = ({page, data})=>{
             <img src={product.imageUrl} alt="product" />
             
             <div className="details">
-                <h2 className="price">Gh&cent; {(parseFloat(product.price) + (data.charge || 0)).toFixed(2)}</h2>
+                <h2 className="price">Gh&cent; {parseFloat(product.price).toFixed(2)}</h2>
                 <input required value={formData.name} onChange={(e)=> handleChange(e, "username")} placeholder="Name for delivery" type="text" />
                 
                 {renderSelect([

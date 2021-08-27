@@ -158,54 +158,43 @@ function ProductsProvider({ children }) {
         }
     }
 
-    const getRequestById = (reqId)=>{
-        return purchaseReqRef.doc(reqId).get().then(res=> res.data());
-    }
+    const joinHolders = (userId, product)=> productsRef.doc(product.id).update({holders: [...product.holders, userId]})
 
-    const requestPurchase = (userId, product, callback=()=>{}) => {
+    const unlockProduct = (id)=> productsRef.doc(id).update({locked: false});
+
+    const getRequestById = (reqId)=>{ return purchaseReqRef.doc(reqId).get().then(res=> res.data()); }
+
+    const requestPurchase = (userId, product) => {
         if(product && userId){
             const requestId = v4();
-            // charges generator
-            const getCharges = ()=> {
-                const output = [];
-                const generateNumber = ()=>{
-                        let number = ((Math.random() + 0.1) * 5).toFixed(2);
-                        if(output.includes(number)){
-                            return generateNumber();
-                        }
-                        return number;
-                }
-                for (let x = 1; x <= 3; x++) { output.push(generateNumber()) }
-                return output;                        
-            }
-            // add purchase request
             purchaseReqRef.doc(requestId)
             .set({
                 id: requestId,
                 productId: product.id,
                 requestee: userId,
                 holder: product.heldBy,
-                charges: getCharges(),
-                accepted: false
             }).then(_=>{
-                notifyPurchaseRequest(product.heldBy, product.id, requestId);
-                callback();
+                productsRef.doc(product.id).update({locked: true});
             }).catch(error=>{
                 createError(error.message, 2000);
             })
         }
     }
 
-    const acceptPurchaseRequest = ({productId, charge, reqId, userId})=>{
-        return purchaseReqRef.doc(reqId).update({charge, accepted: true})
+    const acceptPurchaseRequest = ({productId, reqId, userId})=>{
+        return purchaseReqRef.doc(reqId).update({accepted: true})
         .then(async _=>{
-            const {status, message} = await acceptRequest({charge, userId, productId});
-            if(!status){
-                createError(message, 4000);
+            const {status, message} = await acceptRequest({userId, productId});
+            if(status){
+                productsRef.doc(productId).update({locked: true});
+                return true;
             }
+            createError(message, 4000);
+            return false;
         })
         .catch(({message})=>{
             createError(message, 2000)
+            return false;
         });
     }
 
@@ -359,8 +348,8 @@ function ProductsProvider({ children }) {
             fetchProducts, getProducts, holdProduct, fetchProductById, fetchRequests,
             unholdProduct, markProductsAsSold, searchProducts, requestPurchase, cancelRequestCheckout,
             cancelRequestPurchase, like, addToWishList, share, getProductById, acceptRequestCheckout,
-            comment, increaseWatch, reduceWatch, getRequestById, acceptPurchaseRequest,
-            denyPurchaseRequest 
+            comment, increaseWatch, reduceWatch, getRequestById, acceptPurchaseRequest, unlockProduct,
+            denyPurchaseRequest , joinHolders
         }}>
             {children}
         </ProductsContext.Provider>

@@ -1,130 +1,93 @@
 import React, { useState, Fragment, useMemo } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useProducts } from '../providers/productProvider';
 import '../css/negotiation.css';
 import { useEffect } from 'react';
-import Loader from './simple_loader';
-import { AiOutlineCheckCircle } from '@meronex/icons/ai';
-import { MdcCheckCircle, MdcCheckCircleOutline } from '@meronex/icons/mdc';
-import { useError } from '../providers/errorProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
+import { useAuth } from '../providers/authProvider';
+import Loader from './simple_loader';
 
 const NegotiationPopup = () => {
-    const {reqId} = useParams();
+    const {user} = useAuth();
     const history = useHistory();
-    const {createError} = useError();
-    const { requests, fetchProductById, getRequestById, acceptPurchaseRequest, denyPurchaseRequest } = useProducts();
-    const {createRequestPayment} = useWatchlist();
-    const [product, setProduct] = useState(null);
-    const [request, setRequest] = useState(null);
-    const [charge, setCharge] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [loadSuccess, setLoadSuccess] = useState(false);
-    const accepted = useMemo(()=>{
-        let output = false;
-        requests.forEach(req=> {
-            if(req.id === reqId && req.accepted){ 
-                output= true
-            }
-        });
-        return output;
-    }, [requests])
+    const { requests } = useProducts();
+    const pendingRequests = useMemo(()=>{
+        return requests.filter(req=> req.holder === user.uid);
+    }, [])
 
     useEffect(() => {
-        (async ()=>{
-            const requestRes = await getRequestById(reqId);
-            if(requestRes){
-                return setRequest(()=> requestRes);
-            }
+        if(pendingRequests.length < 1){
             history.replace("/");
-        })()
-    }, []);
+        }
+    }, [pendingRequests]);
+
+    // useEffect(() => {
+    //     (async ()=>{
+    //         const requestRes = await getRequestById(request.id);
+    //         if(requestRes){
+    //             return setRequest(()=> requestRes);
+    //         }
+    //         history.replace("/");
+    //     })()
+    // }, []);
+
+    return (<div className="nego-popup">
+            <div className="inner">
+                {pendingRequests.map((request, index)=> <ConfirmationBox key={request.id} index={index+1} total={pendingRequests.length} request={request} />)}
+            </div>
+        </div>
+    );
+}
+
+const ConfirmationBox = ({request, index, total})=>{
+    const history = useHistory();
+    const [product, setProduct] = useState(null);
+    const {addForQuickCheckout, removeFromWatchlist} = useWatchlist();
+    const { fetchProductById, unholdProduct, acceptPurchaseRequest, cancelRequestPurchase } = useProducts();
 
     useEffect(async () => {
         if(request){
             setProduct(await fetchProductById(request.productId));
-            return setLoading(false);
         }
     }, [request]);
 
-    useEffect(() => {
-        if(accepted){
-            setLoadSuccess(false);
-        }
-    }, [accepted]);
-
-    const handleAccept = ()=>{
-        setLoadSuccess(true);
-        if(accepted){
-            setLoadSuccess(false);
-            return createError("You have already accepted this purchase request.");
-        }
-        acceptPurchaseRequest({productId: request.productId, userId: request.requestee, charge, reqId});
+    const handleAccept = async ()=>{
+        removeFromWatchlist(product.id);
+        unholdProduct(request.holder, product);
+        acceptPurchaseRequest({productId: product.id, reqId: request.id, userId: request.requestee})
+        .then(()=>{ history.replace("/"); });
     }
 
-    const handleDeny = ()=>{
-        denyPurchaseRequest(product, reqId, ()=> history.replace('/'));
+    const handlePayNow = ()=>{
+        cancelRequestPurchase(request.requestee, product);
+        addForQuickCheckout(request.holder, request.productId, true);
     }
 
-    const handleSelectCharge = (val)=>{
-        if(!loadSuccess){
-            setCharge(()=> val)
-        }
-    }
-
-    const renderSuccess = ()=>{
-        const message = (request.charge || charge) ? 
-        `You'll receive a FOINE TOKEN of ✨ ${<span>Gh&cent;</span>} ${request.charge || charge} ✨ once the requestee checks out`
-        : "Today must be the requestee's lucky day😀";
-
-        return <div id="success">
-            <AiOutlineCheckCircle style={{marginBottom: 10}} size={80} color="limegreen"/>
-            <p>You have successfully accepted this purchase request. {message}</p>
+    return product ? <div className="request-box">
+        <div className="tag">{index} of {total}</div>
+        <div className="img-box">
+            <img src={product.imageUrl} alt={product.name} />
         </div>
-    }
-
-    return ((product && request) ? <div className="nego-popup">
-            <div onClick={()=>history.replace('/')} className="close-bg"></div>
-            <div className="inner">
+        <div className="confirm-box">
+            <div className="head">                            
+                <div className="details">
+                    <h4>Purchase Request</h4>
+                    <span style={{color: "var(--dark-color)"}}><small>GHC</small><big>{parseFloat(product.price).toFixed(2)}</big></span>
+                </div>
+            </div>                        
+            <div className="content">
+                <small>A customer is requesting for this product you are holding. Please checkout now or accept the request.</small>
                 <Fragment>
-                    <div className="img-box">
-                        <img src={product.imageUrl} alt={product.name} />
-                    </div>
-                    <div className="confirm-box">
-                        <div className="head">                            
-                            <div className="details">
-                                <h4>{request.accepted ? "Accepted Successfully" : "Confirm Request"}</h4>
-                                <span style={{color: "var(--dark-color)"}}><small>GHC</small><big>{(parseFloat(product.price) + charge).toFixed(2)}</big></span>
-                            </div>
-                        </div>                        
-                        <div className="content">
-                            {accepted ? renderSuccess() : 
-                            <Fragment>
-                            <h5>Select an option below:</h5>
-                            <div className="options">
-                            <div onClick={()=> handleSelectCharge(0)} className={`option ${charge === 0 ? "selected" : ""}`}>
-                                {charge === 0 ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
-                                <span>Let go free of charge</span>
-                            </div>
-                            {request.charges.map((c, key)=> 
-                            <div key={key} onClick={()=> handleSelectCharge(parseFloat(c))} className={`option ${charge === parseFloat(c) ? "selected" : ""}`}>
-                                {charge === parseFloat(c) ? <MdcCheckCircle size={25} color="var(--dark-color)"/> : <MdcCheckCircleOutline size={25} color="#aaa" />}
-                                <span>Ghc {c}</span>
-                            </div>)}
-                        </div>
-                            {request.accepted ? <Fragment></Fragment> : <div className="actions">
-                                <button onClick={handleAccept} id="accept">
-                                   {loadSuccess ? <Loader /> :  <p>Accept</p>}
-                                </button>
-                                <button onClick={handleDeny} id="deny"><p>Deny</p></button>
-                            </div>}
-                            </Fragment>}
-                        </div>
-                    </div>
+                    {<div className="actions">
+                        <button onClick={handlePayNow} id="accept">
+                        {<p>Pay Now</p>}
+                        </button>
+                        <button onClick={handleAccept} id="deny"><p>Accept</p></button>
+                    </div>}
                 </Fragment>
             </div>
-        </div> : <Loader expand={true} />
-    );
+        </div>
+    </div> : <Loader expand={true} />
 }
 
 export default NegotiationPopup;

@@ -1,6 +1,6 @@
 import '../css/home.css';
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { Route, useHistory } from "react-router-dom";
 
 import FloatNotifications from '../components/float_notifications';
@@ -16,15 +16,28 @@ import NotificationPopup from '../components/notification_popup';
 import NegotiationPopup from '../components/negotiation_popup';
 import QuickPay from '../components/quick-pay';
 import { useWatchlist } from '../providers/watchlistProvider';
+import { useAuth } from '../providers/authProvider';
+import { useProducts } from '../providers/productProvider';
 
 const HomePage = () => {
     const [searchString, setSearchString] = useState("");
+    const {user} = useAuth();
     const {quickCheckout} = useWatchlist();
+    const {requests} = useProducts();
     const history = useHistory();
+    const pendingRequests = useMemo(()=>{
+        return requests.filter(req=> req.holder === user.uid).length > 0;
+    }, [requests])
 
     const handleSearch = (string)=>{
         setSearchString(string);
     }
+
+    useEffect(() => {
+        if(pendingRequests){
+            history.push("/negotiate");
+        }
+    }, [pendingRequests]);
 
   useEffect(()=>{
     if(quickCheckout.length > 0){
@@ -57,7 +70,7 @@ const HomePage = () => {
                 <Route path="/notifications">
                     <NotificationPopup />
                 </Route>
-                <Route path="/negotiate/:reqId">
+                <Route path="/negotiate">
                     <NegotiationPopup />
                 </Route>
                 <Route path="/profile" >

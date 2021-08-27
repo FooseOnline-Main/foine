@@ -42,16 +42,29 @@ function WatchlistProvider({ children }) {
         }
     }
 
-    const addForQuickCheckout = (userId, productId)=>{
+    const addForQuickCheckout = (userId, productId, final=false)=>{
         if(productId && userId){
             watchlistRef
             .where("userId", "==", userId)
             .where("productId", "==", productId)
             .get()
             .then(res=>{
-                const item = res.docs[0];
+                const item = res.docs.map(i=> i.data())[0];
                 if(item){
-                    setQuickCheckout([item.data()]);
+                    if(final) {
+                        const now = new Date().getTime();
+                        watchlistRef.doc(item.id)
+                        .update({
+                            expired: true, 
+                            endedAt: now,
+                            extraTime: now + 180000,
+                            requested: true
+                        }).then(()=>{
+                            setQuickCheckout([item]);
+                        })
+                    }else{
+                        setQuickCheckout([item]);
+                    }
                 }
             })
         }
@@ -77,9 +90,9 @@ function WatchlistProvider({ children }) {
 
     const removeFromWatchlist = (prodId)=>{
         setLoading(true);
-        const watchId = watchlist.filter(item=> item.productId === prodId)[0].id;
-        if(watchId && watchlist.length > 0){
-            watchlistRef.doc(watchId).delete()
+        const watchItem = watchlist.filter(item=> item.productId === prodId)[0];
+        if(watchItem && watchlist.length > 0){
+            watchlistRef.doc(watchItem.id).delete()
             .then(_=>{
                 setLoading(false);
             })

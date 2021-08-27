@@ -6,7 +6,7 @@ import React, {Fragment, useMemo} from 'react';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 import { useState } from 'react';
-import { MdcChevronDownCircle, MdcChevronUpCircle } from '@meronex/icons/mdc';
+import { MdcChevronDownCircle, MdcChevronUpCircle, MdcLock } from '@meronex/icons/mdc';
 import { useEffect } from 'react';
 import Loader from './simple_loader';
 
@@ -113,17 +113,21 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                         <hr />
                     </div>
                     <div className={`add-section ${showButtons ? "show" : ""}`}>
-                        {feed.heldBy ? <Fragment></Fragment> :
-                            <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
-                        }
-                        {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                            <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
-                        : 
-                            <Fragment>
-                                <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{holdLoading ? <Loader /> : (feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
-                                {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=> addForQuickCheckout(user.uid, feed.id)}>Pay</button>}
-                            </Fragment>
-                        }
+                        {feed.locked && !requested ?  
+                        <button className="lock-banner">Temporarily Locked! <br /> This item will be unlocked in some few seconds.</button> : 
+                        <Fragment>    
+                            {feed.heldBy ? <Fragment></Fragment> :
+                                <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
+                            }
+                            {feed.status === 1 && !(feed.heldBy === user.uid) ? 
+                                <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
+                            : 
+                                <Fragment>
+                                    <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{holdLoading ? <Loader /> : (feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
+                                    {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=> addForQuickCheckout(user.uid, feed.id)}>Pay</button>}
+                                </Fragment>
+                            }
+                        </Fragment>}
                     </div>
                 </Fragment>
                 }
@@ -140,6 +144,14 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     background: #fff;
                     animation: slide-up .5s ease-in;
                     -webkit-animation: slide-up .5s ease-in;
+                }
+
+                .feed-card .lock-banner{
+                    background: #f56a3330;
+                    color: var(--dark-color);
+                    border-radius: 10px;
+                    font-size: 10px;
+                    padding: 10px;
                 }
 
                 @keyframes slide-up{
@@ -206,7 +218,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     cursor: pointer;
                     background: transparent;
                     box-sizing: content-box;
-                    margin-top: -50px;
+                    margin-top: -80px;
                     transition: all .15s linear;
                 }
                 .feed-card .add-section.show button{
