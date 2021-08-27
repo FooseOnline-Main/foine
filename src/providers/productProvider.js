@@ -187,6 +187,7 @@ function ProductsProvider({ children }) {
             const {status, message} = await acceptRequest({userId, productId});
             if(status){
                 productsRef.doc(productId).update({locked: true});
+                purchaseReqRef.doc(reqId).delete();
                 return true;
             }
             createError(message, 4000);

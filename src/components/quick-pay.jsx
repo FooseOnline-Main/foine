@@ -11,11 +11,9 @@ const QuickPay = () => {
     const {quickCheckout} = useWatchlist();
     const history = useHistory();
     
-    useEffect(() => {
-        if(quickCheckout.length < 1){
-            history.goBack();
-        }
-    }, [quickCheckout]);
+    if(quickCheckout.length < 1){
+        history.replace("/");
+    }
 
     return (
         <div id="quick-pay">
@@ -150,10 +148,10 @@ const PayForm = ({page, data})=>{
 
     const handleCancel = (e)=>{
         e.preventDefault(); 
-        if(data.requested){
-            unlockProduct(data.productId);
+        unlockProduct(data.productId);
+        if(requested){
             joinHolders(data.userId, product);
-        }
+        }        
         if(hasExpired) {
             removeFromWatchlist(data.productId) 
         }else{
@@ -172,6 +170,7 @@ const PayForm = ({page, data})=>{
         {product !== null && <div className="product-details">
             <div className="timer">{data.expired ? "Extra" : ""} {timeLeft}s Left</div>
             {page ? <div className="page">{page}</div> : <Fragment />}
+            
             <img src={product.imageUrl} alt="product" />
             
             <div className="details">

@@ -15,21 +15,9 @@ const NegotiationPopup = () => {
         return requests.filter(req=> req.holder === user.uid);
     }, [])
 
-    useEffect(() => {
-        if(pendingRequests.length < 1){
-            history.replace("/");
-        }
-    }, [pendingRequests]);
-
-    // useEffect(() => {
-    //     (async ()=>{
-    //         const requestRes = await getRequestById(request.id);
-    //         if(requestRes){
-    //             return setRequest(()=> requestRes);
-    //         }
-    //         history.replace("/");
-    //     })()
-    // }, []);
+    if(pendingRequests.length < 1){
+        history.replace("/");
+    }
 
     return (<div className="nego-popup">
             <div className="inner">
@@ -43,7 +31,7 @@ const ConfirmationBox = ({request, index, total})=>{
     const history = useHistory();
     const [product, setProduct] = useState(null);
     const {addForQuickCheckout, removeFromWatchlist} = useWatchlist();
-    const { fetchProductById, unholdProduct, acceptPurchaseRequest, cancelRequestPurchase } = useProducts();
+    const { fetchProductById, unholdProduct, deleteRequest, acceptPurchaseRequest, cancelRequestPurchase } = useProducts();
 
     useEffect(async () => {
         if(request){
@@ -55,7 +43,6 @@ const ConfirmationBox = ({request, index, total})=>{
         removeFromWatchlist(product.id);
         unholdProduct(request.holder, product);
         acceptPurchaseRequest({productId: product.id, reqId: request.id, userId: request.requestee})
-        .then(()=>{ history.replace("/"); });
     }
 
     const handlePayNow = ()=>{
