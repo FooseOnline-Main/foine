@@ -33,9 +33,9 @@ const LiveFeedSection = () => {
                 <div ref={scrollTopRef}></div>
                 {products.map((feed, id)=>(<LiveFeedCard expanded={expanded === id} onExpand={()=>setExpanded(id)} feed={feed} key={id} />))}
             </div>
-            <FilterBox show={showFilters} />
+            {/* <FilterBox show={showFilters} /> */}
             
-            <div id="helpers" className={`${showHelpers || showFilters ? "show" : ""}`}>
+            <div onMouseEnter={()=> setShowHelpers(true)} onMouseLeave={()=> setShowHelpers(false)} id="helpers" className={`${showHelpers || showFilters ? "show" : ""}`}>
                 {showScroll && <div onClick={()=>scrollTopRef.current.scrollIntoView({behavior: "smooth"})} data-label="Scroll to top">
                     <MdcChevronDoubleUp size={25} />
                 </div>}
@@ -45,9 +45,9 @@ const LiveFeedSection = () => {
                 <div data-label="For Males">
                     <MdcHumanMale size={25} />
                 </div>
-                <div data-label={showFilters ? "Close" : "Filter"} onClick={()=>setShowFilters(!showFilters)} className="filter">
+                {/* <div data-label={showFilters ? "Close" : "Filter"} onClick={()=>setShowFilters(!showFilters)} className="filter">
                     {showFilters ? <MdcCloseOutline size={25} /> : <MdcFilterOutline size={25} />}
-                </div>
+                </div> */}
             </div>
             <style jsx>{`
                 .feed-section .loader-area{
