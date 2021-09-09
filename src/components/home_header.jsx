@@ -29,39 +29,7 @@ const HomeHeader = ({onSearch}) => {
     const {user} = useAuth();
 
     const renderAuth = ()=>{
-        return <Fragment>
-        <button className='profile-button'>
-            <FiShoppingBag size={22} color="#555" />
-            {watchlist.length ? <div className="tag">{watchlist.length}</div> : <Fragment></Fragment>}
-            <div style={{minWidth: 210}} className="drop-down">
-                <p>All Items</p>
-                <div className="items-box">
-                    {products.map(item=> <div style={{backgroundImage: `url(${item.imageUrl})`}} className="item" />)}
-                </div>
-                <div className="checkout-space">
-                    <button>Pay Bulk</button>
-                    <div className="sub-total">
-                        <small>GH&cent;</small> <b>{totalPrice}</b>
-                    </div>
-                </div>
-            </div>
-        </button>
-        {user.isAnonymous ? 
-        <button className='profile-button'>
-            <FiUser size={22} color="#555" />
-            <MdcChevronDown size={18} color="#555" />
-            <div className="drop-down">
-                <Link to="/login" className="item">Log In</Link>
-                <Link to="/signup" className="item">Signup</Link>
-            </div>
-        </button> :
-        <Fragment>
-            <Link to='/profile' className='profile-button'>
-                <MdcAccountCircleOutline size={25} color="#555" />
-            </Link>
-        </Fragment>
-        }
-        </Fragment>
+        return 
     }
 
     return (
@@ -73,7 +41,36 @@ const HomeHeader = ({onSearch}) => {
                 <AiOutlineSearch size={20} color="#555" />
                 <input onChange={({target: {value}})=> onSearch(value)} type="text" placeholder='Search by name or category' aria-placeholder="Search by name or category" className="search-input"/>
             </div>
-            {renderAuth()}
+            <button className='profile-button'>
+                <FiShoppingBag size={22} color="#555" />
+                {watchlist.length ? <div className="tag">{watchlist.length}</div> : <Fragment></Fragment>}
+                <div style={{minWidth: 210}} className="drop-down">
+                    <p>All Items</p>
+                    <div className="items-box">
+                        {products.map(item=> <div style={{backgroundImage: `url(${item.imageUrl})`}} className="item" />)}
+                    </div>
+                    <div className="checkout-space">
+                        <button>Pay Bulk</button>
+                        <div className="sub-total">
+                            <small>GH&cent;</small> <b>{totalPrice}</b>
+                        </div>
+                    </div>
+                </div>
+            </button>
+            {user.isAnonymous ? 
+            <button className='profile-button'>
+                <FiUser size={22} color="#555" />
+                <MdcChevronDown size={18} color="#555" />
+                <div className="drop-down">
+                    <Link to="/login" className="item">Log In</Link>
+                    <Link to="/signup" className="item">Signup</Link>
+                </div>
+            </button> :
+            <Fragment>
+                <Link to='/profile' className='profile-button'>
+                    <MdcAccountCircleOutline size={25} color="#555" />
+                </Link>
+            </Fragment>}
             <style jsx>{`
                 .home-header{
                     padding: 10px 2.5%;
@@ -96,6 +93,13 @@ const HomeHeader = ({onSearch}) => {
                 @media(max-width: 500px){
                     .home-header .search-form{
                         display: flex;
+                    }
+                }
+
+                 @media(max-width: 400px){
+                    .home-header .search-form{
+                        width: 50px;
+                        overflow: hidden;
                     }
                 }
 
@@ -216,9 +220,7 @@ const HomeHeader = ({onSearch}) => {
                     .home-header h4{
                         margin-right: auto;
                     }
-                    .profile-button:not(:last-child){
-                        margin-right: 15px;
-                    }
+                    
                 }
             `}</style>
         </div>
