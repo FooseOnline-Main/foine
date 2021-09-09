@@ -1,23 +1,54 @@
 import { AiOutlineSearch } from '@meronex/icons/ai';
-import React, {Fragment} from 'react';
+import React, {Fragment, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
-import { useNotification } from '../providers/notificationProvider';
-import { MdcAccountCircleOutline, MdcAccountOutline, MdcBell, MdcCartOutline, MdcChevronDown } from '@meronex/icons/mdc';
+// import { useNotification } from '../providers/notificationProvider';
+import { MdcAccountCircleOutline, MdcChevronDown } from '@meronex/icons/mdc';
+import { FiShoppingBag, FiUser } from '@meronex/icons/fi';
+import { useWatchlist } from '../providers/watchlistProvider';
+import { useProducts } from '../providers/productProvider';
 
 const HomeHeader = ({onSearch}) => {
-    const {unread} = useNotification();
+    const {watchlist} = useWatchlist();
+    const {fetchProductById} = useProducts();
+    const [products, setProducts] = useState([]);
+    const [totalPrice, setTotalPrice] = useState(0);
+
+    useEffect(() => {
+        setProducts([]);
+        setTotalPrice(0);
+        watchlist.forEach(async item=> {
+            const data = await fetchProductById(item.productId);
+            if(data){
+                setProducts(old => [...old, data]);
+                setTotalPrice(old => (parseFloat(data.price) + parseFloat(old)).toFixed(2))
+            }
+        });   
+    }, [watchlist, setProducts, setTotalPrice]);
+
     const {user} = useAuth();
 
     const renderAuth = ()=>{
         return <Fragment>
-        <Link to="/notifications" className='profile-button'>
-            <MdcBell size={22} color="#555" />
-            {unread.length ? <div className="tag">{unread.length}</div> : <Fragment></Fragment>}
-        </Link>
+        <button className='profile-button'>
+            <FiShoppingBag size={22} color="#555" />
+            {watchlist.length ? <div className="tag">{watchlist.length}</div> : <Fragment></Fragment>}
+            <div style={{minWidth: 210}} className="drop-down">
+                <p>All Items</p>
+                <div className="items-box">
+                    {products.map(item=> <div style={{backgroundImage: `url(${item.imageUrl})`}} className="item" />)}
+                </div>
+                <div className="checkout-space">
+                    <button>Pay Bulk</button>
+                    <div className="sub-total">
+                        <small>GH&cent;</small> <b>{totalPrice}</b>
+                    </div>
+                </div>
+            </div>
+        </button>
         {user.isAnonymous ? 
         <button className='profile-button'>
-            <MdcAccountCircleOutline size={25} color="#555" />
+            <FiUser size={22} color="#555" />
             <MdcChevronDown size={18} color="#555" />
             <div className="drop-down">
                 <Link to="/login" className="item">Log In</Link>
@@ -30,7 +61,6 @@ const HomeHeader = ({onSearch}) => {
             </Link>
         </Fragment>
         }
-        
         </Fragment>
     }
 
@@ -65,7 +95,7 @@ const HomeHeader = ({onSearch}) => {
 
                 @media(max-width: 500px){
                     .home-header .search-form{
-                        display: none;
+                        display: flex;
                     }
                 }
 
@@ -107,10 +137,47 @@ const HomeHeader = ({onSearch}) => {
                     transition: all .15s linear;
                     background: #fff;
                     box-shadow: 0 0 10px 1px #00000010;
-                    border-radius: 10px;
+                    border-radius: 8px;
                     z-index: 10;
-                    min-width: 100px;
+                    min-width: 150px;
                     overflow: hidden;
+                }
+
+                .profile-button .items-box{
+                    padding: 10px;
+                    display: flex;
+                    column-gap: 10px;
+                    flex-wrap: wrap;
+                    max-height: 220px;
+                    min-height: 120px;
+                    overflow: auto;
+                }
+                .profile-button .items-box::-webkit-scrollbar{ display: none }
+
+                .profile-button .items-box .item{
+                    width: 40px; height: 40px;
+                    border-radius: 50%;
+                    background: #eee;
+                    margin-bottom: 10px;
+                    background-size: cover;
+                    background-position: center;
+                }
+                .profile-button .checkout-space{
+                    display: flex;
+                    justify-content: space-between;
+                    column-gap: 10px;
+                    padding: 10px;
+                    align-items: center;
+                }
+
+                .checkout-space button{
+                    padding: 8px 12px;
+                    border: none;
+                    border-radius: 10px;
+                    background: #222;
+                    color: #fff;
+                    cursor: pointer;
+                    font-size: 10px;
                 }
 
                 .profile-button:focus .drop-down,
@@ -121,7 +188,7 @@ const HomeHeader = ({onSearch}) => {
                 }
 
                 .profile-button .drop-down .item{
-                    padding: 10px 10px;
+                    padding: 10px 20px;
                     white-space: nowrap;
                     font-size: 12px;
                     border: none;

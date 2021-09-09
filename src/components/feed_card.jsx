@@ -6,17 +6,21 @@ import React, {Fragment, useMemo} from 'react';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 import { useState } from 'react';
-import { MdcChevronDownCircle, MdcChevronUpCircle, MdcLock } from '@meronex/icons/mdc';
 import { useEffect } from 'react';
 import Loader from './simple_loader';
+import InputBox from './input_box';
 
 const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {user} = useAuth();
     const {holdProduct, unholdProduct, requests, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
-    const {isWatching, addToWatchlist, removeFromWatchlist, addForQuickCheckout} = useWatchlist();
+    const {isWatching, addToWatchlist, removeFromWatchlist, makePayment, verifyOTP, addForQuickCheckout} = useWatchlist();
+    const [showCheckout, setShowCheckout] = useState(false);
+    const [status, setStatus] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [otp, setOtp] = useState({
+        otp: "", reference: ""
+    });
     const productId = feed.id;
-    const [showButtons, setShowButtons] = useState(false);
-    const [holdLoading, setHoldLoading] = useState(false);
     const requested = useMemo(()=>{
         let output = false;
         requests.forEach(req=>{
@@ -27,15 +31,20 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
         return output;
     }, [requests]);
 
-    useEffect(()=> setHoldLoading(false), [feed])
+    const [paymentForm, setPaymentForm] = useState({
+        phone: "",
+        provider: "mtn"
+    });
 
     useEffect(() => {
         if(expanded){
-            setShowButtons(true);
+            setShowCheckout(true);
         }else{
-            setShowButtons(false);
+            setShowCheckout(false);
         }
     }, [expanded]);
+
+    // useEffect(()=> setHoldLoading(false), [feed])
 
     const onViewItem = ()=>{
         // set current open feed
@@ -53,22 +62,42 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
         }
     }
 
-    const handleHoldItem = ()=>{
-        setHoldLoading(true);
-        if(feed.heldBy !== ""){
-            unholdProduct(user.uid, feed);
-            removeFromWatchlist(feed.id)
-            reduceWatch(feed);
-        }else{
-            holdProduct(user.uid, feed, ()=> setHoldLoading(false));
-        }
-    }
+    const handleSubmit = async (e)=>{
+        e.preventDefault();
+        setLoading(true);
+        let stat;
 
-    const handleRequestPurchase = ()=>{
-        if(requested){
-            cancelRequestPurchase(user.uid, feed);
-        }else{
-            requestPurchase(user.uid, feed);
+        switch(status){
+            case 1:
+                stat = await verifyOTP({otp, userId: user.uid});
+                break;
+
+            default:
+                stat = await makePayment(
+                    {...paymentForm, 
+                        amount: (parseFloat(feed.price).toFixed(2)) * 100,
+                    }, 
+                    user.uid,
+                    [{id: feed.id, imageUrl: feed.imageUrl, price: feed.price, size: feed.size}],
+                );
+                break;
+        }
+
+        if(stat){
+            setLoading(false);
+            switch(stat){
+                case "send_otp":
+                    setStatus(1);
+                    break;
+
+                case "pay_offline":
+                    setStatus(2)
+                    break;
+
+                default:
+                    setStatus(0)
+                    break;
+            }
         }
     }
 
@@ -93,7 +122,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
             </div> : <Fragment></Fragment>}
 
             {/* details */}
-            <div  onMouseOut={()=> setShowButtons(false)} onMouseOver={()=> {onExpand(); setShowButtons(true)}} className="details" onClick={onViewItem}>
+            <div className="details" onClick={onViewItem}>
                 <Link to={`/preview-product/${feed.id}`} >
                     {/* <h3>{feed.name}</h3> */}
                     <div className="flex">
@@ -102,33 +131,57 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     </div>
                 </Link>
                 
+
                 {/* add section */}
                 {feed.sold ? <Fragment></Fragment> :
                 <Fragment>
-                    <div className="buttons-toggler">
-                        <hr />
-                        {showButtons ? 
-                        <MdcChevronUpCircle style={{cursor: "pointer"}} size={20} color="#555" /> : 
-                        <MdcChevronDownCircle style={{cursor: "pointer"}} size={20} color="#555" />}
-                        <hr />
-                    </div>
-                    <div className={`add-section ${showButtons ? "show" : ""}`}>
-                        {feed.locked && !requested ?  
-                        <div className="lock-warning">Temporarily Locked! <br /> This item will be unlocked in some few seconds.</div> : 
-                        <Fragment>    
-                            {feed.heldBy ? <Fragment></Fragment> :
-                                <button className="watch" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Return" : "Buy"}</button>
-                            }
-                            {feed.status === 1 && !(feed.heldBy === user.uid) ? 
-                                <button style={{flex: 1}} onClick={handleRequestPurchase} className="hold">{requested ? "Cancel Request" : "Request"}</button>
-                            : 
+                    <div className={`add-section show`}><Fragment>    
+                            <button className="watch" onClick={()=> {
+                                const value = !showCheckout;
+                                setShowCheckout(value); 
+                                onExpand();
+                                if(!value) setStatus(0);
+                            }}>
+                                {showCheckout ? "Cancel" : "Buy Now"}</button>
                                 <Fragment>
-                                    <button style={{flex: feed.heldBy === (user.uid ) ? 1 : 0}} className="hold" onClick={handleHoldItem}>{holdLoading ? <Loader /> : (feed.heldBy === user.uid ) ? "Drop" : "Hold"}</button>
-                                    {(feed.heldBy === user.uid) && <button style={{flex: 0}} className="watch" onClick={()=> addForQuickCheckout(user.uid, feed.id)}>Pay</button>}
+                                    <button style={{flex: 1}} className="hold" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Remove" : "Buy + more"}</button>
                                 </Fragment>
-                            }
-                        </Fragment>}
+                        </Fragment>
                     </div>
+
+                    {/* Phone number field */}
+                    {status === 0 && <form onSubmit={handleSubmit} className={`payment-form ${showCheckout ? "show" : ""}`}>
+                        <ProviderOptionsSelect value={paymentForm.provider} onSelect={provider=> setPaymentForm({...paymentForm, provider})} />
+                        <InputBox 
+                            name="phone" 
+                            placeholder="Enter phone number" 
+                            value={paymentForm.phone} type="number" 
+                            style={{padding: "5px 0", width: "100%"}} 
+                            onChange={({target: {value: phone}})=> setPaymentForm({...paymentForm, phone})} 
+                        />
+                        <button disabled={loading} className="watch">{loading ? "Loading..." : "Pay"}</button>
+                    </form>}
+
+
+                    {/* OTP form field */}
+                    {status === 1 && <form onSubmit={handleSubmit} className={`payment-form ${showCheckout ? "show" : ""}`}>
+                        <p style={{textAlign: "center", marginBottom: 10}}>Enter the otp code sent to your device below.</p>
+                        <InputBox 
+                            value={otp.otp} 
+                            name="otp" type="text" 
+                            placeholder="Enter OTP here" 
+                            style={{padding: "5px 0", width: "100%"}} 
+                            onChange={({target: {value}})=> setPaymentForm({...otp, otp: value})} 
+                        />
+                        <button disabled={loading} className="watch">{loading ? "Submitting..." : "Submit OTP"}</button>
+                    </form>}
+
+
+                    {/* Submit Button field */}
+                    {status === 2 && <form onSubmit={handleSubmit} className={`payment-form ${showCheckout ? "show" : ""}`}>
+                        <p style={{textAlign: "center", marginBottom: 10}}>Finalize payment on your device by entering your PIN.</p>
+                        <Loader />
+                    </form>}
                 </Fragment>
                 }
             </div>
@@ -142,6 +195,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     border-radius: 20px;
                     margin-bottom: 15px;
                     background: #fff;
+                    border: 3px solid #555;
                     animation: slide-up .5s ease-in;
                     -webkit-animation: slide-up .5s ease-in;
                 }
@@ -167,7 +221,8 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     margin-top: 10px;
                     margin-left: 10px;
                     border-radius: 20px;
-                    box-shadow: 0 10px 10px 1px #00000010;
+                    box-shadow: 0 10px 10px 1px #00000000;
+                    border: 1px solid #eee;
                 }
 
                 .feed-card .held-stamp{
@@ -209,8 +264,24 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                 .feed-card .add-section.show{
                     padding-bottom: 20px;
                 }
+
+                .feed-card .payment-form{
+                    display: flex;
+                    flex-direction: column;
+                    align-items: stretch;
+                    padding-bottom: 10px;
+                    overflow: hidden;
+                }
+                .feed-card .payment-form > *{
+                    margin-top: -200px;
+                    transition: .25s linear;
+                }
+                .feed-card .payment-form.show > *{
+                    margin-top: 0px;
+                }
                 
-                .feed-card .add-section button{
+                .feed-card button{
+                    flex: 1;
                     border: none;
                     border-radius: 10px;
                     padding: 10px 20px;
@@ -219,10 +290,11 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     background: transparent;
                     box-sizing: content-box;
                     transition: all .15s linear;
+                    white-space: wrap;
                 }
-                .feed-card .add-section button,
-                .feed-card .add-section .lock-warning{
-                    margin-top: -80px;
+                .feed-card button,
+                .feed-card .lock-warning{
+                    margin-top: 0px;
                 }
                 .feed-card .add-section.show button,
                 .feed-card .add-section.show .lock-warning
@@ -230,13 +302,13 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     margin-top: 0px;
                 }   
                 
-                .feed-card .add-section button.watch{
-                    flex: 1;
-                    background: var(--dark-color);
+                .feed-card button.watch{
+                    background: var(--dark-colo);
+                    background: #222;
                     color: #fff;
                 }
-                .feed-card .add-section button.hold{
-                    border: 1px dashed #222;
+                .feed-card button.hold{
+                    border: 2px solid #222;
                     color: #222;
                 }
 
@@ -308,6 +380,45 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
             `}</style>
         </div>
     );
+}
+
+const ProviderOptionsSelect = ({onSelect, value})=>{
+    const providers = [
+        {name: "MTN", value: "mtn"},
+        {name: "Vodafone", value: "vod"},
+        {name: "Airtel/Tigo", value: "tgo"},
+    ];
+
+    return <div className="provider-select">
+        {providers.map(p=> <div 
+        onClick={()=>onSelect(p.value)}
+        className={`provider ${value === p.value ? "active" : ""}`}>
+            {p.name}
+        </div>)}
+        <style jsx>{`
+            .provider-select{
+                display: flex;
+                align-items: center;
+                column-gap: 10px;
+                justify-content: space-around;
+            }    
+
+            .provider{
+                padding: 5px 10px;
+                white-space: nowrap;
+                font-size: 10px;
+                color: #555;
+                border: 1px solid #222;
+                border-radius: 20px;
+                margin-bottom: 10px;
+                cursor: pointer;
+            }
+            .provider.active{
+                background: #222;
+                color: #fff;
+            }
+        `}</style>
+    </div>
 }
 
 export default LiveFeedCard;

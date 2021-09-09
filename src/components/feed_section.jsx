@@ -89,6 +89,13 @@ const LiveFeedSection = () => {
                     }
                 }
 
+                @media(max-width: 450px){
+                    .feed-section > .inner{
+                        columns: 1;
+                        padding: 10px 2%;
+                    }
+                }
+
                 #helpers{
                     position: fixed;
                     bottom: 50px;

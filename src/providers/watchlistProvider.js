@@ -43,31 +43,19 @@ function WatchlistProvider({ children }) {
     }
 
     const addForQuickCheckout = (userId, productId, final=false)=>{
-        if(productId && userId){
-            watchlistRef
-            .where("userId", "==", userId)
-            .where("productId", "==", productId)
-            .get()
-            .then(res=>{
-                const item = res.docs.map(i=> i.data())[0];
-                if(item){
-                    if(final) {
-                        const now = new Date().getTime();
-                        watchlistRef.doc(item.id)
-                        .update({
-                            expired: true, 
-                            endedAt: now,
-                            extraTime: now + 180000,
-                            requested: true
-                        }).then(()=>{
-                            setQuickCheckout([item]);
-                        })
-                    }else{
-                        setQuickCheckout([item]);
-                    }
-                }
-            })
-        }
+        // if(productId && userId){
+
+            const createdAt = new Date().getTime();
+            const id = v4();
+            const item = {id, userId, productId, createdAt}
+            setQuickCheckout([item]);
+
+            // watchlistRef.doc(id)
+            // .set(item)
+            // .then(()=>{
+            //     setQuickCheckout([item]);
+            // })
+        // }
     }
 
     const emptyQuickCheckout = ()=> setQuickCheckout([])
@@ -116,16 +104,16 @@ function WatchlistProvider({ children }) {
 
     const makePayment = async (formData, userId, products)=>{
         if(formData){
-            const {watchId, username, delivery, amount, provider, phone} = formData;
+            const {watchId, amount, provider, phone} = formData;
             const temp = {
-                    delivery,
-                    userDetails: {id: userId, username, phone},
-                    products,
-                    amount,
-                };
+                userDetails: {id: userId, phone},
+                products,
+                amount,
+            };
             
-            const {status, data} = await pay({provider, phone, amount});
-                
+            console.log({provider, phone, amount});
+            const {status, data: {data}} = await pay({provider, phone, amount});
+
             if(status){
                 if(watchId){
                     tempCheckoutRef.doc(watchId).set({...temp, watchId, reference: data.reference});

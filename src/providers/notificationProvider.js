@@ -22,6 +22,12 @@ function NotificationProvider({ children }) {
     const [action, setAction] = useState(null);
     const resetAction = ()=> setAction(null);
 
+    // OTP SERVICE
+    const signal = new window.AbortController();
+    setTimeout(()=>{
+        signal.abort();
+    }, 60 * 1000);
+
     // initializing firestore refs
     const store = firebase.firestore();
     const notificationsRef = store.collection('notifications');
@@ -42,6 +48,30 @@ function NotificationProvider({ children }) {
             });
         }
     }, [user]);
+
+    const getOtp = async (callback)=>{
+        if('OTPCredential' in window){
+            try{
+                if(navigator.credentials){
+                    try{
+                        await navigator.credentials.get({
+                            abort: signal, 
+                            otp: {transport: ['sms']}
+                        })
+                        .then(content=> {
+                            if(content && content.code){
+                                callback(content.code);
+                            }
+                        })
+                    }catch(error){
+                        console.log({error})
+                    }
+                }
+            }catch(error){
+                console.log({error})
+            }
+        }
+    }
 
     const notifyHold = (productId)=>{
         watchlistRef.where("productId", "==", productId).get()
@@ -229,8 +259,8 @@ function NotificationProvider({ children }) {
 
     return (
         <NotificationContext.Provider value={{
-            notifications, loading, unread, action, 
-            notifyHold, notifyUnheld, deleteNotification, markAsRead,
+            notifications, loading, unread, action, getOtp,
+            notifyHold, notifyUnheld, deleteNotification, markAsRead, 
             notifyPurchaseRequest, resetAction, notifyAcceptedRequest,
             notifyDeniedRequest, notifyCancelRequestCheckout, notifyRequestCheckoutSuccess
         }}>

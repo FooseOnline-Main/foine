@@ -1,9 +1,9 @@
 import React from 'react';
 
-const InputBox = ({name, icon: Icon, placeholder, type, value="", onChange})=>{
-    return <div className="input-box">
-        <Icon size={18} color="#222" />
-        <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} />
+const InputBox = ({name, icon: Icon, placeholder, type, value="", onChange, inputStyle, ...rest})=>{
+    return <div {...rest} className="input-box">
+        {Icon && <Icon size={18} color="#222" />}
+        <input style={inputStyle} type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} />
         <style jsx>{`
             .input-box{
                 padding: 10px;

@@ -33,7 +33,7 @@ const QuickPay = () => {
                     width: 100%; height: 100%;
                     display: grid;
                     place-items: center;
-                    background: #00000050;
+                    background: #fff2;
                     backdrop-filter: blur(5px);
                     -webkit-backdrop-filter: blur(5px);
                     z-index: 1;
@@ -49,6 +49,7 @@ const QuickPay = () => {
                     overflow: auto;
                     scroll-snap-type: mandatory;
                     scroll-snap-type: x mandatory;
+                    border: 3px solid #555;
                 }
                 #quick-pay .form-box::-webkit-scrollbar{ display: none; }
             `}</style>
@@ -226,7 +227,7 @@ const PayForm = ({page, data})=>{
             .pay-form .overlay{
                 position: absolute;
                 top: 0;
-                left: 0; 
+                left: 0;
                 width: 100%; height: 100%;
                 background: #ffffffc0;
                 text-align: center;

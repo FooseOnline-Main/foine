@@ -56,7 +56,7 @@ const HomePage = () => {
                 <div className="page-body">
                     <LiveFeedSection />
                 </div>
-                <QuickWatchlistView />
+                {/* <QuickWatchlistView /> */}
                 <FloatNotifications />
                 <Route path="/login">
                     <LoginForm />
