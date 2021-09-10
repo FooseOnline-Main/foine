@@ -15,6 +15,7 @@ const client = axios.create({
 
 export async function pay(body){
     body = {...body, email: "myfoine@gmail.com", paymentMethod: "mobile_money"}
+    console.log({body})
     try {
         const {data} = await client.post('/transaction/charge', JSON.stringify(body));
         return data;

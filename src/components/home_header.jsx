@@ -3,16 +3,25 @@ import React, {Fragment, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../providers/authProvider';
 // import { useNotification } from '../providers/notificationProvider';
-import { MdcAccountCircleOutline, MdcChevronDown } from '@meronex/icons/mdc';
+import { MdcAccountCircleOutline, MdcChevronDown, MdcClose } from '@meronex/icons/mdc';
 import { FiShoppingBag, FiUser } from '@meronex/icons/fi';
 import { useWatchlist } from '../providers/watchlistProvider';
 import { useProducts } from '../providers/productProvider';
+import InputBox from './input_box';
 
 const HomeHeader = ({onSearch}) => {
-    const {watchlist} = useWatchlist();
+    const {watchlist, removeFromWatchlist, reduceWatch} = useWatchlist();
     const {fetchProductById} = useProducts();
     const [products, setProducts] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
+    const [formData, setFormData] = useState({
+        provider: "mtn",
+        phone: "",
+        otp: {
+            reference: "",
+            otp: ""
+        }
+    });
 
     useEffect(() => {
         setProducts([]);
@@ -27,10 +36,6 @@ const HomeHeader = ({onSearch}) => {
     }, [watchlist, setProducts, setTotalPrice]);
 
     const {user} = useAuth();
-
-    const renderAuth = ()=>{
-        return 
-    }
 
     return (
         <div className='home-header'>
@@ -47,10 +52,26 @@ const HomeHeader = ({onSearch}) => {
                 <div style={{minWidth: 210}} className="drop-down">
                     <p>All Items</p>
                     <div className="items-box">
-                        {products.map(item=> <div style={{backgroundImage: `url(${item.imageUrl})`}} className="item" />)}
+                        {products.map(item=> <div style={{backgroundImage: `url(${item.imageUrl})`}} className="item">
+                            <div onClick={()=>{ removeFromWatchlist(item.id); reduceWatch(item)}} className="remover">
+                                <MdcClose size={20} color="#ffff" />
+                            </div>
+                        </div>)}
+                    </div>
+                    <div className="providers">
+                        <div onClick={()=> setFormData({...formData, provider: "mtn"})} className={`prov ${formData.provider === "mtn" ? "active" : ""}`}>MTN</div>
+                        <div onClick={()=> setFormData({...formData, provider: "vod"})} className={`prov ${formData.provider === "vod" ? "active" : ""}`}>Vodafone</div>
+                        <div onClick={()=> setFormData({...formData, provider: "tgo"})} className={`prov ${formData.provider === "tgo" ? "active" : ""}`}>Airtel/Tigo</div>
+                    </div>
+                    <div style={{padding: "0 10px"}}>
+                        <InputBox 
+                            style={{padding: 5}} value={formData.phone} 
+                            onChange={({target: {value}})=>{setFormData({...formData, phone: value})}} 
+                            placeholder="Enter phone number..." 
+                        />
                     </div>
                     <div className="checkout-space">
-                        <button>Pay Bulk</button>
+                        <button style={{flex: 1}}>Pay Bulk</button>
                         <div className="sub-total">
                             <small>GH&cent;</small> <b>{totalPrice}</b>
                         </div>
@@ -166,11 +187,44 @@ const HomeHeader = ({onSearch}) => {
                     background-size: cover;
                     background-position: center;
                 }
+                .profile-button .items-box .item .remover{
+                    position: absolute;
+                    inset: 0;
+                    opacity: 0;
+                    width: inherit; 
+                    height: inherit;
+                    border-radius: inherit;
+                    display: grid;
+                    place-items: center;
+                    background-color: #0005;
+                }
+                .profile-button .items-box .item:hover .remover{
+                    opacity: 1;
+                }
+                .profile-button .providers{
+                    display: flex;
+                    column-gap: 10px;
+                    padding: 10px;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                .profile-button .providers .prov{
+                    padding: 5px 10px;
+                    font-size: 10px;
+                    border: 1px solid #222;
+                    color: #222;
+                    border-radius: 20px;
+                }
+                .profile-button .providers .prov.active{
+                    background: #222;
+                    color: #ffff;
+                }
                 .profile-button .checkout-space{
                     display: flex;
                     justify-content: space-between;
                     column-gap: 10px;
                     padding: 10px;
+                    padding-top: 0;
                     align-items: center;
                 }
 

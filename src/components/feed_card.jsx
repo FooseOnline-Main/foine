@@ -12,24 +12,13 @@ import InputBox from './input_box';
 
 const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {user} = useAuth();
-    const {holdProduct, unholdProduct, requests, requestPurchase, cancelRequestPurchase, increaseWatch, reduceWatch} = useProducts();
-    const {isWatching, addToWatchlist, removeFromWatchlist, makePayment, verifyOTP, addForQuickCheckout} = useWatchlist();
+    const {requests, increaseWatch, reduceWatch} = useProducts();
+    const {isWatching, addToWatchlist, removeFromWatchlist, makePayment, verifyOTP} = useWatchlist();
     const [showCheckout, setShowCheckout] = useState(false);
     const [status, setStatus] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [otp, setOtp] = useState({
-        otp: "", reference: ""
-    });
+    const [otp, setOtp] = useState("");
     const productId = feed.id;
-    const requested = useMemo(()=>{
-        let output = false;
-        requests.forEach(req=>{
-            if(req.requestee === user.uid && req.productId === feed.id){
-                output = true;
-            }
-        });
-        return output;
-    }, [requests]);
 
     const [paymentForm, setPaymentForm] = useState({
         phone: "",
@@ -43,8 +32,6 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
             setShowCheckout(false);
         }
     }, [expanded]);
-
-    // useEffect(()=> setHoldLoading(false), [feed])
 
     const onViewItem = ()=>{
         // set current open feed
@@ -167,15 +154,15 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     {status === 1 && <form onSubmit={handleSubmit} className={`payment-form ${showCheckout ? "show" : ""}`}>
                         <p style={{textAlign: "center", marginBottom: 10}}>Enter the otp code sent to your device below.</p>
                         <InputBox 
-                            value={otp.otp} 
+                            value={otp} 
                             name="otp" type="text" 
                             placeholder="Enter OTP here" 
                             style={{padding: "5px 0", width: "100%"}} 
-                            onChange={({target: {value}})=> setPaymentForm({...otp, otp: value})} 
+                            onChange={({target: {value}})=> setOtp(value)} 
                         />
                         <button disabled={loading} className="watch">{loading ? "Submitting..." : "Submit OTP"}</button>
                     </form>}
-
+                    
 
                     {/* Submit Button field */}
                     {status === 2 && <form onSubmit={handleSubmit} className={`payment-form ${showCheckout ? "show" : ""}`}>
