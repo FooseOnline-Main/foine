@@ -1,8 +1,8 @@
 import { getStatus, useProducts } from '../providers/productProvider';
 
-import { AiOutlineCheck, AiOutlineEye } from '@meronex/icons/ai';
+import { AiOutlineEye } from '@meronex/icons/ai';
 import { Link } from 'react-router-dom';
-import React, {Fragment, useMemo} from 'react';
+import React, {Fragment} from 'react';
 import { useAuth } from '../providers/authProvider';
 import { useWatchlist } from '../providers/watchlistProvider';
 import { useState } from 'react';
@@ -12,7 +12,7 @@ import InputBox from './input_box';
 
 const LiveFeedCard = ({feed, onExpand, expanded}) => {
     const {user} = useAuth();
-    const {requests, increaseWatch, reduceWatch} = useProducts();
+    const {increaseWatch, reduceWatch} = useProducts();
     const {isWatching, addToWatchlist, removeFromWatchlist, makePayment, verifyOTP} = useWatchlist();
     const [showCheckout, setShowCheckout] = useState(false);
     const [status, setStatus] = useState(0);
@@ -62,7 +62,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
             default:
                 stat = await makePayment(
                     {...paymentForm, 
-                        amount: (parseFloat(feed.price).toFixed(2)) * 100,
+                        amount: (parseFloat(feed.price)) * 100,
                     }, 
                     user.uid,
                     [{id: feed.id, imageUrl: feed.imageUrl, price: feed.price, size: feed.size}],
@@ -123,16 +123,21 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                 {feed.sold ? <Fragment></Fragment> :
                 <Fragment>
                     <div className={`add-section show`}><Fragment>    
-                            <button className="watch" onClick={()=> {
+                            <button className="watch" 
+                            onClick={()=> {
                                 const value = !showCheckout;
                                 setShowCheckout(value); 
                                 onExpand();
-                                if(!value) setStatus(0);
+                                if(!value) {
+                                    setStatus(0)
+                                };
+                                setLoading(false);
                             }}>
-                                {showCheckout ? "Cancel" : "Buy Now"}</button>
-                                <Fragment>
-                                    <button style={{flex: 1}} className="hold" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Remove" : "Buy + more"}</button>
-                                </Fragment>
+                                {showCheckout ? "Cancel" : "Buy Now"}
+                            </button>
+                            <Fragment>
+                                <button style={{flex: 1}} className="hold" onClick={handleAddToWatchlist}>{isWatching(feed.id) ? "Remove" : "Buy + more"}</button>
+                            </Fragment>
                         </Fragment>
                     </div>
 
@@ -176,13 +181,12 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                 .feed-card{
                     min-height: 250px;
                     break-inside: avoid;
-                    box-shadow: 0 0 20px 1px #00000010;
+                    box-shadow: 0 0 20px 1px #00000015;
                     overflow: hidden;
                     padding: 0px;
                     border-radius: 20px;
                     margin-bottom: 15px;
                     background: #fff;
-                    border: 3px solid #555;
                     animation: slide-up .5s ease-in;
                     -webkit-animation: slide-up .5s ease-in;
                 }
@@ -207,7 +211,7 @@ const LiveFeedCard = ({feed, onExpand, expanded}) => {
                     margin: 10px auto;
                     margin-top: 10px;
                     margin-left: 10px;
-                    border-radius: 20px;
+                    border-radius: 20px 20px 0 0;
                     box-shadow: 0 10px 10px 1px #00000000;
                     border: 1px solid #eee;
                 }

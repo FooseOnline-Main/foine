@@ -106,13 +106,13 @@ function WatchlistProvider({ children }) {
         if(formData){
             const {watchId, amount, provider, phone} = formData;
             const temp = {
-                userDetails: {id: userId, phone},
-                products,
-                amount,
-            };
+                    userDetails: {id: userId, phone},
+                    products,
+                    amount,
+                };
             
-            console.log({provider, phone, amount});
             const {status, data: {data}} = await pay({provider, phone, amount});
+            console.log({data})
 
             if(status){
                 if(watchId){
