@@ -74,4 +74,14 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 Welcome to Foose Online App documentation where you'll learn about the various directories and files available in there.
 
 ## Files And Directories
-In the ### `src` folder
+### Api
+In the `src/api` folder, there's an `index.js` file which contains code for fetching data from the backend using `Axios`.
+
+### Components
+The `src/components` folder contains all seperable components
+
+### Providers
+Using the react `useContext` hook for state management. All modules created with this hook was provided through the at the top-most level of the app ie: `index.js` which allows other components to be able to access the states of the modules.
+
+The `src/providers` directory contains all state management files for the following modules
+`Auth module`, `notification module`, `orders module`, `products module`, `watchlist module`, and `error module`
