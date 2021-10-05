@@ -71,3 +71,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 
 # Documentation
+Welcome to Foose Online App documentation where you'll learn about the various directories and files available in there.
+
+## Files And Directories
+In the ### `src` folder
