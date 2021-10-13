@@ -1,6 +1,7 @@
 {
   "name": "foine-remake",
   "version": "0.1.0",
+  "homepage": "http://fooseonline.com",
   "private": true,
   "dependencies": {
     "@feathersjs/client": "^4.5.11",
