@@ -9,10 +9,12 @@ import { useState } from "react";
 import { useEffect } from "react";
 import Loader from "./simple_loader";
 import InputBox from "./input_box";
+import { useError } from "../providers/errorProvider";
 
 const LiveFeedCard = ({ feed, onExpand, expanded }) => {
   const { user } = useAuth();
   const { increaseWatch, reduceWatch } = useProducts();
+  const { error, createError } = useError();
   const {
     isWatching,
     addToWatchlist,
@@ -58,6 +60,11 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    if (paymentForm.phone == "") {
+      createError("Please enter phone number");
+      setLoading(false);
+      return;
+    }
     let stat;
 
     switch (status) {

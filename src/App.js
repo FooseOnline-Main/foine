@@ -27,9 +27,9 @@ function App() {
       {!user ? <Loader expand={true} /> :
       <Router>
         <Switch>
-          <Route path="/addProduct">
+          {/* <Route path="/addProduct">
             <AddProdPage />
-          </Route>
+          </Route> */}
           <Route path="/">
             <HomePage />
           </Route>
