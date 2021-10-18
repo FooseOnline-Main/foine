@@ -96,7 +96,7 @@ const LiveFeedSection = () => {
         .feed-section > .inner {
           padding: 20px var(--space-x);
           display: column;
-          columns: 4;
+          columns: 5;
           column-gap: var(--space-x);
           transition: all 0.25s ease-out;
         }
@@ -106,13 +106,13 @@ const LiveFeedSection = () => {
 
         @media (max-width: 1000px) {
           .feed-section > .inner {
-            columns: 3;
+            columns: 4;
           }
         }
 
         @media (max-width: 650px) {
           .feed-section > .inner {
-            columns: 2;
+            columns: 3;
             padding: 10px 2%;
             column-gap: 1.5%;
           }
@@ -120,7 +120,7 @@ const LiveFeedSection = () => {
 
         @media (max-width: 450px) {
           .feed-section > .inner {
-            columns: 1;
+            columns: 2;
             padding: 10px 2%;
           }
         }

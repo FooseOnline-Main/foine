@@ -1,0 +1,56 @@
+<div className="purchase-actions">
+                {product.sold ? (
+                  <Fragment></Fragment>
+                ) : (
+                  <Fragment>
+                    {product.status === 1 && !(product.heldBy === user.uid) ? (
+                      <button
+                        style={{ flex: 1 }}
+                        onClick={handleRequestPurchase}
+                        id="hold"
+                      >
+                        {requested ? "Cancel Request" : "Request"}
+                      </button>
+                    ) : (
+                      <Fragment>
+                        <button
+                          onClick={() =>
+                            product.heldBy !== ""
+                              ? unholdProduct(user.uid, product)
+                              : holdProduct(user.uid, product)
+                          }
+                          id="hold"
+                        >
+                          <FaStopwatch size={18} color="#fff" />
+                          <span>{product.heldBy === "" ? "Hold" : "Drop"}</span>
+                        </button>
+                        {product.heldBy === "" ? (
+                          <Fragment></Fragment>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              addForQuickCheckout(user.uid, product.id)
+                            }
+                            id="add-to-watchlist"
+                          >
+                            Pay Now
+                          </button>
+                        )}
+                      </Fragment>
+                    )}
+                    {/* Buy buttons */}
+                    {product.heldBy ? (
+                      <Fragment />
+                    ) : (
+                      <button onClick={handleWatch} id="add-to-watchlist">
+                        {watching ? (
+                          <FaEyeSlash size={20} color="#fff" />
+                        ) : (
+                          <FaEye size={20} color="#fff" />
+                        )}
+                        <span>{watching ? "Return" : "Buy"}</span>
+                      </button>
+                    )}
+                  </Fragment>
+                )}
+              </div>

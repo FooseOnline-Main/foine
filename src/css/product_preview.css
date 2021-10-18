@@ -99,6 +99,7 @@
   width: 100%;
   max-width: 500px;
   height: 100%;
+  object-fit: contain;
   border-radius: 20px;
   background-color: var(--light-color);
   background-size: cover;
@@ -117,6 +118,7 @@
   .single-product-page .img-box {
     width: 100%;
     max-width: 100%;
+    object-fit: contain;
     min-height: 70vh;
     border-radius: 20px;
     margin-bottom: 0px;

@@ -2,7 +2,7 @@ import { getStatus, useProducts } from "../providers/productProvider";
 
 import { AiOutlineEye } from "@meronex/icons/ai";
 import { Link } from "react-router-dom";
-import React, { Fragment } from "react";
+import React, { Fragment, useRef } from "react";
 import { useAuth } from "../providers/authProvider";
 import { useWatchlist } from "../providers/watchlistProvider";
 import { useState } from "react";
@@ -12,6 +12,7 @@ import InputBox from "./input_box";
 import { useError } from "../providers/errorProvider";
 
 const LiveFeedCard = ({ feed, onExpand, expanded }) => {
+  const checkoutRef = useRef();
   const { user } = useAuth();
   const { increaseWatch, reduceWatch } = useProducts();
   const { error, createError } = useError();
@@ -27,6 +28,10 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState("");
   const productId = feed.id;
+
+  const handleScrollCheckIntoView = () => {
+    checkoutRef.current.scrollIntoView({ behavior: "smooth" });
+  };
 
   const [paymentForm, setPaymentForm] = useState({
     phone: "",
@@ -109,7 +114,13 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
   return (
     <div key={feed.key} className="feed-card">
       <Link to={`/preview-product/${feed.id}`}>
-        <div style={{ width: "100%", background: "#fff", overflow: "visible" }}>
+        <div
+          style={{
+            width: "100%",
+            background: "#fff",
+            overflow: "visible",
+          }}
+        >
           <img src={feed.imageUrl} className="feed-img" alt={feed.name} />
         </div>
       </Link>
@@ -149,7 +160,7 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
         <Link to={`/preview-product/${feed.id}`}>
           {/* <h3>{feed.name}</h3> */}
           <div className="flex">
-            <p>{feed.size} Size</p>
+            <p>Size {feed.size}</p>
             <p style={{ color: "var(--dark-color)" }}>
               <small>GHC</small>
               <span>{parseFloat(feed.price).toFixed(2)}</span>
@@ -173,6 +184,7 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
                     if (!value) {
                       setStatus(0);
                     }
+                    handleScrollCheckIntoView();
                     setLoading(false);
                   }}
                 >
@@ -193,6 +205,7 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
             {/* Phone number field */}
             {status === 0 && (
               <form
+                ref={checkoutRef}
                 onSubmit={handleSubmit}
                 className={`payment-form ${showCheckout ? "show" : ""}`}
               >
@@ -287,8 +300,9 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
 
         .feed-card .feed-img {
           max-width: calc(100% - 20px);
-          margin: 10px auto;
-          margin-top: 10px;
+          margin: 4px auto;
+          object-fit: cover;
+          margin-top: 5px;
           margin-left: 10px;
           border-radius: 20px 20px 0 0;
           box-shadow: 0 10px 10px 1px #00000000;
@@ -333,6 +347,35 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
           column-gap: 5%;
           overflow: hidden;
         }
+
+        @media (max-width: 430px) {
+          .feed-card button.watch {
+            width: 100vw;
+          }
+        }
+
+        @media (max-width: 1430px) {
+          .feed-card .add-section {
+            display: block;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            column-gap: 5%;
+            overflow: hidden;
+          }
+
+          .feed-card button.watch {
+            display: block;
+            margin-bottom: 10px;
+            width: calc(100vw - 90vw);
+          }
+
+          .feed-card button.hold {
+            width: calc(100vw - 90vw);
+          }
+        }
+
         .feed-card .add-section.show {
           padding-bottom: 20px;
         }
@@ -431,6 +474,11 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
           .feed-card h3 {
             font-size: 0.9em;
           }
+          .feed-card button.watch {
+            background: #222;
+            color: #fff;
+            display: block;
+          }
 
           .feed-card p {
             font-size: 0.7em;
@@ -474,8 +522,17 @@ const ProviderOptionsSelect = ({ onSelect, value }) => {
         .provider-select {
           display: flex;
           align-items: center;
-          column-gap: 10px;
+          column-gap: 5px;
           justify-content: space-around;
+        }
+
+        @media (max-width: 1350px) {
+          .provider-select {
+            display: block;
+            align-items: center;
+            column-gap: 5px;
+            justify-content: space-around;
+          }
         }
 
         .provider {
