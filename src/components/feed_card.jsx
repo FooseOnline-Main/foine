@@ -376,6 +376,16 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
           }
         }
 
+        @media (max-width: 450px) {
+          .feed-card button.watch {
+            width: calc(100vw - 70vw);
+          }
+
+          .feed-card button.hold {
+            width: calc(100vw - 70vw);
+          }
+        }
+
         .feed-card .add-section.show {
           padding-bottom: 20px;
         }
