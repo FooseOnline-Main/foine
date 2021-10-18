@@ -82,7 +82,7 @@ function ProductsProvider({ children }) {
         // make api call to fetch products from db
         if(products.length < 1){
             productsRef
-            .orderBy("created_at")
+            .orderBy("created_at", "desc")
             .limit(5)
             .onSnapshot(snapshot=>{
                 setLoading(false);
@@ -93,7 +93,7 @@ function ProductsProvider({ children }) {
             });       
         }else{
             productsRef
-            .orderBy("created_at")
+            .orderBy("created_at", "desc")
             .startAfter(products[products.length - 1].created_at)
             .limit(5)
             .onSnapshot(snapshot=>{

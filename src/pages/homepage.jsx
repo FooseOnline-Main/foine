@@ -53,6 +53,7 @@ const HomePage = () => {
         <div id='homepage'>
             <Fragment>
                 <HomeHeader onSearch={handleSearch} />
+                
                 <div className="page-body">
                     <LiveFeedSection />
                 </div>

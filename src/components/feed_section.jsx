@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import LiveFeedCard from "./feed_card";
 import { useProducts } from "../providers/productProvider";
 import {
@@ -11,6 +11,10 @@ import {
 
 const LiveFeedSection = () => {
   const { products, fetchProducts, loading } = useProducts();
+  const [feedProducts, setFeedProducts] = useState([]);
+  const [allActive, setAllActive] = useState(true);
+  const [maleActive, setMaleActive] = useState(false);
+  const [femaleActive, setFemaleActive] = useState(false);
   const [showHelpers, setShowHelpers] = useState(false);
   const [showScroll, setShowScroll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -33,22 +37,141 @@ const LiveFeedSection = () => {
     }
   };
 
+  const handleMale = () => {
+    let prods = [];
+    setAllActive(false);
+    setFemaleActive(false);
+    setMaleActive(true);
+    products.map((product) => {
+      if (product.gender === "Male") {
+        prods.push(product);
+      }
+    });
+    setFeedProducts(prods);
+  };
+
+  const handleAll = () => {
+    let prods = [];
+    setAllActive(true);
+    setFemaleActive(false);
+    setMaleActive(false);
+    products.map((product) => {
+        prods.push(product);
+    });
+    setFeedProducts(prods);
+  };
+
+  const handleFemale = () => {
+    let prods = [];
+    setFemaleActive(true);
+    setMaleActive(false);
+    setAllActive(false);
+    products.map((product) => {
+      if (product.gender === "Female") {
+        prods.push(product);
+      }
+    });
+    setFeedProducts(prods);
+  };
+
   return (
     <div className="feed-section" onScroll={handleFeedScroll} id="scroll-feed">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <span
+          onClick={handleAll}
+          style={{
+            display: "flex",
+            backgroundColor: allActive ? "#ED4038" : "gray",
+            padding: "5px",
+            borderRadius: "30px",
+            color: "white",
+            alignItems: "center",
+            alignContent: "center",
+            justifyContent: "center",
+            justifyItems: "center",
+            marginRight: "5px",
+            opacity: 0.8,
+            cursor: "pointer",
+          }}
+        >
+          <p> All</p>
+        </span>
+        <span
+          onClick={handleMale}
+          style={{
+            display: "flex",
+            backgroundColor: maleActive ? "#ED4038" : "gray",
+            padding: "5px",
+            borderRadius: "30px",
+            color: "white",
+            alignItems: "center",
+            alignContent: "center",
+            justifyContent: "center",
+            justifyItems: "center",
+            marginRight: "5px",
+            opacity: 0.8,
+            cursor: "pointer",
+          }}
+        >
+          <MdcHumanMale size={25} />
+          <p> Male</p>
+        </span>
+        <span
+          onClick={handleFemale}
+          style={{
+            display: "flex",
+            backgroundColor: femaleActive ? "#ED4038" : "gray",
+            padding: "5px",
+            borderRadius: "30px",
+            color: "white",
+            alignItems: "center",
+            alignContent: "center",
+            opacity: 0.8,
+            justifyContent: "center",
+            justifyItems: "center",
+            cursor: "pointer",
+          }}
+        >
+          <MdcHumanFemale size={25} /> <p>Female</p>
+        </span>
+      </div>
       <div className={`inner ${showFilters ? "shift" : ""}`}>
         <div ref={scrollTopRef}></div>
-        {products.length > 0 ? (
-          products.map((feed, id) => (
-            <LiveFeedCard
-              expanded={expanded === id}
-              onExpand={() => setExpanded(id)}
-              feed={feed}
-              key={id}
-            />
-          ))
-        ) : (
-          <p>No Products</p>
-        )}
+        {
+          feedProducts.length > 0
+            ? feedProducts.map((feed, id) => (
+                <LiveFeedCard
+                  expanded={expanded === id}
+                  onExpand={() => setExpanded(id)}
+                  feed={feed}
+                  key={id}
+                />
+              ))
+            : products.map((feed, id) => (
+                <LiveFeedCard
+                  expanded={expanded === id}
+                  onExpand={() => setExpanded(id)}
+                  feed={feed}
+                  key={id}
+                />
+              ))
+
+          // <div
+          //   style={{
+          //     position: "relative",
+          //     alignItems: "center",
+          //     justifyContent: "centers",
+          //   }}
+          // >
+          //   <p>No Products</p>
+          // </div>
+        }
       </div>
       {/* <FilterBox show={showFilters} /> */}
 
