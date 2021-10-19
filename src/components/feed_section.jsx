@@ -56,7 +56,7 @@ const LiveFeedSection = () => {
     setFemaleActive(false);
     setMaleActive(false);
     products.map((product) => {
-        prods.push(product);
+      prods.push(product);
     });
     setFeedProducts(prods);
   };
@@ -100,7 +100,7 @@ const LiveFeedSection = () => {
             cursor: "pointer",
           }}
         >
-          <p> All</p>
+          <p> ALL</p>
         </span>
         <span
           onClick={handleMale}
@@ -120,7 +120,6 @@ const LiveFeedSection = () => {
           }}
         >
           <MdcHumanMale size={25} />
-          <p> Male</p>
         </span>
         <span
           onClick={handleFemale}
@@ -138,7 +137,7 @@ const LiveFeedSection = () => {
             cursor: "pointer",
           }}
         >
-          <MdcHumanFemale size={25} /> <p>Female</p>
+          <MdcHumanFemale size={25} />
         </span>
       </div>
       <div className={`inner ${showFilters ? "shift" : ""}`}>

@@ -115,6 +115,7 @@ const ProductViewPage = () => {
                 backgroundImage: `url(${product.imageUrl})`,
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
+
                 width: "100%",
               }}
             >

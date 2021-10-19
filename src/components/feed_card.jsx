@@ -117,6 +117,10 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
         <div
           style={{
             width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0",
+            justifyItems: "center",
             background: "#fff",
             overflow: "visible",
           }}
@@ -271,7 +275,7 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
       </div>
       <style jsx>{`
         .feed-card {
-          min-height: 250px;
+          min-height: 150px;
           break-inside: avoid;
           box-shadow: 0 0 20px 1px #00000015;
           overflow: hidden;
@@ -299,12 +303,11 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
         }
 
         .feed-card .feed-img {
-          max-width: calc(100% - 20px);
-          margin: 4px auto;
+          width: 95%;
+          margin-top: 10px;
           object-fit: cover;
-          margin-top: 5px;
-          margin-left: 10px;
-          border-radius: 20px 20px 0 0;
+          margin-left: 8px;
+          border-radius: 20px 20px 20px 20px;
           box-shadow: 0 10px 10px 1px #00000000;
           border: 1px solid #eee;
         }
@@ -346,44 +349,6 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
           margin-top: 10px;
           column-gap: 5%;
           overflow: hidden;
-        }
-
-        @media (max-width: 430px) {
-          .feed-card button.watch {
-            width: 100vw;
-          }
-        }
-
-        @media (max-width: 1430px) {
-          .feed-card .add-section {
-            display: block;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            column-gap: 5%;
-            overflow: hidden;
-          }
-
-          .feed-card button.watch {
-            display: block;
-            margin-bottom: 10px;
-            width: calc(100vw - 90vw);
-          }
-
-          .feed-card button.hold {
-            width: calc(100vw - 90vw);
-          }
-        }
-
-        @media (max-width: 450px) {
-          .feed-card button.watch {
-            width: calc(100vw - 70vw);
-          }
-
-          .feed-card button.hold {
-            width: calc(100vw - 70vw);
-          }
         }
 
         .feed-card .add-section.show {
