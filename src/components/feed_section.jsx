@@ -38,44 +38,21 @@ const LiveFeedSection = () => {
   };
 
   const handleMale = () => {
-    let prods = [];
-    console.log("handle Male");
     setAllActive(false);
     setFemaleActive(false);
     setMaleActive(true);
-    products.map((product) => {
-      if (product.gender === "Male") {
-        console.log("Product Male");
-        prods.push(product);
-      }
-    });
-    console.log("SET FEED");
-    setFeedProducts([prods]);
-    console.log("FEED SET");
   };
 
   const handleAll = () => {
-    let prods = [];
     setAllActive(true);
     setFemaleActive(false);
     setMaleActive(false);
-    products.map((product) => {
-      prods.push(product);
-    });
-    setFeedProducts([prods]);
   };
 
   const handleFemale = () => {
-    let prods = [];
     setFemaleActive(true);
     setMaleActive(false);
     setAllActive(false);
-    products.map((product) => {
-      if (product.gender === "Female") {
-        prods.push(product);
-      }
-    });
-    setFeedProducts(prods);
   };
 
   return (
@@ -146,35 +123,37 @@ const LiveFeedSection = () => {
       </div>
       <div className={`inner ${showFilters ? "shift" : ""}`}>
         <div ref={scrollTopRef}></div>
-        {
-          feedProducts.length > 0
-            ? feedProducts.map((feed, id) => (
-                <LiveFeedCard
-                  expanded={expanded === id}
-                  onExpand={() => setExpanded(id)}
-                  feed={feed}
-                  key={id}
-                />
-              ))
-            : products.map((feed, id) => (
-                <LiveFeedCard
-                  expanded={expanded === id}
-                  onExpand={() => setExpanded(id)}
-                  feed={feed}
-                  key={id}
-                />
-              ))
 
-          // <div
-          //   style={{
-          //     position: "relative",
-          //     alignItems: "center",
-          //     justifyContent: "centers",
-          //   }}
-          // >
-          //   <p>No Products</p>
-          // </div>
-        }
+        {allActive
+          ? products.map((feed, id) => (
+              <LiveFeedCard
+                expanded={expanded === id}
+                onExpand={() => setExpanded(id)}
+                feed={feed}
+                key={id}
+              />
+            ))
+          : maleActive
+          ? products
+              .filter((product) => product.gender === "Male")
+              .map((filteredProduct, id) => (
+                <LiveFeedCard
+                  expanded={expanded === id}
+                  onExpand={() => setExpanded(id)}
+                  feed={filteredProduct}
+                  key={id}
+                />
+              ))
+          : products
+              .filter((product) => product.gender === "Female")
+              .map((filteredProduct, id) => (
+                <LiveFeedCard
+                  expanded={expanded === id}
+                  onExpand={() => setExpanded(id)}
+                  feed={filteredProduct}
+                  key={id}
+                />
+              ))}
       </div>
       {/* <FilterBox show={showFilters} /> */}
 
