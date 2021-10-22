@@ -36,6 +36,7 @@ const HomeHeader = ({ onSearch }) => {
   const watchListRef = firebase.firestore().collection("watchlist");
 
   useEffect(() => {
+    console.log(formData.phone.length !== 10);
     setProducts([]);
     setTotalPrice(0);
     watchlist.forEach(async (item) => {
@@ -60,7 +61,6 @@ const HomeHeader = ({ onSearch }) => {
   const { user } = useAuth();
 
   const onSuccess = (reference) => {
-    console.log("success", reference);
     tempCheckoutRef
       .where("reference", "==", config.reference)
       .get()
@@ -115,7 +115,7 @@ const HomeHeader = ({ onSearch }) => {
   const handlePay = async () => {
     setLoading(true);
     const temp = {
-      userDetails: { id: user.uid, phone: formData.phone },
+      userDetails: { id: user.uid, email: user.email, phone: formData.phone },
       products,
       amount: totalPrice,
     };
@@ -129,7 +129,11 @@ const HomeHeader = ({ onSearch }) => {
     <div className="home-header">
       <h4 style={{ color: "#222", whiteSpace: "nowrap" }}>
         <span>
-          <img src={process.env.PUBLIC_URL + "/fologo.png"} alt="foine logo" width={30} />
+          <img
+            src={process.env.PUBLIC_URL + "/fologo.png"}
+            alt="foine logo"
+            width={30}
+          />
         </span>
       </h4>
       <div className="search-form">
@@ -202,8 +206,22 @@ const HomeHeader = ({ onSearch }) => {
             />
           </div>
           <div className="checkout-space">
-            <button style={{ flex: 1 }} disabled={loading} onClick={handlePay}>
-              Pay Bulk
+            <button
+              style={{
+                flex: 1,
+                opacity:
+                  formData.phone == "" || formData.phone.length !== 10
+                    ? 0.5
+                    : 1,
+              }}
+              disabled={
+                loading || formData.phone == "" || formData.phone.length !== 10
+              }
+              onClick={handlePay}
+            >
+              {formData.phone == "" || formData.phone.length !== 10
+                ? "Enter Valid Phone Number"
+                : "Pay Bulk"}
             </button>
             <div className="sub-total">
               {loading ? <small>loading..</small> : <small>GH&cent;</small>}{" "}
