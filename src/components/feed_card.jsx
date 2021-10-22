@@ -415,6 +415,7 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
             max-width: 100%;
             margin: 0px;
             box-shadow: none;
+            margin-left: 8px;
           }
 
           .feed-card .details {
