@@ -39,15 +39,19 @@ const LiveFeedSection = () => {
 
   const handleMale = () => {
     let prods = [];
+    console.log("handle Male");
     setAllActive(false);
     setFemaleActive(false);
     setMaleActive(true);
     products.map((product) => {
       if (product.gender === "Male") {
+        console.log("Product Male");
         prods.push(product);
       }
     });
-    setFeedProducts(prods);
+    console.log("SET FEED");
+    setFeedProducts([prods]);
+    console.log("FEED SET");
   };
 
   const handleAll = () => {
@@ -58,7 +62,7 @@ const LiveFeedSection = () => {
     products.map((product) => {
       prods.push(product);
     });
-    setFeedProducts(prods);
+    setFeedProducts([prods]);
   };
 
   const handleFemale = () => {
