@@ -116,9 +116,9 @@ function WatchlistProvider({ children }) {
 
             if(status){
                 if(watchId){
-                    tempCheckoutRef.doc(watchId).set({...temp, watchId, reference: data.reference});
+                    await tempCheckoutRef.doc(watchId).set({...temp, watchId, reference: data.reference});
                 }else{
-                    tempCheckoutRef.doc(userId).set({...temp, reference: data.reference});
+                    await tempCheckoutRef.doc(userId).set({...temp, reference: data.reference});
                 }
                 return data.status;
             }

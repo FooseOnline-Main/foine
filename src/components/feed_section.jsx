@@ -19,6 +19,7 @@ const LiveFeedSection = () => {
   const [showScroll, setShowScroll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [expanded, setExpanded] = useState("");
+  const [gender, setGender] = useState("");
   const scrollTopRef = useRef();
 
   const handleFeedScroll = (e) => {
@@ -41,6 +42,7 @@ const LiveFeedSection = () => {
     setAllActive(false);
     setFemaleActive(false);
     setMaleActive(true);
+    setGender("Male")
   };
 
   const handleAll = () => {
@@ -53,6 +55,7 @@ const LiveFeedSection = () => {
     setFemaleActive(true);
     setMaleActive(false);
     setAllActive(false);
+    setGender("Female")
   };
 
   return (
@@ -123,37 +126,9 @@ const LiveFeedSection = () => {
       </div>
       <div className={`inner ${showFilters ? "shift" : ""}`}>
         <div ref={scrollTopRef}></div>
-
-        {allActive
-          ? products.map((feed, id) => (
-              <LiveFeedCard
-                expanded={expanded === id}
-                onExpand={() => setExpanded(id)}
-                feed={feed}
-                key={id}
-              />
-            ))
-          : maleActive
-          ? products
-              .filter((product) => product.gender === "Male")
-              .map((filteredProduct, id) => (
-                <LiveFeedCard
-                  expanded={expanded === id}
-                  onExpand={() => setExpanded(id)}
-                  feed={filteredProduct}
-                  key={id}
-                />
-              ))
-          : products
-              .filter((product) => product.gender === "Female")
-              .map((filteredProduct, id) => (
-                <LiveFeedCard
-                  expanded={expanded === id}
-                  onExpand={() => setExpanded(id)}
-                  feed={filteredProduct}
-                  key={id}
-                />
-              ))}
+          {allActive && products.map((filteredProduct, id) => (<LiveFeedCard expanded={expanded === id} onExpand={() => setExpanded(id)} feed={filteredProduct} key={id}/>))}
+          {maleActive && products.filter((product) => product.gender === "Male").map((filteredProduct, id) => (<LiveFeedCard expanded={expanded === id} onExpand={() => setExpanded(id)} feed={filteredProduct} key={id}/>))}
+          {femaleActive && products.filter((product) => product.gender === "Female").map((filteredProduct, id) => (<LiveFeedCard expanded={expanded === id} onExpand={() => setExpanded(id)} feed={filteredProduct} key={id}/>))}
       </div>
       {/* <FilterBox show={showFilters} /> */}
 

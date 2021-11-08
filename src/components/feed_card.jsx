@@ -10,6 +10,10 @@ import { useEffect } from "react";
 import Loader from "./simple_loader";
 import InputBox from "./input_box";
 import { useError } from "../providers/errorProvider";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 const LiveFeedCard = ({ feed, onExpand, expanded }) => {
   const checkoutRef = useRef();
@@ -65,7 +69,7 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    if (paymentForm.phone == "") {
+    if (paymentForm.phone === "") {
       createError("Please enter phone number");
       setLoading(false);
       return;
@@ -102,6 +106,10 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
 
         case "pay_offline":
           setStatus(2);
+          break;
+
+        case "success":
+          await MySwal.fire({ title: "Order Successful", icon: "success" });
           break;
 
         default:
@@ -504,7 +512,6 @@ const ProviderOptionsSelect = ({ onSelect, value }) => {
 
         @media (max-width: 1350px) {
           .provider-select {
-            display: block;
             align-items: center;
             column-gap: 5px;
             justify-content: space-around;
