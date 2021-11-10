@@ -50,6 +50,16 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
     }
   }, [expanded]);
 
+  useEffect(() => {
+    var fireSuccess = async () => {
+      if (status === 2) {
+        await MySwal.fire({ title: "Order Successful", icon: "success" });
+      }
+    };
+
+    fireSuccess();
+  }, [status]);
+
   const onViewItem = () => {
     // set current open feed
     document.body.style.overflow = "hidden";
@@ -106,10 +116,6 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
 
         case "pay_offline":
           setStatus(2);
-          break;
-
-        case "success":
-          await MySwal.fire({ title: "Order Successful", icon: "success" });
           break;
 
         default:
