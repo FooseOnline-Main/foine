@@ -120,7 +120,7 @@ function WatchlistProvider({ children }) {
                 }else{
                     await tempCheckoutRef.doc(userId).set({...temp, reference: data.reference});
                 }
-                return data.status;
+                return data;
             }
         }
     }

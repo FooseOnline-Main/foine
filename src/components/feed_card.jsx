@@ -15,7 +15,7 @@ import withReactContent from "sweetalert2-react-content";
 
 const MySwal = withReactContent(Swal);
 
-const LiveFeedCard = ({ feed, onExpand, expanded }) => {
+const LiveFeedCard = ({ feed, onExpand, expanded, socket }) => {
   const checkoutRef = useRef();
   const { user } = useAuth();
   const { increaseWatch, reduceWatch } = useProducts();
@@ -31,6 +31,9 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
   const [status, setStatus] = useState(0);
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState("");
+  const [orderSuccessfull, setOrderSuccessful] = useState(false);
+  const [initOrder, setInitOrder] = useState(false);
+  const [payError, setPayError] = useState("");
   const productId = feed.id;
 
   const handleScrollCheckIntoView = () => {
@@ -49,16 +52,6 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
       setShowCheckout(false);
     }
   }, [expanded]);
-
-  useEffect(() => {
-    var fireSuccess = async () => {
-      if (status === 2) {
-        await MySwal.fire({ title: "Order Successful", icon: "success" });
-      }
-    };
-
-    fireSuccess();
-  }, [status]);
 
   const onViewItem = () => {
     // set current open feed
@@ -86,44 +79,79 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
     }
     let stat;
 
-    switch (status) {
-      case 1:
-        stat = await verifyOTP({ otp, userId: user.uid });
-        break;
-
-      default:
-        stat = await makePayment(
-          { ...paymentForm, amount: parseFloat(feed.price) * 100 },
-          user.uid,
-          [
-            {
-              id: feed.id,
-              imageUrl: feed.imageUrl,
-              price: feed.price,
-              size: feed.size,
-            },
-          ]
-        );
-        break;
-    }
-
-    if (stat) {
-      setLoading(false);
-      switch (stat) {
-        case "send_otp":
-          setStatus(1);
-          break;
-
-        case "pay_offline":
-          setStatus(2);
+    setInitOrder(true);
+    try {
+      switch (status) {
+        case 1:
+          stat = await verifyOTP({ otp, userId: user.uid });
           break;
 
         default:
-          setStatus(0);
+          const dat = await makePayment(
+            { ...paymentForm, amount: parseFloat(feed.price) * 100 },
+            user.uid,
+            [
+              {
+                id: feed.id,
+                imageUrl: feed.imageUrl,
+                price: feed.price,
+                size: feed.size,
+                name: feed.name,
+              },
+            ]
+          );
+          stat = dat.status;
+          socket.emit("newOrder", { userId: socket.id, ref: dat.reference });
           break;
       }
+
+      if (stat) {
+        setLoading(false);
+        switch (stat) {
+          case "send_otp":
+            setStatus(1);
+            break;
+
+          case "pay_offline":
+            setStatus(2);
+            break;
+
+          default:
+            setStatus(0);
+            break;
+        }
+      }
+    } catch (err) {
+      console.log(`ERR ${err}`);
+      setPayError("Error Processing payment. Please try again later");
+      setTimeout(() => {
+        setPayError("");
+        setShowCheckout(false);
+      }, 4000);
     }
   };
+
+  useEffect(() => {
+    if (initOrder)
+      socket.on("success", () => {
+        console.log("WE HAVE CAUGHT THE HOOK");
+        setOrderSuccessful(true);
+        return () => {
+          setOrderSuccessful(false);
+          setInitOrder(false);
+        };
+      });
+  }, [initOrder]);
+
+  useEffect(() => {
+    const showPop = async () => {
+      if (orderSuccessfull) {
+        await MySwal.fire({ title: "Order Successful", icon: "success" });
+      }
+    };
+
+    showPop();
+  }, [orderSuccessfull]);
 
   return (
     <div key={feed.key} className="feed-card">
@@ -222,31 +250,34 @@ const LiveFeedCard = ({ feed, onExpand, expanded }) => {
 
             {/* Phone number field */}
             {status === 0 && (
-              <form
-                ref={checkoutRef}
-                onSubmit={handleSubmit}
-                className={`payment-form ${showCheckout ? "show" : ""}`}
-              >
-                <ProviderOptionsSelect
-                  value={paymentForm.provider}
-                  onSelect={(provider) =>
-                    setPaymentForm({ ...paymentForm, provider })
-                  }
-                />
-                <InputBox
-                  name="phone"
-                  placeholder="Enter phone number"
-                  value={paymentForm.phone}
-                  type="number"
-                  style={{ padding: "5px 0", width: "100%" }}
-                  onChange={({ target: { value: phone } }) =>
-                    setPaymentForm({ ...paymentForm, phone })
-                  }
-                />
-                <button disabled={loading} className="watch">
-                  {loading ? "Loading..." : "Pay"}
-                </button>
-              </form>
+              <>
+                <form
+                  ref={checkoutRef}
+                  onSubmit={handleSubmit}
+                  className={`payment-form ${showCheckout ? "show" : ""}`}
+                >
+                  <ProviderOptionsSelect
+                    value={paymentForm.provider}
+                    onSelect={(provider) =>
+                      setPaymentForm({ ...paymentForm, provider })
+                    }
+                  />
+                  <InputBox
+                    name="phone"
+                    placeholder="Enter phone number"
+                    value={paymentForm.phone}
+                    type="number"
+                    style={{ padding: "5px 0", width: "100%" }}
+                    onChange={({ target: { value: phone } }) =>
+                      setPaymentForm({ ...paymentForm, phone })
+                    }
+                  />
+                  <button disabled={loading} className="watch">
+                    {loading ? "Loading..." : "Pay"}
+                  </button>
+                </form>
+                {payError !== "" && <p style={{ color: "red" }}>{payError}</p>}
+              </>
             )}
 
             {/* OTP form field */}

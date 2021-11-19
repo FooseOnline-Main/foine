@@ -9,7 +9,7 @@ import {
   MdcHumanMale,
 } from "@meronex/icons/mdc";
 
-const LiveFeedSection = () => {
+const LiveFeedSection = ({ sock }) => {
   const { products, fetchProducts, loading } = useProducts();
   const [feedProducts, setFeedProducts] = useState([]);
   const [allActive, setAllActive] = useState(true);
@@ -42,7 +42,7 @@ const LiveFeedSection = () => {
     setAllActive(false);
     setFemaleActive(false);
     setMaleActive(true);
-    setGender("Male")
+    setGender("Male");
   };
 
   const handleAll = () => {
@@ -55,7 +55,7 @@ const LiveFeedSection = () => {
     setFemaleActive(true);
     setMaleActive(false);
     setAllActive(false);
-    setGender("Female")
+    setGender("Female");
   };
 
   return (
@@ -126,9 +126,40 @@ const LiveFeedSection = () => {
       </div>
       <div className={`inner ${showFilters ? "shift" : ""}`}>
         <div ref={scrollTopRef}></div>
-          {allActive && products.map((filteredProduct, id) => (<LiveFeedCard expanded={expanded === id} onExpand={() => setExpanded(id)} feed={filteredProduct} key={id}/>))}
-          {maleActive && products.filter((product) => product.gender === "Male").map((filteredProduct, id) => (<LiveFeedCard expanded={expanded === id} onExpand={() => setExpanded(id)} feed={filteredProduct} key={id}/>))}
-          {femaleActive && products.filter((product) => product.gender === "Female").map((filteredProduct, id) => (<LiveFeedCard expanded={expanded === id} onExpand={() => setExpanded(id)} feed={filteredProduct} key={id}/>))}
+        {allActive &&
+          products.map((filteredProduct, id) => (
+            <LiveFeedCard
+              expanded={expanded === id}
+              onExpand={() => setExpanded(id)}
+              feed={filteredProduct}
+              key={id}
+              socket={sock}
+            />
+          ))}
+        {maleActive &&
+          products
+            .filter((product) => product.gender === "Male")
+            .map((filteredProduct, id) => (
+              <LiveFeedCard
+                expanded={expanded === id}
+                onExpand={() => setExpanded(id)}
+                feed={filteredProduct}
+                key={id}
+                socket={sock}
+              />
+            ))}
+        {femaleActive &&
+          products
+            .filter((product) => product.gender === "Female")
+            .map((filteredProduct, id) => (
+              <LiveFeedCard
+                expanded={expanded === id}
+                onExpand={() => setExpanded(id)}
+                feed={filteredProduct}
+                key={id}
+                socket={sock}
+              />
+            ))}
       </div>
       {/* <FilterBox show={showFilters} /> */}
 

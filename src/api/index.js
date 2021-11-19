@@ -15,13 +15,19 @@ const client = axios.create({
 });
 
 export async function pay(body) {
-  body = { ...body, email: "myfoine@gmail.com", paymentMethod: "mobile_money" };
+  body = {
+    ...body,
+    email: `${body.phone}${body.amount}foine@gmail.com`,
+    paymentMethod: "mobile_money",
+  };
   console.log({ body });
   try {
     const { data } = await client.post(
       "/transaction/charge/",
       JSON.stringify(body)
     );
+    console.log("CHARGE");
+    console.log(data);
     return data;
   } catch (e) {
     return { response: e.response, message: e.message };
