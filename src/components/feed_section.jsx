@@ -8,6 +8,11 @@ import {
   MdcHumanFemale,
   MdcHumanMale,
 } from "@meronex/icons/mdc";
+import {
+  LazyLoadComponent,
+  trackWindowScroll,
+} from "react-lazy-load-image-component";
+import Loader from "./simple_loader";
 
 const LiveFeedSection = ({ sock }) => {
   const { products, fetchProducts, loading } = useProducts();
@@ -15,6 +20,7 @@ const LiveFeedSection = ({ sock }) => {
   const [allActive, setAllActive] = useState(true);
   const [maleActive, setMaleActive] = useState(false);
   const [femaleActive, setFemaleActive] = useState(false);
+  const [scrollPos, setScrollPos] = useState(0);
   const [showHelpers, setShowHelpers] = useState(false);
   const [showScroll, setShowScroll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -37,6 +43,19 @@ const LiveFeedSection = ({ sock }) => {
       setTimeout(() => setShowHelpers(false), 2000);
     }
   };
+
+  const handleScroll = () => {
+    const position = window.scrollY;
+    setScrollPos(position);
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const handleMale = () => {
     setAllActive(false);
@@ -124,43 +143,53 @@ const LiveFeedSection = ({ sock }) => {
           <MdcHumanFemale size={25} />
         </span>
       </div>
-      <div className={`inner ${showFilters ? "shift" : ""}`}>
-        <div ref={scrollTopRef}></div>
-        {allActive &&
-          products.map((filteredProduct, id) => (
-            <LiveFeedCard
-              expanded={expanded === id}
-              onExpand={() => setExpanded(id)}
-              feed={filteredProduct}
-              key={id}
-              socket={sock}
-            />
-          ))}
-        {maleActive &&
-          products
-            .filter((product) => product.gender === "Male")
-            .map((filteredProduct, id) => (
+      {products.length > 0 ? (
+        <div className={`inner ${showFilters ? "shift" : ""}`}>
+          <div ref={scrollTopRef}></div>
+          {allActive &&
+            products.map((filteredProduct, id) => (
               <LiveFeedCard
                 expanded={expanded === id}
                 onExpand={() => setExpanded(id)}
                 feed={filteredProduct}
                 key={id}
+                scroll={scrollPos}
                 socket={sock}
               />
             ))}
-        {femaleActive &&
-          products
-            .filter((product) => product.gender === "Female")
-            .map((filteredProduct, id) => (
-              <LiveFeedCard
-                expanded={expanded === id}
-                onExpand={() => setExpanded(id)}
-                feed={filteredProduct}
-                key={id}
-                socket={sock}
-              />
-            ))}
-      </div>
+          {maleActive &&
+            products
+              .filter((product) => product.gender === "Male")
+              .map((filteredProduct, id) => (
+                <LiveFeedCard
+                  expanded={expanded === id}
+                  onExpand={() => setExpanded(id)}
+                  feed={filteredProduct}
+                  key={id}
+                  scroll={scrollPos}
+                  socket={sock}
+                />
+              ))}
+          {femaleActive &&
+            products
+              .filter((product) => product.gender === "Female")
+              .map((filteredProduct, id) => (
+                <LiveFeedCard
+                  expanded={expanded === id}
+                  onExpand={() => setExpanded(id)}
+                  feed={filteredProduct}
+                  key={id}
+                  scroll={scrollPos}
+                  socket={sock}
+                />
+              ))}
+        </div>
+      ) : (
+        <div className="load">
+          <p>Loading Products</p>
+          <Loader />
+        </div>
+      )}
       {/* <FilterBox show={showFilters} /> */}
 
       <div
@@ -203,6 +232,13 @@ const LiveFeedSection = ({ sock }) => {
           overflow: auto;
           background: #fafafa;
           --space-x: 2.5%;
+        }
+        .load {
+          display: flex;
+          flex-direction: column;
+          margin: 20vh auto;
+          align-items: center;
+          justify-content: center;
         }
         .feed-section > .inner {
           padding: 20px var(--space-x);
@@ -362,4 +398,4 @@ const FilterBox = ({ onFilter, show }) => {
   );
 };
 
-export default LiveFeedSection;
+export default trackWindowScroll(LiveFeedSection);

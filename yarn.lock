@@ -7655,6 +7655,11 @@ lodash.templatesettings@^4.0.0:
   dependencies:
     lodash._reinterpolate "^3.0.0"
 
+lodash.throttle@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
+  integrity sha1-wj6RtxAkKscMN/HhzaknTMOb8vQ=
+
 lodash.truncate@^4.4.2:
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/lodash.truncate/-/lodash.truncate-4.4.2.tgz#5a350da0b1113b837ecfffd5812cbe58d6eae193"
@@ -9855,6 +9860,14 @@ react-js-loading-shimmer@^1.0.10:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/react-js-loading-shimmer/-/react-js-loading-shimmer-1.0.10.tgz#2ed325ddf2c3128a603a7a760dc7986c2432cedc"
   integrity sha512-zEUUR06JOv7Ys9K8LgY+6FqQvzsUJ8kZCrEDZn1yhE1AzNnt5DA53GfHKToRJP3dq93+ls4y9ARJC8P4F7Xtww==
+
+react-lazy-load-image-component@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/react-lazy-load-image-component/-/react-lazy-load-image-component-1.5.1.tgz#59cc92326ba5604e9c4a86805a2cf1667fafbc71"
+  integrity sha512-grTEZzURLHPkq7JoipcBBQU44ijdF4fH3Cb+eSD5eSAaMsjugbXqTaVWm5ruPUNLduoNR9KKQF6bOR9h2WphEg==
+  dependencies:
+    lodash.debounce "^4.0.8"
+    lodash.throttle "^4.1.1"
 
 react-paystack@^3.0.3:
   version "3.0.5"

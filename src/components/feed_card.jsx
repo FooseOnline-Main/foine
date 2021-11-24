@@ -12,10 +12,12 @@ import InputBox from "./input_box";
 import { useError } from "../providers/errorProvider";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
 
 const MySwal = withReactContent(Swal);
 
-const LiveFeedCard = ({ feed, onExpand, expanded, socket }) => {
+const LiveFeedCard = ({ feed, onExpand, expanded, socket, scroll }) => {
   const checkoutRef = useRef();
   const { user } = useAuth();
   const { increaseWatch, reduceWatch } = useProducts();
@@ -146,7 +148,11 @@ const LiveFeedCard = ({ feed, onExpand, expanded, socket }) => {
   useEffect(() => {
     const showPop = async () => {
       if (orderSuccessfull) {
-        await MySwal.fire({ title: "Order Successful", icon: "success" });
+        await MySwal.fire({
+          title: "Order Successful",
+          icon: "success",
+          confirmButtonColor: "#222",
+        });
       }
     };
 
@@ -167,7 +173,13 @@ const LiveFeedCard = ({ feed, onExpand, expanded, socket }) => {
             overflow: "visible",
           }}
         >
-          <img src={feed.imageUrl} className="feed-img" alt={feed.name} />
+          <LazyLoadImage
+            src={feed.imageUrl}
+            effect="blur"
+            className="feed-img"
+            scrollPosition={scroll}
+            alt={feed.name}
+          />
         </div>
       </Link>
       <div className="held-stamp">
